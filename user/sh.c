@@ -378,14 +378,18 @@ parseredirs(struct cmd *cmd, char **ps, char *es)
   char *q, *eq;
 
   while(peek(ps, es, "<>")){
-    tok = gettoken(ps, es, 0, 0);
-    if(gettoken(ps, es, &q, &eq) != 'a')
+    tok = gettoken(ps, es, 0, 0); /* Deal with the redir symbols( >, < or >>)
+                                     and following spaces*/
+    if(gettoken(ps, es, &q, &eq) != 'a') { 
+      /* Invalid token after redir symbols */
       panic("missing file for redirection");
+    }
     switch(tok){
     case '<':
       cmd = redircmd(cmd, q, eq, O_RDONLY, 0);
       break;
     case '>':
+    /* O_TRUNC truncates the file */
       cmd = redircmd(cmd, q, eq, O_WRONLY|O_CREATE|O_TRUNC, 1);
       break;
     case '+':  // >>
@@ -427,12 +431,21 @@ parseexec(char **ps, char *es)
   cmd = (struct execcmd*)ret;
 
   argc = 0;
-  ret = parseredirs(ret, ps, es);
-  while(!peek(ps, es, "|)&;")){
-    if((tok=gettoken(ps, es, &q, &eq)) == 0)
+  ret = parseredirs(ret, ps, es); /* Check if the sub-command begins with redir symbol, 
+                                    Return original cmd if no redir symbol is meet. */
+  while(!peek(ps, es, "|)&;")){ 
+    /* If first non-space character is not "|)&;" 
+      ps point to the first non-space character. */
+    if((tok=gettoken(ps, es, &q, &eq)) == 0) {
+      /* No token */
       break;
-    if(tok != 'a')
+    }
+      
+    if(tok != 'a') {
+      /* Invalid Argument */
       panic("syntax");
+    }
+      
     cmd->argv[argc] = q;
     cmd->eargv[argc] = eq;
     argc++;
