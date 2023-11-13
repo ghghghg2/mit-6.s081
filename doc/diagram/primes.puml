@@ -1,0 +1,36 @@
+@startuml primes
+:Start of primeProc(**fdPipeIn**)
+fdPipeIn: indicate read end of pipe;
+:int filterNum = -1;
+:int p[2];
+:int readNum;
+
+while (readRes = read(**fdPipeIn**, &readNum, sizeof(readNum))) is (> 0)
+    if (filterNum == -1) then (yes)
+        : filterNum = readNum;
+        : pipe(**p**);
+        : pid = fork();
+        fork
+            :Parent;
+            :fprintf(2, "prime %d\\n", readNum);
+            :close(p[0]); 
+        fork again
+            :Child;
+            :close(p[1]);
+            :Recursively primeProc(p[0]);
+            :wait(0);
+            kill
+        end fork
+    else (no)
+        if ((readNum % filterNum) != 0) then (yes)
+            :write(p[1], &readNum, sizeof(readNum));    
+        else (no)
+        endif
+    endif
+endwhile ( = 0 (Pipe is closed))
+
+:close(p[1]);
+:wait(0);
+
+end
+@enduml
