@@ -1,0 +1,54 @@
+@startuml find
+:start of searchDir(char *dir, char *target);
+partition "field" {
+    note
+    char curPath[64];
+    char *p;
+    int fdDir;
+    struct dirent de;
+    struct stat st;
+    end note
+    :field definition;
+}
+
+:strcpy(curPath, dir);
+:p = curPath + strlen(dir);
+:~*p++ = '/';
+
+if ((fdDir = open(dir, 0 /*Read Only*/)) >= 0) then (yes)
+    while (read(fdDir, &de, sizeof(de)) == sizeof(de)) is (true)
+        :memmove(p, de.name, DIRSIZ);
+        :p[DIRSIZ] = '\0';
+        if (de.inum != 0) then (yes)
+            if (stat(curPath, &st) == 0) then (yes)
+                if (st.type == T_DIR) then (yes)
+                    if (strcmp(p, ".") != 0) then (yes)
+                        if (strcmp(p, "..") != 0) then (yes)
+                            partition "recursive" {
+                                :searchDir(curPath, target);
+                            }
+                        endif
+                    endif
+                else (no)
+                    if (st.type == T_FILE or T_DEVICE) then (yes)
+                        if (strcmp(target, p) == 0) then (yes) 
+                            :fprintf(2, "%s\\n", curPath);
+                        endif
+                    endif
+                endif
+            else
+                :fprintf(1, "stat Fail...\\n");
+                :exit(1);
+                kill
+            endif
+        endif
+    endwhile (no)
+else (no)
+    :fprintf(1, "open Fail...\\n");
+    :exit(1);
+    kill
+endif
+
+:end;
+
+@enduml
