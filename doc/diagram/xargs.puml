@@ -1,0 +1,120 @@
+@startuml xargs
+skinparam ConditionEndStyle diamond
+
+:main(int argc, char **argv);
+
+partition "field" {
+    note 
+    char c;
+    int pid;
+    int idxArg;
+    int idxCh;
+    char *myArgv[MAXARG];
+    char argPool[MAX_POOL_SIZE]; /* store strings of argv */
+    char *pArg;
+    end note
+    :initialization;
+}
+    
+if (argc >= 2) then (yes)
+
+    :idxArg = 0;
+    package "myArgv" {
+        note 
+            myArgv to store the new arg
+        end note
+        repeat :myArgv[idxArg] = argv[idxArg + 1];
+        repeat while (idxArg < (argc - 1))
+    }
+
+    :idxArg = argc - 1;
+    :myArgv[argc - 1] = 0;
+    :idxCh = 0;
+    :pArg = argPool;
+
+    while (read(0, &c, 1)) is (> 0)
+        switch (c == ?)
+        case (c == blankspace)
+            package Null-terminated {
+                note
+                    Make arg null-terminated
+                end note
+                :argPool[idxCh++] = '\0';
+            }
+            package idxArg {
+                note
+                    proceed to next arg
+                    default as 0
+                end note
+                :idxArg++;
+                :myArgv[idxArg] = 0;
+            }
+            package pArg {
+                note
+                    pArg point to beginning of a string which
+                    could became a valid arg later on.
+                end note
+                :pArg = &argPool[idxCh];
+            }
+            if (idxArg >= MAXARG) then (yes)
+                :fprintf(2, "too many args...\\n");
+                :exit(1);
+                kill
+            endif
+        case (c == '\\n')
+            :argPool[idxCh] = '\0';
+            :myArgv[idxArg + 1] = 0;
+            fork
+                ->parent;
+                package Recover {
+                    note
+                        Recover the argv back to original one
+                        right before reading STDIN
+                    end note
+                    :idxArg = argc - 1;
+                    :myArgv[argc - 1] = 0;
+                    :idxCh = 0;
+                    :pArg = argPool;
+                }
+                
+                :wait(0);
+            fork again
+                ->child;
+                package "exec" {
+                    note
+                        Exec the command according to myArgv
+                    end note
+                    if (exec(myArgv[0], myArgv) < 0) then
+                        :fprintf(2, "exec fail...\\n");
+                        :exit(1);
+                        kill
+                    endif
+                }
+                
+            end fork
+        case (other character)
+            package "myArgv" {
+                note
+                    update myArgv if at least a character is received
+                    pArg and idxArg is updated in the case ' '(blankspace)
+                end note
+                :myArgv[idxArg] = pArg;
+            }
+            
+            :argPool[idxCh++] = c;
+            if (idxCh >= MAX_POOL_SIZE) then (yes)
+                :fprintf(2, "arg too long...\\n");
+                :exit(1);
+                kill
+            else (no)
+            endif
+        endswitch
+    endwhile ( == 0)
+    :exit(0);
+else
+:fprintf(2, "Usage: [cmd] | xargs [cmd] [arg]...\\n");
+:exit(1);
+kill
+endif
+end
+@enduml
