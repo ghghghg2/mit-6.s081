@@ -1,0 +1,317 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8" />
+  <title>Acquire and Release Semantics</title>
+  <meta name="author" content="Jeff Preshing" />
+
+  
+  
+  <meta name="description" content="Generally speaking, in lock-free programming, there are two ways in which threads can manipulate shared memory: They can compete with each other for a resource, or they can pass &hellip;" />
+  
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <link rel="canonical" href="https://preshing.com/20120913/acquire-and-release-semantics" />
+  <link href="/favicon.png" rel="icon" />
+  <link href="/stylesheets/screen.css?v2" media="screen, projection" rel="stylesheet" type="text/css" />
+  <link href="/feed" rel="alternate" title="Preshing on Programming" type="application/atom+xml" />
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/lib/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+  <script type="text/javascript">
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-44017752-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function() {
+      var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+  </script>
+
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/"><img src="/images/header.png" alt="Preshing on Programming"/>Preshing on Programming</a></h1>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="https://twitter.com/preshing" rel="follow-twitter" title="Follow on Twitter">Twitter</a></li>
+  <li><a href="/feed" rel="subscribe-rss" title="Subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+  <li><a href="/contact">Contact</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2012-09-13T06:48:08-04:00" pubdate data-updated="true">Sep 13, 2012</time>
+        
+      </p>
+    
+    
+      <h1 class="entry-title">Acquire and Release Semantics</h1>
+    
+  </header>
+
+
+<div class="entry-content"><p>Generally speaking, in <a href="http://preshing.com/20120612/an-introduction-to-lock-free-programming">lock-free programming</a>, there are two ways in which threads can manipulate shared memory: They can compete with each other for a resource, or they can pass information co-operatively from one thread to another. Acquire and release semantics are crucial for the latter: reliable passing of information between threads. In fact, I would venture to guess that incorrect or missing acquire and release semantics is the #1 type of lock-free programming error.</p>
+
+<p>In this post, I&rsquo;ll demonstrate various ways to achieve acquire and release semantics in C++. I&rsquo;ll touch upon the C++11 atomic library standard in an introductory way, so you don&rsquo;t already need to know it. And to be clear from the start, the information here pertains to lock-free programming <em>without</em> <a href="http://preshing.com/20120612/an-introduction-to-lock-free-programming#sequential-consistency">sequential consistency</a>. We&rsquo;re dealing directly with memory ordering in a multicore or multiprocessor environment.</p>
+
+<!-- more -->
+<p>Unfortunately, the terms <em>acquire and release semantics</em> appear to be in even worse shape than the term <em>lock-free</em>, in that the more you scour the web, the more seemingly contradictory definitions you&rsquo;ll find. Bruce Dawson offers a couple of good definitions (credited to Herb Sutter) about halfway through <a href="http://msdn.microsoft.com/en-us/library/windows/desktop/ee418650.aspx">this white paper</a>. I&rsquo;d like to offer a couple of definitions of my own, staying close to the principles behind C++11 atomics:</p>
+
+<blockquote>
+  <p><img class="right" src="/images/read-acquire.png" /><strong>Acquire semantics</strong> is a property that can only apply to operations that <strong>read</strong> from shared memory, whether they are <a href="http://preshing.com/20120612/an-introduction-to-lock-free-programming#atomic-rmw">read-modify-write</a> operations or plain loads. The operation is then considered a <strong>read-acquire</strong>. Acquire semantics prevent memory reordering of the read-acquire with any read or write operation that <strong>follows</strong> it in program order.</p>
+</blockquote>
+
+<blockquote>
+  <p><img class="right" src="/images/write-release.png" /><strong>Release semantics</strong> is a property that can only apply to operations that <strong>write</strong> to shared memory, whether they are read-modify-write operations or plain stores. The operation is then considered a <strong>write-release</strong>. Release semantics prevent memory reordering of the write-release with any read or write operation that <strong>precedes</strong> it in program order.</p>
+</blockquote>
+
+<p>Once you digest the above definitions, it&rsquo;s not hard to see that acquire and release semantics can be achieved using simple combinations of the memory barrier types I <a href="http://preshing.com/20120710/memory-barriers-are-like-source-control-operations">described at length in my previous post</a>. The barriers must (somehow) be placed <em>after</em> the read-acquire operation, but <em>before</em> the write-release. <em>[Update: Please note that these barriers are technically more strict than what&rsquo;s required for acquire and release semantics on a single memory operation, but they do achieve the desired effect.]</em></p>
+
+<p><img class="center" src="/images/acq-rel-barriers.png" /></p>
+
+<p>What&rsquo;s cool is that neither acquire nor release semantics requires the use of a <code>#StoreLoad</code> barrier, which is often a more expensive memory barrier type. For example, on PowerPC, the <code>lwsync</code> (short for &ldquo;lightweight sync&rdquo;) instruction acts as all three <code>#LoadLoad</code>, <code>#LoadStore</code> and <code>#StoreStore</code> barriers at the same time, yet is less expensive than the <code>sync</code> instruction, which includes a <code>#StoreLoad</code> barrier.</p>
+
+<h2 id="with-explicit-platform-specific-fence-instructions">With Explicit Platform-Specific Fence Instructions</h2>
+
+<p>One way to obtain the desired memory barriers is by issuing explicit fence instructions. Let&rsquo;s start with a simple example. Suppose we&rsquo;re coding for PowerPC, and <code>__lwsync()</code> is a compiler intrinsic function that emits the <code>lwsync</code> instruction. Since <code>lwsync</code> provides so many barrier types, we can use it in the following code to establish either acquire or release semantics as needed. In Thread 1, the store to <code>Ready</code> turns into a write-release, and in Thread 2, the load from <code>Ready</code> becomes a read-acquire.</p>
+
+<p><img class="center" src="/images/platform-fences.png" /></p>
+
+<p><a href="http://preshing.com/20120710/memory-barriers-are-like-source-control-operations"><img class="right" src="/images/analogy-small.png" /></a>If we let both threads run and find that <code>r1 == 1</code>, that serves as confirmation that the value of <code>A</code> assigned in Thread 1 was passed successfully to Thread 2. As such, we are guaranteed that <code>r2 == 42</code>. In my previous post, I already <a href="http://preshing.com/20120710/memory-barriers-are-like-source-control-operations">gave a lengthy analogy</a> for <code>#LoadLoad</code> and <code>#StoreStore</code> to illustrate how this works, so I won&rsquo;t rehash that explanation here.</p>
+
+<p>In formal terms, we say that the store to <code>Ready</code> <em>synchronized-with</em> the load. I&rsquo;ve written a separate post about <em>synchronizes-with</em> <a href="http://preshing.com/20130823/the-synchronizes-with-relation">here</a>. For now, suffice to say that for this technique to work in general, the acquire and release semantics must apply to the same variable &ndash; in this case, <code>Ready</code> &ndash; and both the load and store must be atomic operations. Here, <code>Ready</code> is a simple aligned <code>int</code>, so the operations are already atomic on PowerPC.</p>
+
+<h2 id="with-fences-in-portable-c11">With Fences in Portable C++11</h2>
+
+<p>The above example is compiler- and processor-specific. One approach for supporting multiple platforms is to convert the code to C++11. All C++11 identifiers exist in the <code>std</code> namespace, so to keep the following examples brief, let&rsquo;s assume the statement <code>using namespace std;</code> was placed somewhere earlier in the code.</p>
+
+<p>C++11&rsquo;s atomic library standard defines a portable function <code>atomic_thread_fence()</code> that takes a single argument to specify the type of fence. There are several possible values for this argument, but the values we&rsquo;re most interested in here are <code>memory_order_acquire</code> and <code>memory_order_release</code>. We&rsquo;ll use this function in place of <code>__lwsync()</code>.</p>
+
+<p>There&rsquo;s one more change to make before this example is complete. On PowerPC, we knew that both operations on <code>Ready</code> were atomic, but we can&rsquo;t make that assumption about every platform. To ensure atomicity on all platforms, we&rsquo;ll change the type of <code>Ready</code> from <code>int</code> to <code>atomic&lt;int&gt;</code>. I know, it&rsquo;s kind of a silly change, considering that aligned loads and stores of <code>int</code> are already atomic on every modern CPU that exists today. I&rsquo;ll write more about this in the post on <a href="http://preshing.com/20130823/the-synchronizes-with-relation"><em>synchronizes-with</em></a>, but for now, let&rsquo;s do it for the warm fuzzy feeling of 100% correctness in theory. No changes to <code>A</code> are necessary.</p>
+
+<p><img class="center" src="/images/cpp11-fences.png" /></p>
+
+<p>The <code>memory_order_relaxed</code> arguments above mean &ldquo;ensure these operations are atomic, but don&rsquo;t impose any ordering constraints/memory barriers that aren&rsquo;t already there.&rdquo;</p>
+
+<p>Once again, both of the above <code>atomic_thread_fence()</code> calls can be (and hopefully are) implemented as <code>lwsync</code> on PowerPC. Similarly, they could both emit a <code>dmb</code> instruction on ARM, which I believe is at least as effective as PowerPC&rsquo;s <code>lwsync</code>. On x86/64, both <code>atomic_thread_fence()</code> calls can simply be implemented as <a href="http://preshing.com/20120625/memory-ordering-at-compile-time">compiler barriers</a>, since <em>usually</em>, every load on x86/64 already implies acquire semantics and every store implies release semantics. This is why x86/64 is often said to be <a href="http://preshing.com/20120930/weak-vs-strong-memory-models">strongly ordered</a>.</p>
+
+<h2 id="without-fences-in-portable-c11">Without Fences in Portable C++11</h2>
+
+<p>In C++11, it&rsquo;s possible to achieve acquire and release semantics on <code>Ready</code> without issuing explicit fence instructions. You just need to specify memory ordering constraints directly on the operations on <code>Ready</code>:</p>
+
+<p><img class="center" src="/images/cpp11-no-fences.png" /></p>
+
+<p>Think of it as rolling each fence instruction into the operations on <code>Ready</code> themselves. <em>[Update: Please note that this form is <a href="http://preshing.com/20131125/acquire-and-release-fences-dont-work-the-way-youd-expect">not exactly the same</a> as the version using standalone fences; technically, it&rsquo;s less strict.]</em> The compiler will emit any instructions necessary to obtain the required barrier effects. In particular, on Itanium, each operation can be easily implemented as a single instruction: <code>ld.acq</code> and <code>st.rel</code>. Just as before, <code>r1 == 1</code> indicates a <em>synchronizes-with</em> relationship, serving as confirmation that <code>r2 == 42</code>. </p>
+
+<p>This is actually the preferred way to express acquire and release semantics in C++11. In fact, the <code>atomic_thread_fence()</code> function used in the previous example was <a href="http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2633.html">added relatively late</a> in the creation of the standard.</p>
+
+<h2 id="acquire-and-release-while-locking">Acquire and Release While Locking</h2>
+
+<p>As you can see, none of the examples in this post took advantage of the <code>#LoadStore</code> barriers provided by acquire and release semantics. Really, only the <code>#LoadLoad</code> and <code>#StoreStore</code> parts were necessary. That&rsquo;s just because in this post, I chose a simple example to let us focus on API and syntax.</p>
+
+<p>One case in which the <code>#LoadStore</code> part becomes essential is when using acquire and release semantics to implement a (mutex) lock. In fact, this is where the names come from: acquiring a lock implies acquire semantics, while releasing a lock implies release semantics! All the memory operations in between are contained inside a nice little barrier sandwich, preventing any undesireable memory reordering across the boundaries.</p>
+
+<p><img class="center" src="/images/acq-rel-lock.png" /></p>
+
+<p>Here, acquire and release semantics ensure that all modifications made while holding the lock will propagate fully to the next thread that obtains the lock. Every implementation of a lock, even one you <a href="http://preshing.com/20120226/roll-your-own-lightweight-mutex">roll on your own</a>, should provide these guarantees. Again, it&rsquo;s all about passing information reliably between threads, especially in a multicore or multiprocessor environment.</p>
+
+<p>In a followup post, I&rsquo;ll show a <a href="http://preshing.com/20121019/this-is-why-they-call-it-a-weakly-ordered-cpu">working demonstration</a> of C++11 code, running on real hardware, which can be plainly observed to break if acquire and release semantics are not used.</p>
+</div>
+
+
+
+  
+
+  <footer>
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/20120710/memory-barriers-are-like-source-control-operations" title="Previous Post: Memory Barriers Are Like Source Control Operations">&laquo; Memory Barriers Are Like Source Control Operations</a>
+      
+      
+        <a class="basic-alignment right" href="/20120930/weak-vs-strong-memory-models" title="Next Post: Weak vs. Strong Memory Models">Weak vs. Strong Memory Models &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+<section>
+<div id="comment-section">
+<script>
+var idcomments_acct = 'b741f3bade873745e10e70447d732c8c';
+var idcomments_post_id = '3841';
+var idcomments_post_url;
+</script>
+<span id="IDCommentsPostTitle" style="display:none"></span>
+<script type='text/javascript' src='https://www.intensedebate.com/js/genericCommentWrapperV2.js'></script>
+</div>
+</section>
+
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <a href="https://plywood.arc80.com/"><p style="margin-bottom:0.8em;">Check out <strong>Plywood</strong>, a cross-platform, open source C++ framework:</p>
+  <img srcset="/images/plywood-button.png 1x,/images/plywood-button@2x.png 2x" src="/images/plywood-button.png" width="165"></a>
+</section>
+<section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/20210315/how-cpp-resolves-a-function-call">How C++ Resolves a Function Call</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20201210/flap-hero-code-review">Flap Hero Code Review</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20201126/a-small-open-source-game-in-cpp">A Small Open Source Game In C++</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20200727/automatically-detecting-text-encodings-in-cpp">Automatically Detecting Text Encodings in C++</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20200708/io-in-plywood">I/O in Plywood</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20200526/a-new-cross-platform-open-source-cpp-framework">A New Cross-Platform Open Source C++ Framework</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20180124/a-flexible-reflection-system-in-cpp-part-2">A Flexible Reflection System in C++: Part 2</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20180116/a-primitive-reflection-system-in-cpp-part-1">A Flexible Reflection System in C++: Part 1</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20171218/how-to-write-your-own-cpp-game-engine">How to Write Your Own C++ Game Engine</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20170612/can-reordering-of-release-acquire-operations-introduce-deadlock">Can Reordering of Release/Acquire Operations Introduce Deadlock?</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20170529/heres-a-standalone-cairo-dll-for-windows">Here's a Standalone Cairo DLL for Windows</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20170522/learn-cmakes-scripting-language-in-15-minutes">Learn CMake's Scripting Language in 15 Minutes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20170511/how-to-build-a-cmake-based-project">How to Build a CMake-Based Project</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20160726/using-quiescent-states-to-reclaim-memory">Using Quiescent States to Reclaim Memory</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20160314/leapfrog-probing">Leapfrog Probing</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20160222/a-resizable-concurrent-map">A Resizable Concurrent Map</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20160201/new-concurrent-hash-maps-for-cpp">New Concurrent Hash Maps for C++</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20150402/you-can-do-any-kind-of-atomic-read-modify-write-operation">You Can Do Any Kind of Atomic Read-Modify-Write Operation</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20150324/safe-bitfields-in-cpp">Safe Bitfields in C++</a>
+      </li>
+    
+      <li class="post">
+        <a href="/20150316/semaphores-are-surprisingly-versatile">Semaphores are Surprisingly Versatile</a>
+      </li>
+    
+  </ul>
+</section>
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2021 Jeff Preshing -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
