@@ -1,0 +1,55 @@
+<html>
+<head>
+<title>GDB Guidance</title>
+<link rel="stylesheet" href="labs.css" type="text/css" />
+</head>
+<body>
+  
+<h1>How to run GDB on Athena</h1>
+
+In the first window:
+<ol>
+  <li> <tt>ssh &lt;your kerb&gt;@athena.dialup.mit.edu</tt>
+  <li> <tt>add -f 6.828</tt>
+  <li> <tt>git clone git://g.csail.mit.edu/xv6-labs-2022</tt> (omit if you already have cloned the lab repo)
+  <li> <tt>cd xv6-labs-2022</tt>
+  <li> <tt>make qemu-gdb</tt>
+  <li> Note the last line of the output of the previous command. It should say something like <tt>tcp::&lt;PORT NUMBER HERE&gt;</tt>. For example, you might see <tt>tcp::26000</tt>
+</ol>
+
+In the second window:
+<ol>
+  <li> <tt>ssh &lt;your kerb&gt;@athena.dialup.mit.edu</tt>
+  <li> <tt>add -f 6.828</tt>
+  <li> <tt>cd xv6-labs-2022</tt>
+  <li> <tt>riscv64-unknown-elf-gdb</tt>
+  <li> Inside the gdb prompt: <tt>target remote localhost:&lt;PORT NUMBER FROM POINT 6 ABOVE&gt;</tt>
+</ol>
+
+Say you wanted to break every time the kernel enters the function <tt>syscall</tt> from <tt>kernel/syscall.c</tt>
+
+<ol start="6">
+  <li> Inside the gdb prompt: <tt>file kernel/kernel</tt> (this is a binary that has all kernel code)
+  <li> Inside the gdb prompt: <tt>b syscall</tt> 
+  <li> Hit <tt>c</tt>. At this point you will start hitting the breakpoint above
+  <li> Keep hitting <tt>c</tt> to see where the kernell hits the <tt>syscall</tt> function. You will how the output in the first window is progressing.
+</ol>
+
+
+Now, say you wanted to break in the <tt>ls</tt> function in <tt>user/ls.c</tt>. Then, you would need to run <tt>file user/_ls</tt> at step 6 since this is the name of the binary where that function is. You would also run <tt>b ls</tt> in step 7.
+
+<h1>Common issues with running GDB</h1>
+<ol>
+  <li> Running GDB from the wrong directory. You need to run <tt>make qemu-gdb</tt> AND <tt>riscv64-unknown-elf-gdb</tt> (or the alternative <tt>gdb-multiarch</tt>) inside the <tt>xv6-labs-2022</tt> directory. Not in <tt>~</tt> and not in <tt>xv6-labs-2022/kernel</tt> or <tt>xv6-labs-2022/user</tt>.
+  <li> Forgetting to add the Athena locker with the tools for the class. See step 2 above (<tt>add -f 6.828</tt>). This is only relevant if you are on Athena.
+  <li> Running the wrong type of gdb. If you run just <tt>gdb</tt>, it will not be able to understand the machine code that your binary is in (your computer/Athena is using x86 and the binary <tt>kernel/kernel</tt> is using RISCV). You need to run <tt>riscv64-unknown-elf-gdb</tt> or the alternative <tt>gdb-multiarch</tt>. If you are on Athena, run <tt>riscv64-unknown-elf-gdb</tt>.
+  <li> gdb not being able to find what you are trying to debug. You might need to run <tt>target remote localhost:&lt;PORT NUMBER FROM POINT 6 ABOVE&gt;</tt>, including if you are running on Athena.
+  <li> Not adding in the file that you are trying to debug. If you get an error that says something about running <tt>file</tt> command or unknown symbol, you need to run <tt>file kernel/kernel</tt> so that gdb knows where to look to find the code you are trying to debug.
+  <li> If you quit GDB, and then re-run <tt>gdb-multiarch</tt> (or <tt>riscv64-unknown-elf-gdb</tt>) without also re-running <tt>make qemu-gdb</tt>, weird things might happen. Most of the times it works but sometimes it does not and then you just need to restart both and start over. This might exhibit itself in a behavior of GDB not being responsive to your requests.
+  <li> If you are using Athena, make sure that the two windows are on the same Athena machine. You can find out what machine you are on by checking out the beginning of each prompt line. It will say &lt;your kerb&gt;@&lt;Athena machine name&gt;. If you have trouble getting the two windows to be on the same machine, you can checkout <a href="https://www.ocf.berkeley.edu/~ckuehl/tmux/">tmux</a>.
+  <li> Not using GDB to help you debug! I know that using GDB is really annoying in the beginning but it is super super helpful in the later labs and we want you all to know the basic commands to make debugging less painful in the future.
+</ol>
+
+</body>
+</html>
+
