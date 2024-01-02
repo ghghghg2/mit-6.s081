@@ -1,0 +1,584 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html
+Subject: RISC-V-Modifiers (Using as)
+Date: Wed, 3 Jan 2024 01:40:39 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----"
+
+
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/html
+Content-ID: <frame-ACDE63B367B7C1E55D52E512B2B34694@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://sourceware.org/binutils/docs/as/RISC_002dV_002dModifiers.html
+
+<!DOCTYPE html><html collamark=3D"crx"><!-- Created by GNU Texinfo 7.0.2, h=
+ttps://www.gnu.org/software/texinfo/ --><head><meta http-equiv=3D"Content-T=
+ype" content=3D"text/html; charset=3DUTF-8"><link rel=3D"stylesheet" type=
+=3D"text/css" href=3D"cid:css-89d9950e-86e9-481c-8fcc-6957c58fd81d@mhtml.bl=
+ink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-18c69f80-=
+20cc-4ec5-9b95-7f1626a15d86@mhtml.blink" /><link rel=3D"stylesheet" type=3D=
+"text/css" href=3D"cid:css-169d1df9-9c7d-44ce-8316-db661516915c@mhtml.blink=
+" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-a2cd03dd-f18=
+f-44be-9ba8-48c691422caa@mhtml.blink" /><link rel=3D"stylesheet" type=3D"te=
+xt/css" href=3D"cid:css-c7ec591f-ba6f-45ab-80f0-c0ab52a14632@mhtml.blink" /=
+><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-30e69380-ee7d-4=
+a85-a24a-21daa0c43429@mhtml.blink" />
+
+<!-- This file documents the GNU Assembler "as".
+
+Copyright =C2=A9 1991-2023 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3
+or any later version published by the Free Software Foundation;
+with no Invariant Sections, with no Front-Cover Texts, and with no
+Back-Cover Texts.  A copy of the license is included in the
+section entitled "GNU Free Documentation License".
+ -->
+<title>RISC-V-Modifiers (Using as)</title>
+
+<meta name=3D"description" content=3D"RISC-V-Modifiers (Using as)">
+<meta name=3D"keywords" content=3D"RISC-V-Modifiers (Using as)">
+<meta name=3D"resource-type" content=3D"document">
+<meta name=3D"distribution" content=3D"global">
+<meta name=3D"Generator" content=3D"makeinfo">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width,initial-scale=3D1">
+
+<link href=3D"https://sourceware.org/binutils/docs/as/index.html" rel=3D"st=
+art" title=3D"Top">
+<link href=3D"https://sourceware.org/binutils/docs/as/AS-Index.html" rel=3D=
+"index" title=3D"AS Index">
+<link href=3D"https://sourceware.org/binutils/docs/as/index.html#SEC_Conten=
+ts" rel=3D"contents" title=3D"Table of Contents">
+<link href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dDepend=
+ent.html" rel=3D"up" title=3D"RISC-V-Dependent">
+<link href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dFloati=
+ng_002dPoint.html" rel=3D"next" title=3D"RISC-V-Floating-Point">
+<link href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dDirect=
+ives.html" rel=3D"prev" title=3D"RISC-V-Directives">
+
+
+
+</head>
+
+<body lang=3D"en">
+<div class=3D"subsection-level-extent" id=3D"RISC_002dV_002dModifiers">
+<div class=3D"nav-panel">
+<p>
+Next: <a href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dFlo=
+ating_002dPoint.html" accesskey=3D"n" rel=3D"next">RISC-V Floating Point</a=
+>, Previous: <a href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_=
+002dDirectives.html" accesskey=3D"p" rel=3D"prev">RISC-V Directives</a>, Up=
+: <a href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dDepende=
+nt.html" accesskey=3D"u" rel=3D"up">RISC-V Dependent Features</a> &nbsp; [<=
+a href=3D"https://sourceware.org/binutils/docs/as/index.html#SEC_Contents" =
+title=3D"Table of contents" rel=3D"contents">Contents</a>][<a href=3D"https=
+://sourceware.org/binutils/docs/as/AS-Index.html" title=3D"Index" rel=3D"in=
+dex">Index</a>]</p>
+</div>
+<hr>
+<h4 class=3D"subsection section-level-set-subsection" id=3D"RISC_002dV-Asse=
+mbler-Modifiers">9.38.3 RISC-V Assembler Modifiers</h4>
+
+<p>The RISC-V assembler supports following modifiers for relocatable addres=
+ses
+used in RISC-V instruction operands.  However, we also support some pseudo
+instructions that are easier to use than these modifiers.
+</p>
+<dl class=3D"table">
+<dt><code class=3D"code">%lo(<var class=3D"var">symbol</var>)</code></dt>
+<dd><p>The low 12 bits of absolute address for <var class=3D"var">symbol</v=
+ar>.
+</p>
+</dd>
+<dt><code class=3D"code">%hi(<var class=3D"var">symbol</var>)</code></dt>
+<dd><p>The high 20 bits of absolute address for <var class=3D"var">symbol</=
+var>.  This is usually
+used with the %lo modifier to represent a 32-bit absolute address.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted">	lui        a0, %hi(<var class=3D"var">=
+symbol</var>)     // R_RISCV_HI20
+	addi       a0, a0, %lo(<var class=3D"var">symbol</var>) // R_RISCV_LO12_I
+
+	lui        a0, %hi(<var class=3D"var">symbol</var>)     // R_RISCV_HI20
+	load/store a0, %lo(<var class=3D"var">symbol</var>)(a0) // R_RISCV_LO12_I/=
+S
+</pre></div>
+
+</dd>
+<dt><code class=3D"code">%pcrel_lo(<var class=3D"var">label</var>)</code></=
+dt>
+<dd><p>The low 12 bits of relative address between pc and <var class=3D"var=
+">symbol</var>.
+<web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"d7c7a=
+6e5-22a4-448b-8768-1f53a956b953" data-highlight-split-type=3D"head" data-hi=
+ghlight-id-extra=3D"" markid=3D"659446640dd9895f4a88ad8e" style=3D"backgrou=
+nd-color: rgb(146, 255, 170); cursor: pointer;">The </web-highlight><var cl=
+ass=3D"var"><web-highlight class=3D"webhighlights-highlight" data-highlight=
+-id=3D"d7c7a6e5-22a4-448b-8768-1f53a956b953" data-highlight-split-type=3D"n=
+one" data-highlight-id-extra=3D"" markid=3D"659446640dd9895f4a88ad8e" style=
+=3D"background-color: rgb(146, 255, 170); cursor: pointer;">symbol</web-hig=
+hlight></var><web-highlight class=3D"webhighlights-highlight" data-highligh=
+t-id=3D"d7c7a6e5-22a4-448b-8768-1f53a956b953" data-highlight-split-type=3D"=
+none" data-highlight-id-extra=3D"" markid=3D"659446640dd9895f4a88ad8e" styl=
+e=3D"background-color: rgb(146, 255, 170); cursor: pointer;"> is related to=
+ the high part instruction which is marked
+by </web-highlight><var class=3D"var"><web-highlight class=3D"webhighlights=
+-highlight" data-highlight-id=3D"d7c7a6e5-22a4-448b-8768-1f53a956b953" data=
+-highlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=3D"65944=
+6640dd9895f4a88ad8e" style=3D"background-color: rgb(146, 255, 170); cursor:=
+ pointer;">label</web-highlight></var><web-highlight class=3D"webhighlights=
+-highlight" data-highlight-id=3D"d7c7a6e5-22a4-448b-8768-1f53a956b953" data=
+-highlight-split-type=3D"tail" data-highlight-id-extra=3D"" markid=3D"65944=
+6640dd9895f4a88ad8e" style=3D"background-color: rgb(146, 255, 170); cursor:=
+ pointer;">.</web-highlight>
+</p>
+</dd>
+<dt><code class=3D"code">%pcrel_hi(<var class=3D"var">symbol</var>)</code><=
+/dt>
+<dd><p>The high 20 bits of relative address between pc and <var class=3D"va=
+r">symbol</var>.
+This is usually used with the %pcrel_lo modifier to represent a +/-2GB
+pc-relative range.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted"><var class=3D"var">label</var>:
+	auipc      a0, %pcrel_hi(<var class=3D"var">symbol</var>)    // R_RISCV_PC=
+REL_HI20
+	addi       a0, a0, %pcrel_lo(<var class=3D"var">label</var>) // R_RISCV_PC=
+REL_LO12_I
+
+<var class=3D"var">label</var>:
+	auipc      a0, %pcrel_hi(<var class=3D"var">symbol</var>)    // R_RISCV_PC=
+REL_HI20
+	load/store a0, %pcrel_lo(<var class=3D"var">label</var>)(a0) // R_RISCV_PC=
+REL_LO12_I/S
+</pre></div>
+
+<p>Or you can use the pseudo lla/lw/sw/... instruction to do this.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted">	lla  a0, <var class=3D"var">symbol</va=
+r>
+</pre></div>
+
+</dd>
+<dt><code class=3D"code">%got_pcrel_hi(<var class=3D"var">symbol</var>)</co=
+de></dt>
+<dd><p>The high 20 bits of relative address between pc and the GOT entry of
+<var class=3D"var">symbol</var>.  This is usually used with the %pcrel_lo m=
+odifier to access
+the GOT entry.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted"><var class=3D"var">label</var>:
+	auipc      a0, %got_pcrel_hi(<var class=3D"var">symbol</var>) // R_RISCV_G=
+OT_HI20
+	addi       a0, a0, %pcrel_lo(<var class=3D"var">label</var>)  // R_RISCV_P=
+CREL_LO12_I
+
+<var class=3D"var">label</var>:
+	auipc      a0, %got_pcrel_hi(<var class=3D"var">symbol</var>) // R_RISCV_G=
+OT_HI20
+	load/store a0, %pcrel_lo(<var class=3D"var">label</var>)(a0)  // R_RISCV_P=
+CREL_LO12_I/S
+</pre></div>
+
+<p>Also, the pseudo la instruction with PIC has similar behavior.
+</p>
+</dd>
+<dt><code class=3D"code">%tprel_add(<var class=3D"var">symbol</var>)</code>=
+</dt>
+<dd><p>This is used purely to associate the R_RISCV_TPREL_ADD relocation fo=
+r
+TLS relaxation.  This one is only valid as the fourth operand to the normal=
+ly
+3 operand add instruction.
+</p>
+</dd>
+<dt><code class=3D"code">%tprel_lo(<var class=3D"var">symbol</var>)</code><=
+/dt>
+<dd><p>The low 12 bits of relative address between tp and <var class=3D"var=
+">symbol</var>.
+</p>
+</dd>
+<dt><code class=3D"code">%tprel_hi(<var class=3D"var">symbol</var>)</code><=
+/dt>
+<dd><p>The high 20 bits of relative address between tp and <var class=3D"va=
+r">symbol</var>.  This is
+usually used with the %tprel_lo and %tprel_add modifiers to access the thre=
+ad
+local variable <var class=3D"var">symbol</var> in TLS Local Exec.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted">	lui        a5, %tprel_hi(<var class=3D=
+"var">symbol</var>)          // R_RISCV_TPREL_HI20
+	add        a5, a5, tp, %tprel_add(<var class=3D"var">symbol</var>) // R_RI=
+SCV_TPREL_ADD
+	load/store t0, %tprel_lo(<var class=3D"var">symbol</var>)(a5)      // R_RI=
+SCV_TPREL_LO12_I/S
+</pre></div>
+
+</dd>
+<dt><code class=3D"code">%tls_ie_pcrel_hi(<var class=3D"var">symbol</var>)<=
+/code></dt>
+<dd><p>The high 20 bits of relative address between pc and GOT entry.  It i=
+s
+usually used with the %pcrel_lo modifier to access the thread local
+variable <var class=3D"var">symbol</var> in TLS Initial Exec.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted">	la.tls.ie  a5, <var class=3D"var">symb=
+ol</var>
+	add        a5, a5, tp
+	load/store t0, 0(a5)
+</pre></div>
+
+<p>The pseudo la.tls.ie instruction can be expended to
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted"><var class=3D"var">label</var>:
+	auipc a5, %tls_ie_pcrel_hi(<var class=3D"var">symbol</var>) // R_RISCV_TLS=
+_GOT_HI20
+	load  a5, %pcrel_lo(<var class=3D"var">label</var>)(a5)     // R_RISCV_PCR=
+EL_LO12_I
+</pre></div>
+
+</dd>
+<dt><code class=3D"code">%tls_gd_pcrel_hi(<var class=3D"var">symbol</var>)<=
+/code></dt>
+<dd><p>The high 20 bits of relative address between pc and GOT entry.  It i=
+s
+usually used with the %pcrel_lo modifier to access the thread local variabl=
+e
+<var class=3D"var">symbol</var> in TLS Global Dynamic.
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted">	la.tls.gd  a0, <var class=3D"var">symb=
+ol</var>
+	call       __tls_get_addr@plt
+	mv         a5, a0
+	load/store t0, 0(a5)
+</pre></div>
+
+<p>The pseudo la.tls.gd instruction can be expended to
+</p>
+<div class=3D"example smallexample">
+<pre class=3D"example-preformatted"><var class=3D"var">label</var>:
+	auipc a0, %tls_gd_pcrel_hi(<var class=3D"var">symbol</var>) // R_RISCV_TLS=
+_GD_HI20
+	addi  a0, a0, %pcrel_lo(<var class=3D"var">label</var>)     // R_RISCV_PCR=
+EL_LO12_I
+</pre></div>
+
+</dd>
+</dl>
+
+</div>
+<hr>
+<div class=3D"nav-panel">
+<p>
+Next: <a href=3D"https://sourceware.org/binutils/docs/as/RISC_002dV_002dFlo=
+ating_002dPoint.html">RISC-V Floating Point</a>, Previous: <a href=3D"https=
+://sourceware.org/binutils/docs/as/RISC_002dV_002dDirectives.html">RISC-V D=
+irectives</a>, Up: <a href=3D"https://sourceware.org/binutils/docs/as/RISC_=
+002dV_002dDependent.html">RISC-V Dependent Features</a> &nbsp; [<a href=3D"=
+https://sourceware.org/binutils/docs/as/index.html#SEC_Contents" title=3D"T=
+able of contents" rel=3D"contents">Contents</a>][<a href=3D"https://sourcew=
+are.org/binutils/docs/as/AS-Index.html" title=3D"Index" rel=3D"index">Index=
+</a>]</p>
+</div>
+
+
+
+
+
+<div class=3D"cm-popover" id=3D"cm-popover">                <div class=3D"c=
+m-popover__arrow">                    <span class=3D"cm-popover__arrow-bg">=
+</span>                </div>                <div class=3D"cm-popover__raw-=
+open">null</div>            </div><div id=3D"webhighlights-notifications"><=
+/div><webhighlights-extension></webhighlights-extension><webhighlights-side=
+bar><template shadowmode=3D"open"><!---->
+      <!--?lit$310382556$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$310382556$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$310382556$--><!--?-->
+      <!--?lit$310382556$-->
+    </template></main-component>
+         =20
+      <!--?lit$310382556$--><!--?-->
+      <!--?lit$310382556$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$310382556$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$310382556$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$310382556$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$310382556$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker><div id=3D"snackbar" class=3D"">
+   =20
+    =E2=9C=85 1 Highlight applied
+           =20
+           =20
+    </div></body></html>
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-89d9950e-86e9-481c-8fcc-6957c58fd81d@mhtml.blink
+
+@charset "utf-8";
+
+div.example { margin-left: 3.2em; }
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-18c69f80-20cc-4ec5-9b95-7f1626a15d86@mhtml.blink
+
+@charset "utf-8";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-169d1df9-9c7d-44ce-8316-db661516915c@mhtml.blink
+
+@charset "utf-8";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00b0783b; --wh-primary-light: #53e3a6; --wh-primary-dark=
+: #007f4b; --wh-primary-dark-hover: #017444; --wh-primary-shadow: #00b07841=
+; --wh-primary-shadow-2: #00b07870; --wh-primary-border-color: #c8c8c870; -=
+-secondary-color: #3d4455; --secondary-color-hover: #3a4052; --secondary-co=
+lor-transparent: #3d44556b; --secondary-light: #4c556d; --secondary-dark: #=
+252934; --secondary-dark-hover: #191b22; --secondary-dark-transparent: #2e2=
+d2d46; --highlight-color: #92ffaa; --error-color: #d62d4c; --warning-color:=
+ #ffcc00; --error-info: #14854e; --success-color: #4BB543; --font-color: #2=
+f3237; --font-color-light: #626364; --font-color-dark: #252525; --wh-font-f=
+amily: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --BREAKPOINT_XS: 575=
+px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 991px; --BREAKPOINT_L: 1199px; -=
+-BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 1699px; --wh-danger-color: var(--=
+red-600); --wh-danger-color-hover: var(--red-700); --wh-font-size: 13px; --=
+wh-blockquote-line-height: 1.3; --wh-bg-base: var(--wh-secondary-600); --wh=
+-bg-base-hover: var(--wh-secondary-500); --wh-border-base: var(--wh-seconda=
+ry-200); --wh-border-base-hover: var(--wh-secondary-100); --wh-border-base-=
+strong: var(--wh-secondary-100); --wh-border-base-strong-hover: var(--wh-se=
+condary-50); --wh-bg-base-hover-strong: var(--wh-secondary-300); --wh-bg-ba=
+ck: var(--wh-secondary-700); --wh-bg-back-strong: var(--wh-secondary-800); =
+--wh-bg-back-strong-hover: var(--wh-secondary-900); --wh-bg-back-hover: var=
+(--wh-secondary-600); --wh-bg-back-hover-strong: var(--wh-secondary-800); -=
+-wh-border-back: var(--wh-secondary-100); --wh-border-back-strong: var(--wh=
+-secondary-50); --wh-bg-front: var(--wh-secondary-400); --wh-bg-front-stron=
+g: var(--wh-secondary-200); --wh-bg-front-strong-hover: var(--wh-secondary-=
+100); --wh-bg-front-hover: var(--wh-secondary-300); --wh-bg-front-hover-str=
+ong: var(--wh-secondary-200); --wh-border-front: hsl(227, 20%, 25%); --wh-b=
+order-front-strong: hsl(227, 20%, 35%); --wh-text-stronger: hsla(0, 0%, 100=
+%, 0.95); --wh-text-strongest: hsla(0, 0%, 100%, 1); --wh-text-strong: rgba=
+(255, 255, 255, 0.9); --wh-text: rgba(255, 255, 255, 0.85); --wh-text-hover=
+: var(--wh-text-strong); --wh-text-light: rgba(255, 255, 255, 0.73); --wh-t=
+ext-lighter: rgba(255, 255, 255, 0.63); --wh-text-lightest: rgba(255, 255, =
+255, 0.5); --wh-border-color: hsla(0, 0%, 100%, 0.15); --wh-border-color-st=
+rong: hsla(0, 0%, 100%, 0.25); --wh-note-editor-bg-color: hsl(221, 27%, 20%=
+); --wh-note-editor-bg-color-preview: hsl(221, 27%, 18%); --wh-bg-tags: var=
+(--wh-secondary-300); --wh-bg-tags-hover: var(--wh-secondary-200); --wh-syn=
+tax-bg-color: rgba(255, 255, 255, 0.05); --wh-fallback-img-color: var(--wh-=
+secondary-600); --wh-bg-disabled: hsl(220, 22%, 18%); --wh-bg-notification-=
+unread: hsla(161, 100%, 20%, 0.15); --wh-bg-notification-unread-hover: hsla=
+(161, 100%, 20%, 0.05); --wh-subtle-gray: rgb(255, 255, 255, 0.1); --wh-sha=
+dow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0.1),
+      /* 2. shadow ring =F0=9F=91=87 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075)=
+,
+      /* 3. multiple soft shadows =F0=9F=91=87 */ 0 0.3px 0.4px hsla(230, 1=
+3%, 9%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); }
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-a2cd03dd-f18f-44be-9ba8-48c691422caa@mhtml.blink
+
+@charset "utf-8";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-c7ec591f-ba6f-45ab-80f0-c0ab52a14632@mhtml.blink
+
+@charset "utf-8";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-30e69380-ee7d-4a85-a24a-21daa0c43429@mhtml.blink
+
+@charset "utf-8";
+
+#snackbar { z-index: 2147483647; font-family: var(--font-family, 'Inter', '=
+SF Pro Display', -apple-system, BlinkMacSystemFont,
+'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif); box-shadow: rgba(=
+0, 0, 0, 0.39) 0px 8px 20px 4px; visibility: hidden; width: 340px; backgrou=
+nd-color: rgb(37, 41, 52); color: rgb(255, 255, 255); text-align: center; b=
+order-radius: 8px; padding: 12px 8px; box-sizing: border-box; position: fix=
+ed; left: calc(50% - 170px); bottom: 30px; font-size: 14px; line-height: 1.=
+5; }
+
+#snackbar.show { visibility: visible; animation: 500ms ease 0s 1 normal non=
+e running fadein, 500ms ease 2000ms 1 normal none running fadeout; }
+
+@-webkit-keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@-webkit-keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+
+@keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+------MultipartBoundary--fgTCEEt8nhtUb2dABaFRW9LxZcZZ681OThIdkQsdxS------
