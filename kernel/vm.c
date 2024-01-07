@@ -450,7 +450,8 @@ print_pt(pagetable_t pagetable, uint8 depth)
       for (int j = 0; j < depth; j++) {
         printf(" ..");
       }
-      printf("%d:  pte %p pa %p flags: %x\n", i, pte, PTE2PA(pte), PTE_FLAGS(pte));
+      // printf("%d:  pte %p pa %p flags: %x\n", i, pte, PTE2PA(pte), PTE_FLAGS(pte));
+      printf("%d: pte %p pa %p\n", i, pte, PTE2PA(pte));
       if ((pte & (PTE_R|PTE_W|PTE_X)) == 0) {
         /* There is lower level PTE */
         print_pt((pagetable_t)PTE2PA(pte), depth + 1);
