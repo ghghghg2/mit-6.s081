@@ -482,6 +482,12 @@ scheduler(void)
         // before jumping back to us.
         p->state = RUNNING;
         c->proc = p;
+
+        // Switch page table to independent kernel page table 
+        // stored in chosen process
+        w_satp(MAKE_SATP(p->kPageTable));
+        sfence_vma();
+
         swtch(&c->context, &p->context);
 
         // Process is done running for now.
