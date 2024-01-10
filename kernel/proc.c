@@ -121,6 +121,14 @@ found:
     return 0;
   }
 
+  // Duplicate kernel pagetable for the proc
+  p->kPageTable = kvm_dup_kpagetable();
+  // Map Corresponding kernel stack
+  uint64 va = KSTACK((int) (p - proc));
+  uint64 pa = kvmpa(va);
+  if(mappages(p->kPageTable, va, PGSIZE, pa, PTE_R | PTE_W) != 0)
+    panic("map proc kstack");
+  
   // Set up new context to start executing at forkret,
   // which returns to user space.
   memset(&p->context, 0, sizeof(p->context));
