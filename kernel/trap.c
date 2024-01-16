@@ -146,6 +146,8 @@ kerneltrap()
   if((which_dev = devintr()) == 0){
     printf("scause %p\n", scause);
     printf("sepc=%p stval=%p\n", r_sepc(), r_stval());
+    printf("current satp: %p\n", r_satp());
+    printf("current kpagetable: %p\n", myproc()->kPageTable);
     panic("kerneltrap");
   }
 
