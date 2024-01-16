@@ -46,6 +46,11 @@ usertrap(void)
   w_stvec((uint64)kernelvec);
 
   struct proc *p = myproc();
+
+  // Switch page table to independent kernel page table 
+  // stored in current process
+  w_satp(MAKE_SATP(p->kPageTable));
+  sfence_vma();
   
   // save user program counter.
   p->trapframe->epc = r_sepc();
