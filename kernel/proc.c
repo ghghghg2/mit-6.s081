@@ -490,6 +490,8 @@ scheduler(void)
 
         swtch(&c->context, &p->context);
 
+        kvminithart(); // Switch to global kernel_pagetable
+
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
@@ -500,6 +502,7 @@ scheduler(void)
     }
 #if !defined (LAB_FS)
     if(found == 0) {
+      kvminithart(); // Switch to global kernel_pagetable
       intr_on();
       asm volatile("wfi");
     }
