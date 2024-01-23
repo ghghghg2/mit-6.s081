@@ -274,8 +274,13 @@ growproc(int n)
 {
   uint sz;
   struct proc *p = myproc();
+  uint64 koldsz;
+  pagetable_t upagetable;
 
   sz = p->sz;
+  upagetable = p->pagetable;
+  koldsz = sz;
+
   if(n > 0){
     if((sz = uvmalloc(p->pagetable, sz, sz + n)) == 0) {
       return -1;
@@ -283,6 +288,11 @@ growproc(int n)
   } else if(n < 0){
     sz = uvmdealloc(p->pagetable, sz, sz + n);
   }
+
+  /* Copy the newly allocated memory mapping to kpagetable */
+  // printf("growprocing koldsz: %p, sz: %p\n", koldsz, sz);
+  mapUvaToKva(upagetable, p->kPageTable, koldsz, sz);
+
   p->sz = sz;
   return 0;
 }
