@@ -1,0 +1,701 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/syscall.html
+Subject: Lab: System calls
+Date: Wed, 24 Jan 2024 00:12:38 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----"
+
+
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/html
+Content-ID: <frame-E91CEAC9297A9B599EFCAC019F9AC5D6@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/syscall.html
+
+<html class=3D"cm-retina" collamark=3D"crx"><head><meta http-equiv=3D"Conte=
+nt-Type" content=3D"text/html; charset=3Dwindows-1252"><link rel=3D"stylesh=
+eet" type=3D"text/css" href=3D"cid:css-47c7e30c-f8da-447b-a0ba-abd146b95e4c=
+@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-=
+e14e20d1-59dd-4877-928e-43a99ba53163@mhtml.blink" /><link rel=3D"stylesheet=
+" type=3D"text/css" href=3D"cid:css-de6ae6b5-0ad5-4c7d-8769-d484bc363200@mh=
+tml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-d51=
+41a88-865f-4748-9f62-1f5b8fd7b2e6@mhtml.blink" /><link rel=3D"stylesheet" t=
+ype=3D"text/css" href=3D"cid:css-3cc77feb-943b-4324-a0a0-97f328ab0fa5@mhtml=
+.blink" />
+<title>Lab: System calls</title>
+<link rel=3D"stylesheet" href=3D"https://pdos.csail.mit.edu/6.S081/2020/lab=
+s/labs.css" type=3D"text/css">
+=20
+
+</head>
+<body>
+
+<h1>Lab: system calls</h1>
+
+<p>In the last lab you used systems calls to write a few utilities. In
+this lab you will add some new system calls to xv6, which will help
+you understand how they work and will expose you to some of the
+internals of the xv6 kernel.  You will add more system calls in later
+labs.
+
+</p><div class=3D"prereq">
+<p>Before you start coding, read Chapter 2 of
+    the <a href=3D"https://pdos.csail.mit.edu/6.S081/2020/xv6/book-riscv-re=
+v1.pdf">xv6 book</a>, and
+    Sections 4.3 and 4.4 of Chapter 4, and
+  related source files:
+ =20
+  </p><ul>
+   =20
+    <li> The user-space code for systems calls is
+      in <tt>user/user.h</tt> and <tt>user/usys.pl</tt>.</li>
+   =20
+    <li> The kernel-space code
+    is <tt>kernel/syscall.h</tt>, kernel/syscall.c.
+
+    </li><li> The process-related code is <tt>kernel/proc.h</tt> and <tt>ke=
+rnel/proc.c</tt>.
+ =20
+  </li></ul>
+</div>
+
+<p>To start the lab, switch to the syscall branch:
+  </p><pre>  $ <kbd>git fetch</kbd>
+  $ <kbd>git checkout syscall</kbd>
+  $ <kbd>make clean</kbd>
+  </pre>
+
+<p>If you run, make grade, you will see that the grading script cannot
+exec
+  <tt>trace</tt> and <tt>sysinfotest</tt>.  Your job is to add the
+  necessary system calls and stubs to make them work.
+ =20
+</p><h2>System call tracing (<a class=3D"moderate" href=3D"https://pdos.csa=
+il.mit.edu/6.S081/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>
+</p><div class=3D"required">
+  In this assignment you will add a system call tracing feature that
+  may help you when debugging later labs.  You'll create a
+  new <tt>trace</tt> system call that will control tracing. It should
+  take one argument, an integer "mask", whose bits specify which
+  system calls to trace.  For example, to trace the fork system call,
+  a program calls <tt>trace(1 &lt;&lt; SYS_fork)</tt>, where <tt>SYS_fork</=
+tt> is a
+  syscall number from <tt>kernel/syscall.h</tt>. You have to modify
+  the xv6 kernel to print out a line when each system call is <web-highligh=
+t class=3D"webhighlights-highlight" data-highlight-id=3D"4c638b81-ce47-4c8d=
+-bef0-89d7e301725f" data-highlight-split-type=3D"both" data-highlight-id-ex=
+tra=3D"" markid=3D"656df2553b5ec0346e66f745" style=3D"background-color: rgb=
+(248, 252, 70); cursor: pointer;">about to
+  return</web-highlight>, if the system call's number is set in the mask.
+  The line should contain the
+  <web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"f18=
+2d319-2a0c-42ec-b4ef-ff9a7e694e04" data-highlight-split-type=3D"both" data-=
+highlight-id-extra=3D"" markid=3D"656f335761af5ce5ba8a7288" style=3D"backgr=
+ound-color: rgb(255, 173, 42); cursor: pointer;">process id</web-highlight>=
+, the <web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D=
+"7dc2d99b-db2e-46ed-8b04-6440ce010469" data-highlight-split-type=3D"both" d=
+ata-highlight-id-extra=3D"" markid=3D"656f336461af5ce5ba8a7289" style=3D"ba=
+ckground-color: rgb(255, 173, 42); cursor: pointer;">name of the system cal=
+l</web-highlight> and the
+  <web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"658=
+7532f-9ce3-4640-8f8f-1e9e9014f8cf" data-highlight-split-type=3D"both" data-=
+highlight-id-extra=3D"" markid=3D"656f336e61af5ce5ba8a728a" style=3D"backgr=
+ound-color: rgb(255, 173, 42); cursor: pointer;">return value</web-highligh=
+t>; you don't need to print the system call
+  arguments. The <tt>trace</tt> system call should enable tracing=20
+  for the process that calls it and any children that it subsequently forks=
+,
+  but should not affect other processes.
+</div>
+
+<p>We provide a <tt>trace</tt> user-level program that runs another
+  program with tracing enabled (see <tt>user/trace.c</tt>). When you're
+  done, you should see output like this:
+
+</p><pre>$ trace 32 grep hello README
+3: syscall read -&gt; 1023
+3: syscall read -&gt; 966
+3: syscall read -&gt; 70
+3: syscall read -&gt; 0
+$
+$ trace 2147483647 grep hello README
+4: syscall trace -&gt; 0
+4: syscall exec -&gt; 3
+4: syscall open -&gt; 3
+4: syscall read -&gt; 1023
+4: syscall read -&gt; 966
+4: syscall read -&gt; 70
+4: syscall read -&gt; 0
+4: syscall close -&gt; 0
+$
+$ grep hello README
+$
+$ trace 2 usertests forkforkfork
+usertests starting
+test forkforkfork: 407: syscall fork -&gt; 408
+408: syscall fork -&gt; 409
+409: syscall fork -&gt; 410
+410: syscall fork -&gt; 411
+409: syscall fork -&gt; 412
+410: syscall fork -&gt; 413
+409: syscall fork -&gt; 414
+411: syscall fork -&gt; 415
+...
+$  =20
+</pre>
+
+<p>In the first example above, trace invokes grep tracing just the
+read system call. The 32 is <tt>1&lt;&lt;SYS_read</tt>. In the second
+example, trace runs grep while tracing all system calls; the
+2147583647 has all 31 low bits set. In the third example, the program
+isn't traced, so no trace output is printed. In the fourth example,
+the fork system calls of all the descendants of the <tt>forkforkfork</tt> t=
+est
+in <tt>usertests</tt> are being traced. Your solution is correct if your
+program behaves as shown above (though the process IDs may be
+different).
+
+</p><p>Some hints:
+  </p><ul>
+
+    <li><p>Add <tt>$U/_trace</tt> to UPROGS in Makefile
+
+    </p></li><li><p>Run <kbd>make qemu</kbd> and you will see that the
+	compiler cannot compile <tt>user/trace.c</tt>, because the
+	user-space stubs for the system call don't exist yet: add a
+	prototype for the system call to <tt>user/user.h</tt>, a stub
+	to <tt>user/usys.pl</tt>, and a syscall number
+	to <tt>kernel/syscall.h</tt>.  The Makefile invokes the perl
+	script <tt>user/usys.pl</tt>, which produces <tt>user/usys.S</tt>,=20
+	the actual system call stubs, which use the
+	RISC-V <tt>ecall</tt> instruction to transition to the
+	kernel. Once you fix the compilation issues,=20
+	run <kbd>trace 32 grep hello README</kbd>; it will fail
+	because you haven't implemented the system call in the kernel
+	yet.
+   =20
+    </p></li><li><p>Add a <tt>sys_trace()</tt> function
+	in <tt>kernel/sysproc.c</tt> that implements the new system
+	call by remembering its argument in a new variable in
+	the <tt>proc</tt> structure (see <tt>kernel/proc.h</tt>). The
+	functions to retrieve system call arguments from user space are
+	in <tt>kernel/syscall.c</tt>, and you can see examples
+        of their use in <tt>kernel/sysproc.c</tt>.
+   </p></li>
+
+    <li><p>Modify <tt>fork()</tt> (see <tt>kernel/proc.c</tt>) to copy
+    the trace mask from the parent to the child process. </p></li>
+
+    <li><p>Modify the <tt>syscall()</tt> function
+	in <tt>kernel/syscall.c</tt> to print the trace output. You will need to a=
+dd an array of syscall names to index into.</p></li>
+
+  </ul>
+
+<h2>Sysinfo (<a class=3D"moderate" href=3D"https://pdos.csail.mit.edu/6.S08=
+1/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>
+</p><div class=3D"required">
+  In this assignment you will add a system call, <tt>sysinfo</tt>,
+  that collects information about the running system.  The system call
+  takes one argument: a pointer to a <tt>struct sysinfo</tt>
+  (see <tt>kernel/sysinfo.h</tt>). The kernel should fill out the
+  fields of this struct: the <tt><web-highlight class=3D"webhighlights-high=
+light" data-highlight-id=3D"27764334-3af8-4e02-bcd5-9715e969b67f" data-high=
+light-split-type=3D"both" data-highlight-id-extra=3D"" markid=3D"6574288f2c=
+7569e7cbf5cc95" style=3D"background-color: rgb(248, 252, 70); cursor: point=
+er;">freemem</web-highlight></tt> field should be set
+  to the <web-highlight class=3D"webhighlights-highlight" data-highlight-id=
+=3D"3a726867-0cac-402f-b017-673ddb18c0bb" data-highlight-split-type=3D"both=
+" data-highlight-id-extra=3D"" markid=3D"657428892c7569e7cbf5cc94" style=3D=
+"background-color: rgb(248, 252, 70); cursor: pointer;">number of bytes of =
+free memory</web-highlight>, and the <tt><web-highlight class=3D"webhighlig=
+hts-highlight" data-highlight-id=3D"00955588-fb10-4293-a056-a27b75500e4c" d=
+ata-highlight-split-type=3D"both" data-highlight-id-extra=3D"" markid=3D"65=
+7428942c7569e7cbf5cc96" style=3D"background-color: rgb(248, 252, 70); curso=
+r: pointer;">nproc</web-highlight></tt>
+  field should be set to the <web-highlight class=3D"webhighlights-highligh=
+t" data-highlight-id=3D"9028275d-9b83-4a1c-8737-32c5d323e373" data-highligh=
+t-split-type=3D"head" data-highlight-id-extra=3D"" markid=3D"657428a12c7569=
+e7cbf5cc98" style=3D"background-color: rgb(248, 252, 70); cursor: pointer;"=
+>number of processes whose </web-highlight><tt><web-highlight class=3D"webh=
+ighlights-highlight" data-highlight-id=3D"9028275d-9b83-4a1c-8737-32c5d323e=
+373" data-highlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=
+=3D"657428a12c7569e7cbf5cc98" style=3D"background-color: rgb(248, 252, 70);=
+ cursor: pointer;">state</web-highlight></tt><web-highlight class=3D"webhig=
+hlights-highlight" data-highlight-id=3D"9028275d-9b83-4a1c-8737-32c5d323e37=
+3" data-highlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=
+=3D"657428a12c7569e7cbf5cc98" style=3D"background-color: rgb(248, 252, 70);=
+ cursor: pointer;">
+  is not </web-highlight><tt><web-highlight class=3D"webhighlights-highligh=
+t" data-highlight-id=3D"9028275d-9b83-4a1c-8737-32c5d323e373" data-highligh=
+t-split-type=3D"tail" data-highlight-id-extra=3D"" markid=3D"657428a12c7569=
+e7cbf5cc98" style=3D"background-color: rgb(248, 252, 70); cursor: pointer;"=
+>UNUSED</web-highlight></tt>.
+  We provide a test program <tt>sysinfotest</tt>; you pass this
+  assignment if it prints "sysinfotest: OK".
+</div>
+
+<p>Some hints:
+</p><ul>
+
+<li><p>Add <tt>$U/_sysinfotest</tt> to UPROGS in Makefile
+ =20
+</p></li><li><p>Run <kbd>make qemu</kbd>; <tt>user/sysinfotest.c</tt> will
+  fail to compile. Add the system call sysinfo, following the same
+  steps as in the previous assignment. To declare the prototype for
+  sysinfo() <tt>in user/user.h</tt> you need predeclare the existence
+  of <tt>struct sysinfo</tt>:
+  </p><pre>    struct sysinfo;
+    int sysinfo(struct sysinfo *);
+  </pre>
+Once you fix the compilation issues, run
+  <kbd>sysinfotest</kbd>; it will fail because you haven't
+  implemented the system call in the kernel yet.
+</li>
+
+<li><p>sysinfo needs to copy a <tt>struct sysinfo</tt> back to user
+  space; see <tt>sys_fstat()</tt> (<tt>kernel/sysfile.c</tt>)
+  and <tt>filestat()</tt> (<tt>kernel/file.c</tt>) for examples of how
+  to do that using <tt>copyout()</tt>.
+</p></li>
+
+<li><p>To collect the amount of free memory, add a
+  function to <tt>kernel/kalloc.c</tt>
+</p></li>
+
+<li><p>To collect the number of processes, add a
+  function to <tt>kernel/proc.c</tt>
+</p></li>
+
+</ul>
+
+<p><a name=3D"submit">
+</a></p><h2><a name=3D"submit">Submit the lab</a></h2><a name=3D"submit">
+
+<p><b>This completes the lab.</b> Make sure you pass all of the make
+grade tests. If this lab had questions, don't forget to write up your
+answers to the questions in answers-<i>lab-name</i>.txt. Commit your change=
+s
+(including adding answers-<i>lab-name</i>.txt) and type make handin in the =
+lab
+  directory to hand in your lab.
+
+</p><h3>Time spent</h3>
+
+<p>Create a new file, <tt>time.txt</tt>, and put in it a single integer, th=
+e
+number of hours you spent on the lab. Don't forget to <tt>git add</tt> and
+<tt>git commit</tt> the file.
+
+</p><h3>Submit</h3>
+
+You will turn in your assignments using
+the </a><a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">submission
+website</a>.  You need to request once an API key from the submission
+website before you can turn in any assignments or labs.
+<p></p>
+
+<p>After committing your final changes to the lab, type <kbd>make
+handin</kbd> to submit your lab.
+</p><pre>$ <kbd>git commit -am "ready to submit my lab"</kbd>
+[util c2e3c8b] ready to submit my lab
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+$ <kbd>make handin</kbd>
+tar: Removing leading `/' from member names
+Get an API key for yourself by visiting https://6828.scripts.mit.edu/2020/h=
+andin.py/
+Please enter your API key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Cur=
+rent
+                                 Dload  Upload   Total   Spent    Left  Spe=
+ed
+100 79258  100   239  100 79019    853   275k --:--:-- --:--:-- --:--:--  2=
+76k
+$
+</pre>
+<kbd>make handin</kbd> will store your API key in <i>myapi.key</i>. If you =
+need
+to change your API key, just remove this file and let <kbd>make handin</kbd=
+>
+generate it again (<i>myapi.key</i> must not include newline characters).
+<p></p>
+
+<p>
+If you run <kbd>make handin</kbd> and you have either uncomitted changes or
+untracked files, you will see output similar to the following:
+</p><pre> M hello.c
+?? bar.c
+?? foo.pyc
+Untracked files will not be handed in.  Continue? [y/N]
+</pre>
+Inspect the above lines and make sure all files that your lab solution need=
+s
+are tracked i.e. not listed in a line that begins with <kbd>??</kbd>.
+You can cause <tt>git</tt> to track a new file that you create using
+<tt>git add filename</tt>.
+<p></p>
+
+<p>
+If <kbd>make handin</kbd> does not work properly,=20
+try fixing the problem with the curl or Git commands.
+Or you can run <kbd>make tarball</kbd>.
+This will make a tar file for you, which you can
+then upload via our=20
+<a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">web interface</a>.
+</p>
+
+<p>
+</p><div class=3D"warning">
+<ul>
+  <li>Please run `make grade` to ensure that your code passes all of the te=
+sts</li>
+  <li>Commit any modified source code before running `make handin`</li>
+  <li>You can inspect the status of your submission and download the submit=
+ted code at <a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">https:=
+//6828.scripts.mit.edu/2020/handin.py/</a> </li>
+</ul>
+</div>
+
+
+
+
+<h2>Optional challenge exercises</h2>
+
+<ul>
+
+  <li>Print the system call arguments for traced system
+  calls (<a class=3D"easy" href=3D"https://pdos.csail.mit.edu/6.S081/2020/l=
+abs/guidance.html">easy</a>).</li>
+
+  <li>Compute the load average and export it through
+  sysinfo(<a class=3D"moderate" href=3D"https://pdos.csail.mit.edu/6.S081/2=
+020/labs/guidance.html">moderate</a>).</li>
+
+</ul>
+
+
+
+<div class=3D"cm-popover" id=3D"cm-popover">                <div class=3D"c=
+m-popover__arrow">                    <span class=3D"cm-popover__arrow-bg">=
+</span>                </div>                <div class=3D"cm-popover__raw-=
+open">null</div>            </div><div id=3D"webhighlights-notifications"><=
+/div><webhighlights-extension></webhighlights-extension><webhighlights-side=
+bar><template shadowmode=3D"open"><!---->
+      <!--?lit$849082906$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$849082906$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$849082906$--><!--?-->
+      <!--?lit$849082906$-->
+    </template></main-component>
+         =20
+      <!--?lit$849082906$--><!--?-->
+      <!--?lit$849082906$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$849082906$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$849082906$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$849082906$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$849082906$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker><div id=3D"snackbar" class=3D"">
+   =20
+    &#9989; 8 Highlights applied
+            <br><br>
+           =20
+            &#9888;&#65039; 1 Highlight only visible in in the sidebar.
+    </div></body></html>
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-47c7e30c-f8da-447b-a0ba-abd146b95e4c@mhtml.blink
+
+@charset "windows-1252";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-e14e20d1-59dd-4877-928e-43a99ba53163@mhtml.blink
+
+@charset "windows-1252";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00b0783b; --wh-primary-light: #53e3a6; --wh-primary-dark=
+: #007f4b; --wh-primary-dark-hover: #017444; --wh-primary-shadow: #00b07841=
+; --wh-primary-shadow-2: #00b07870; --wh-primary-border-color: #c8c8c870; -=
+-secondary-color: #3d4455; --secondary-color-hover: #3a4052; --secondary-co=
+lor-transparent: #3d44556b; --secondary-light: #4c556d; --secondary-dark: #=
+252934; --secondary-dark-hover: #191b22; --secondary-dark-transparent: #2e2=
+d2d46; --highlight-color: #92ffaa; --error-color: #d62d4c; --warning-color:=
+ #ffcc00; --error-info: #14854e; --success-color: #4BB543; --font-color: #2=
+f3237; --font-color-light: #626364; --font-color-dark: #252525; --wh-font-f=
+amily: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--red-600); --wh-danger-color-hover: var(--red=
+-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-bg-base=
+: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500); --w=
+h-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(--wh-se=
+condary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-border=
+-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong: var(=
+--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-back-st=
+rong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-secondar=
+y-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hover-str=
+ong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-100); --=
+wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--wh-seco=
+ndary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-front-st=
+rong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-secondar=
+y-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-border-fr=
+ont: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%); --wh=
+-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0, 0%, 1=
+00%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(255, 2=
+55, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-light: rg=
+ba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63); --wh=
+-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, 0%, 10=
+0%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-note-edi=
+tor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: hsl(22=
+1, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hover: va=
+r(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05); --w=
+h-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(220, 2=
+2%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --wh-bg-=
+notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gray: rg=
+b(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0=
+.1),
+      /* 2. shadow ring \1f447  */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
+      /* 3. multiple soft shadows \1f447  */ 0 0.3px 0.4px hsla(230, 13%, 9=
+%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); }
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-de6ae6b5-0ad5-4c7d-8769-d484bc363200@mhtml.blink
+
+@charset "windows-1252";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-d5141a88-865f-4748-9f62-1f5b8fd7b2e6@mhtml.blink
+
+@charset "windows-1252";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-3cc77feb-943b-4324-a0a0-97f328ab0fa5@mhtml.blink
+
+@charset "windows-1252";
+
+#snackbar { z-index: 2147483647; font-family: var(--font-family, 'Inter', '=
+SF Pro Display', -apple-system, BlinkMacSystemFont,
+'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif); box-shadow: rgba(=
+0, 0, 0, 0.39) 0px 8px 20px 4px; visibility: hidden; width: 340px; backgrou=
+nd-color: rgb(37, 41, 52); color: rgb(255, 255, 255); text-align: center; b=
+order-radius: 8px; padding: 12px 8px; box-sizing: border-box; position: fix=
+ed; left: calc(50% - 170px); bottom: 30px; font-size: 14px; line-height: 1.=
+5; }
+
+#snackbar.show { visibility: visible; animation: 500ms ease 0s 1 normal non=
+e running fadein, 500ms ease 2000ms 1 normal none running fadeout; }
+
+@-webkit-keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@-webkit-keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+
+@keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/labs.css
+
+@charset "windows-1252";
+
+.easy { color: rgb(0, 204, 0); }
+
+.moderate { color: rgb(0, 102, 255); }
+
+.hard { color: rgb(255, 51, 0); }
+
+div.required, div.challenge, div.question, div.warning, div.prereq { margin=
+: 1em auto; width: 80%; background-color: rgb(224, 224, 255); padding-left:=
+ 1em; padding-right: 1em; }
+
+div.required .header { font-weight: bold; }
+
+div.challenge .header { font-style: italic; }
+
+div.question .header { font-weight: bold; }
+
+div.required { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.challenge { background-color: rgb(255, 224, 224); border: 1px solid rgb=
+(255, 192, 192); }
+
+div.question { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.warning { background-color: rgb(255, 224, 224); border: 1px solid rgb(2=
+55, 192, 192); }
+
+div.prereq { background-color: rgb(255, 239, 213); border: 1px solid rgb(25=
+5, 192, 192); }
+
+kbd { color: rgb(0, 119, 0); font-family: monospace; font-weight: bold; }
+------MultipartBoundary--cUJG89wCgtlUuXVXNQlwr6T1hKfUzjBbbjxV5dbhaw------
