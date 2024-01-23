@@ -422,11 +422,14 @@ copyout(pagetable_t pagetable, uint64 dstva, char *src, uint64 len)
 // Copy from user to kernel.
 // Copy len bytes to dst from virtual address srcva in a given page table.
 // Return 0 on success, -1 on error.
+#define USE_COPYIN_NEW
 int
 copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 {
+#ifdef USE_COPYIN_NEW
+  return copyin_new(pagetable, dst, srcva, len);
+#else
   uint64 n, va0, pa0;
-
   while(len > 0){
     va0 = PGROUNDDOWN(srcva);
     pa0 = walkaddr(pagetable, va0);
@@ -442,6 +445,7 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
     srcva = va0 + PGSIZE;
   }
   return 0;
+#endif  
 }
 
 // Copy a null-terminated string from user to kernel.
@@ -451,6 +455,9 @@ copyin(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len)
 int
 copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
 {
+#ifdef USE_COPYIN_NEW
+  return copyinstr_new(pagetable, dst, srcva, max);
+#else
   uint64 n, va0, pa0;
   int got_null = 0;
 
@@ -485,6 +492,7 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
   } else {
     return -1;
   }
+#endif
 }
 
 static void 
