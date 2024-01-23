@@ -311,6 +311,9 @@ fork(void)
 
   np->parent = p;
 
+  /* Copy user space mapping into kpagetable */
+  mapUvaToKva(np->pagetable, np->kPageTable, 0, np->sz);
+
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
