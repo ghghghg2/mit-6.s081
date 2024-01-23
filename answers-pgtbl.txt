@@ -1,0 +1,12 @@
+Q1. Explain the output of vmprint in terms of Fig 3-4 from the text. What does page 0 contain? What is in page 2? 
+When running in user mode, could the process read/write the memory mapped by page 1?
+
+A1-1. Page 0 contains the code to execute.
+A1-2. Page 2 is the region for user stack.
+A1-3. The process can't r/w the memory mapped in page 1 since the PTE_U flag is clear. 
+      Morever, the page is also known as guard page preventing overflow of stack.
+
+Q2. Explain why the third test srcva + len < srcva is necessary in copyin_new(): give values for srcva and len 
+for which the first two test fail (i.e., they will not cause to return -1) but for which the third one is true (resulting in returning -1).
+
+A2. The condition is used to prevent (srcva + len) overflow.
