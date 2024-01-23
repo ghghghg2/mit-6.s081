@@ -143,6 +143,26 @@ found:
   return p;
 }
 
+pagetable_t allocKpagetable(struct proc *p)
+{
+  pagetable_t pt;
+
+  // Duplicate kernel pagetable for the proc
+  pt = kvm_dup_kpagetable();
+  if (pt == 0) {
+    return 0;
+  }
+  // Map Corresponding kernel stack
+  uint64 va = KSTACK((int) (p - proc));
+  uint64 pa = kvmpa(va);
+  if(mappages(pt, va, PGSIZE, pa, PTE_R | PTE_W) != 0) {
+    vmfreepagetable(pt);
+    return 0;
+  }
+
+  return pt;
+}
+
 // free a proc structure and the data hanging from it,
 // including user pages.
 // p->lock must be held.
