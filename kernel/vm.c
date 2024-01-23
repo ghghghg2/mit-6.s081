@@ -161,6 +161,27 @@ walkaddr(pagetable_t pagetable, uint64 va)
   return pa;
 }
 
+// Look up a virtual address, return the leaf pte,
+// or 0 if not mapped.
+uint64
+walkpte(pagetable_t pagetable, uint64 va)
+{
+  /* Similar to walkaddr but not checking PTE_U */
+  pte_t *pte;
+
+  if(va >= MAXVA)
+    return 0;
+
+  pte = walk(pagetable, va, 0);
+
+  if(pte == 0)
+    return 0;
+  if((*pte & PTE_V) == 0)
+    return 0;
+  
+  return (*pte);
+}
+
 // add a mapping to the kernel page table.
 // only used when booting.
 // does not flush TLB or enable paging.
