@@ -182,6 +182,29 @@ walkpte(pagetable_t pagetable, uint64 va)
   return (*pte);
 }
 
+void mapUvaToKva(pagetable_t upagetable, pagetable_t kpagetable, uint64 oldsz, uint64 newsz) {
+  if (newsz >= oldsz) {
+    for (oldsz = PGROUNDUP(oldsz); oldsz < newsz; oldsz += PGSIZE) {
+      uint64 pa, permFlgs;
+      uint64 leafPte = walkpte(upagetable, oldsz);
+      if (leafPte == 0) {
+        /* uvaddr isn't mapped to user page table */
+        panic("dupUpgtlToKpgtbl: walkaddr pagetable fail");
+      }
+      pa = PTE2PA(leafPte);
+      permFlgs = PTE_FLAGS(leafPte);
+      permFlgs = permFlgs & (~((uint64)PTE_U)); // Remove PTE_U flag
+      if ((mappages(kpagetable, oldsz, PGSIZE, pa, permFlgs)) != 0) {
+        /* Map fail */
+        panic("dupUpgtlToKpgtbl: mappage kpagetable fail");
+      }
+    }
+  } else {
+    /* newsz < oldsz */
+    int npages = (PGROUNDUP(oldsz) - PGROUNDUP(newsz)) / PGSIZE;
+    uvmunmap(kpagetable, PGROUNDUP(newsz), npages, 0);
+  }
+}
 // add a mapping to the kernel page table.
 // only used when booting.
 // does not flush TLB or enable paging.

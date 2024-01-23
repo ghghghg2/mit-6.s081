@@ -185,6 +185,7 @@ void            vmfreepagetable(pagetable_t pagetable);
 int             copyin_new(pagetable_t pagetable, char *dst, uint64 srcva, uint64 len);
 int             copyinstr_new(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max);
 uint64          walkpte(pagetable_t pagetable, uint64 va);
+void            mapUvaToKva(pagetable_t upagetable, pagetable_t kpagetable, uint64 oldsz, uint64 newsz);
 
 // plic.c
 void            plicinit(void);
