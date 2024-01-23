@@ -57,40 +57,44 @@ kvm_dup_kpagetable(void)
   pt = uvmcreate();
 
   if (pt == 0) {
-    panic("dup kpagetable");
+    return 0;
   }
   memset(pt, 0, PGSIZE);
 
   // uart registers
   if(mappages(pt, UART0, PGSIZE, UART0, PTE_R | PTE_W) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   // virtio mmio disk interface
   if(mappages(pt, VIRTIO0, PGSIZE, VIRTIO0, PTE_R | PTE_W) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   // CLINT
-  if(mappages(pt, CLINT, 0x10000, CLINT, PTE_R | PTE_W) != 0)
-    panic("dup kpagetable");
+  // if(mappages(pt, CLINT, 0x10000, CLINT, PTE_R | PTE_W) != 0)
+  //   panic("dup kpagetable");
 
   // PLIC
   if(mappages(pt, PLIC, 0x400000, PLIC, PTE_R | PTE_W) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   // map kernel text executable and read-only.
   if(mappages(pt, KERNBASE, (uint64)etext-KERNBASE, KERNBASE, PTE_R | PTE_X) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   // map kernel data and the physical RAM we'll make use of.
   if(mappages(pt, (uint64)etext, PHYSTOP-(uint64)etext, (uint64)etext, PTE_R | PTE_W) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   // map the trampoline for trap entry/exit to
   // the highest virtual address in the kernel.
   if(mappages(pt, TRAMPOLINE, PGSIZE, (uint64)trampoline, PTE_R | PTE_X) != 0)
-    panic("dup kpagetable");
+    goto bad;
 
   return pt;
+
+bad:
+  vmfreepagetable(pt);
+  return 0;
 }
 
 // Switch h/w page table register to the kernel's page table,

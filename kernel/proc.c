@@ -123,6 +123,11 @@ found:
 
   // Duplicate kernel pagetable for the proc
   p->kPageTable = kvm_dup_kpagetable();
+  if(p->kPageTable == 0){
+    freeproc(p);
+    release(&p->lock);
+    return 0;
+  }
   // Map Corresponding kernel stack
   uint64 va = KSTACK((int) (p - proc));
   uint64 pa = kvmpa(va);
