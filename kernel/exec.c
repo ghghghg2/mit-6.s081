@@ -19,6 +19,8 @@ exec(char *path, char **argv)
   struct inode *ip;
   struct proghdr ph;
   pagetable_t pagetable = 0, oldpagetable;
+  pagetable_t kpagetable = 0;
+  pagetable_t oldkpagetable = 0;
   struct proc *p = myproc();
 
   begin_op();
@@ -75,6 +77,15 @@ exec(char *path, char **argv)
   sp = sz;
   stackbase = sp - PGSIZE;
 
+  /* Make a new kpagetable */
+  kpagetable = allocKpagetable(p);
+  if (kpagetable == 0) {
+    goto bad;
+  }
+
+  /* Copy user space mapping into kpagetable */
+  mapUvaToKva(pagetable, kpagetable, 0, sz);
+
   // Push argument strings, prepare rest of stack in ustack.
   for(argc = 0; argv[argc]; argc++) {
     if(argc >= MAXARG)
@@ -115,6 +126,18 @@ exec(char *path, char **argv)
   p->trapframe->epc = elf.entry;  // initial program counter = main
   p->trapframe->sp = sp; // initial stack pointer
   proc_freepagetable(oldpagetable, oldsz);
+  oldkpagetable = p->kPageTable;
+
+  /* Switch to new kpagetale with user space mapping*/
+  p->kPageTable = kpagetable;
+
+  /* Switch to new kpagetable */
+  w_satp(MAKE_SATP(kpagetable));
+  sfence_vma();
+
+  /* Free the old kpagetable */
+  vmfreepagetable(oldkpagetable);
+
 
   if (p->pid == 1) {
     vmprint(p->pagetable);
@@ -129,6 +152,8 @@ exec(char *path, char **argv)
     iunlockput(ip);
     end_op();
   }
+  if(kpagetable)
+    vmfreepagetable(kpagetable);
   return -1;
 }
 
