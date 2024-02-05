@@ -135,7 +135,17 @@ sys_sigalarm(void)
 uint64 
 sys_sigreturn(void)
 {
+  struct proc *p = myproc();
+
+  if (p->isInHandler == 1) {
+    // Exit the handler
+    p->isInHandler = 0;
+    // Save the original user trapframe
+    memmove(p->trapframe, p->bkptrapframe, sizeof(struct trapframe));
+  }
+
   return 0;
+  
 }
 
 
