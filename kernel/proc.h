@@ -95,6 +95,7 @@ struct proc {
   int pid;                     // Process ID
 
   // these are private to the process, so p->lock need not be held.
+  int isInHandler;             // Whether the user program is executing alarm handler.
   uint64 alarmTick;            // Record the tick at last call to alarm handler.
   uint64 ticksToAlarm;         // Alarm interval in ticks.
   uint64 handlerAddr;          // Address of Alarm handler in user space
