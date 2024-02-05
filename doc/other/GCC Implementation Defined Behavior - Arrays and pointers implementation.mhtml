@@ -1,0 +1,624 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://gcc.gnu.org/onlinedocs/gcc/Arrays-and-pointers-implementation.html
+Subject: Arrays and pointers implementation (Using the GNU Compiler Collection (GCC))
+Date: Sun, 4 Feb 2024 14:06:48 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----"
+
+
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/html
+Content-ID: <frame-72FB8FAF8F184DF0B464B83E2ACF04F1@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://gcc.gnu.org/onlinedocs/gcc/Arrays-and-pointers-implementation.html
+
+<!DOCTYPE html><html class=3D"cm-retina" collamark=3D"crx"><!-- Created by =
+GNU Texinfo 7.0dev, http://www.gnu.org/software/texinfo/ --><head><meta htt=
+p-equiv=3D"Content-Type" content=3D"text/html; charset=3DUTF-8"><link rel=
+=3D"stylesheet" type=3D"text/css" href=3D"cid:css-8cbe98c2-f7d0-46b5-9cd4-6=
+6f0fb9fd501@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=
+=3D"cid:css-821cb131-aaab-4e84-bfe0-ef5df3fb03c7@mhtml.blink" /><link rel=
+=3D"stylesheet" type=3D"text/css" href=3D"cid:css-af8a95e1-daed-48e2-9791-8=
+3916a19e15e@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=
+=3D"cid:css-f454e51a-f27d-42a3-b0c2-ce6b946dd23c@mhtml.blink" /><link rel=
+=3D"stylesheet" type=3D"text/css" href=3D"cid:css-065c00b9-6e83-4675-9449-2=
+f5b123524cb@mhtml.blink" />
+
+<!-- This file documents the use of the GNU compilers.
+
+Copyright =C2=A9 1988-2024 Free Software Foundation, Inc.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with the
+Invariant Sections being "Funding Free Software", the Front-Cover
+Texts being (a) (see below), and with the Back-Cover Texts being (b)
+(see below).  A copy of the license is included in the section entitled
+"GNU Free Documentation License".
+
+(a) The FSF's Front-Cover Text is:
+
+A GNU Manual
+
+(b) The FSF's Back-Cover Text is:
+
+You have freedom to copy and modify this GNU Manual, like GNU
+     software.  Copies published by the Free Software Foundation raise
+     funds for GNU development. -->
+<title>Arrays and pointers implementation (Using the GNU Compiler Collectio=
+n (GCC))</title>
+
+<meta name=3D"description" content=3D"Arrays and pointers implementation (U=
+sing the GNU Compiler Collection (GCC))">
+<meta name=3D"keywords" content=3D"Arrays and pointers implementation (Usin=
+g the GNU Compiler Collection (GCC))">
+<meta name=3D"resource-type" content=3D"document">
+<meta name=3D"distribution" content=3D"global">
+<meta name=3D"Generator" content=3D"makeinfo">
+<meta name=3D"viewport" content=3D"width=3Ddevice-width,initial-scale=3D1">
+
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/index.html" rel=3D"start" =
+title=3D"Top">
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/Indices.html" rel=3D"index=
+" title=3D"Indices">
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/index.html#SEC_Contents" r=
+el=3D"contents" title=3D"Table of Contents">
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/C-Implementation.html" rel=
+=3D"up" title=3D"C Implementation">
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/Hints-implementation.html"=
+ rel=3D"next" title=3D"Hints implementation">
+<link href=3D"https://gcc.gnu.org/onlinedocs/gcc/Floating-point-implementat=
+ion.html" rel=3D"prev" title=3D"Floating point implementation">
+
+<link rel=3D"stylesheet" type=3D"text/css" href=3D"https://gcc.gnu.org/texi=
+nfo-manuals.css">
+
+
+</head>
+
+<body lang=3D"en_US">
+<div class=3D"section-level-extent" id=3D"Arrays-and-pointers-implementatio=
+n">
+<div class=3D"nav-panel">
+<p>
+Next: <a href=3D"https://gcc.gnu.org/onlinedocs/gcc/Hints-implementation.ht=
+ml" accesskey=3D"n" rel=3D"next">Hints</a>, Previous: <a href=3D"https://gc=
+c.gnu.org/onlinedocs/gcc/Floating-point-implementation.html" accesskey=3D"p=
+" rel=3D"prev">Floating Point</a>, Up: <a href=3D"https://gcc.gnu.org/onlin=
+edocs/gcc/C-Implementation.html" accesskey=3D"u" rel=3D"up">C Implementatio=
+n-Defined Behavior</a> &nbsp; [<a href=3D"https://gcc.gnu.org/onlinedocs/gc=
+c/index.html#SEC_Contents" title=3D"Table of contents" rel=3D"contents">Con=
+tents</a>][<a href=3D"https://gcc.gnu.org/onlinedocs/gcc/Indices.html" titl=
+e=3D"Index" rel=3D"index">Index</a>]</p>
+</div>
+<hr>
+<h3 class=3D"section" id=3D"Arrays-and-Pointers"><span>4.7 Arrays and Point=
+ers<a class=3D"copiable-link" href=3D"https://gcc.gnu.org/onlinedocs/gcc/Ar=
+rays-and-pointers-implementation.html#Arrays-and-Pointers"> =C2=B6</a></spa=
+n></h3>
+
+<ul class=3D"itemize mark-bullet">
+<li><cite class=3D"cite">The result of converting a pointer to an integer o=
+r
+vice versa (C90 6.3.4, C99 and C11 6.3.2.3).</cite>
+
+<p>A cast from pointer to integer discards most-significant bits if the
+pointer representation is larger than the integer type,
+sign-extends<a class=3D"footnote" id=3D"DOCF5" href=3D"https://gcc.gnu.org/=
+onlinedocs/gcc/Arrays-and-pointers-implementation.html#FOOT5"><sup>5</sup><=
+/a>
+if the pointer representation is smaller than the integer type, otherwise
+the bits are unchanged.
+</p>
+<p>A cast from integer to pointer discards most-significant bits if the
+pointer representation is smaller than the integer type, extends according
+to the signedness of the integer type if the pointer representation
+is larger than the integer type, otherwise the bits are unchanged.
+</p>
+<p>When casting from pointer to integer and back again, the resulting
+pointer must reference the same object as the original pointer, otherwise
+the behavior is undefined.  That is, one may not use integer arithmetic to
+avoid the undefined behavior of pointer arithmetic as proscribed in
+C99 and C11 6.5.6/8.
+</p>
+</li><li><cite class=3D"cite">The size of the result of subtracting two poi=
+nters to elements
+of the same array (C90 6.3.6, C99 and C11 6.5.6).</cite>
+
+<p>The value is as specified in the standard and the type is determined
+by the ABI.
+</p>
+</li></ul>
+
+</div>
+<div class=3D"footnotes-segment">
+<hr>
+<h4 class=3D"footnotes-heading">Footnotes</h4>
+
+<h5 class=3D"footnote-body-heading"><a id=3D"FOOT5" href=3D"https://gcc.gnu=
+.org/onlinedocs/gcc/Arrays-and-pointers-implementation.html#DOCF5">(5)</a><=
+/h5>
+<p>Future versions of GCC may zero-extend, or use
+a target-defined <code class=3D"code">ptr_extend</code> pattern.  Do not re=
+ly on sign extension.</p>
+</div>
+
+
+
+
+
+<div class=3D"cm-popover" id=3D"cm-popover" style=3D"display: none;">      =
+          <div class=3D"cm-popover__arrow">                    <span class=
+=3D"cm-popover__arrow-bg"></span>                </div>                <div=
+ class=3D"cm-popover__raw-open">null</div>            </div><div id=3D"webh=
+ighlights-notifications"></div><webhighlights-extension></webhighlights-ext=
+ension><webhighlights-sidebar><template shadowmode=3D"open"><!---->
+      <!--?lit$6836700414$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$6836700414$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$6836700414$--><!--?-->
+      <!--?lit$6836700414$-->
+    </template></main-component>
+         =20
+      <!--?lit$6836700414$--><!--?-->
+      <!--?lit$6836700414$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$6836700414$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$6836700414$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker style=3D"=
+position: fixed; left: 710px; top: 245px;"><template shadowmode=3D"open"><!=
+---->
+      <!--?lit$6836700414$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX" style=3D"--bookmark-details-header-padding: 0 6px 0 6px; -=
+-bookmark-details-main-padding: 0 0 0 0; --bookmark-details-grid-item-paddi=
+ng: 0 6px; --mark-blockquote-padding: 2px 4px 0px 6px;"><template shadowmod=
+e=3D"open"><!---->
+      <!--?lit$6836700414$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker></body></html>
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-8cbe98c2-f7d0-46b5-9cd4-66f0fb9fd501@mhtml.blink
+
+@charset "utf-8";
+
+a.copiable-link { visibility: hidden; text-decoration: none; line-height: 0=
+em; }
+
+kbd.key { font-style: normal; }
+
+span:hover a.copiable-link { visibility: visible; }
+
+ul.mark-bullet { list-style-type: disc; }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-821cb131-aaab-4e84-bfe0-ef5df3fb03c7@mhtml.blink
+
+@charset "utf-8";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-af8a95e1-daed-48e2-9791-83916a19e15e@mhtml.blink
+
+@charset "utf-8";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00b0783b; --wh-primary-light: #53e3a6; --wh-primary-dark=
+: #007f4b; --wh-primary-dark-hover: #017444; --wh-primary-shadow: #00b07841=
+; --wh-primary-shadow-2: #00b07870; --wh-primary-border-color: #c8c8c870; -=
+-secondary-color: #3d4455; --secondary-color-hover: #3a4052; --secondary-co=
+lor-transparent: #3d44556b; --secondary-light: #4c556d; --secondary-dark: #=
+252934; --secondary-dark-hover: #191b22; --secondary-dark-transparent: #2e2=
+d2d46; --highlight-color: #92ffaa; --error-color: #d62d4c; --warning-color:=
+ #ffcc00; --error-info: #14854e; --success-color: #4BB543; --font-color: #2=
+f3237; --font-color-light: #626364; --font-color-dark: #252525; --wh-font-f=
+amily: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--red-600); --wh-danger-color-hover: var(--red=
+-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-bg-base=
+: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500); --w=
+h-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(--wh-se=
+condary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-border=
+-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong: var(=
+--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-back-st=
+rong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-secondar=
+y-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hover-str=
+ong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-100); --=
+wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--wh-seco=
+ndary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-front-st=
+rong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-secondar=
+y-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-border-fr=
+ont: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%); --wh=
+-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0, 0%, 1=
+00%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(255, 2=
+55, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-light: rg=
+ba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63); --wh=
+-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, 0%, 10=
+0%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-note-edi=
+tor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: hsl(22=
+1, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hover: va=
+r(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05); --w=
+h-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(220, 2=
+2%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --wh-bg-=
+notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gray: rg=
+b(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0=
+.1),
+      /* 2. shadow ring =F0=9F=91=87 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075)=
+,
+      /* 3. multiple soft shadows =F0=9F=91=87 */ 0 0.3px 0.4px hsla(230, 1=
+3%, 9%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-f454e51a-f27d-42a3-b0c2-ce6b946dd23c@mhtml.blink
+
+@charset "utf-8";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-065c00b9-6e83-4675-9449-2f5b123524cb@mhtml.blink
+
+@charset "utf-8";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://gcc.gnu.org/texinfo-manuals.css
+
+@charset "utf-8";
+
+@import url("gcc.css");
+
+:root { --contents-width-max: 60em; --backdrop: #e7e7e7; --contents-backdro=
+p: #ffffff; --example-background: #f2f2f2; --defining-border: #c2c2c2; --ta=
+ble-color-even: var(--contents-backdrop); --table-color-odd: var(--backdrop=
+); }
+
+html { margin: 0px; padding: 0px; background-color: var(--backdrop); line-h=
+eight: 1.3; }
+
+body { margin: 0px auto; padding: 1em 3px; max-width: min(max(75vw, var(--c=
+ontents-width-max)), 130em); min-height: 100vh; background-color: var(--con=
+tents-backdrop); border: 1px solid var(--defining-border); }
+
+@media only screen and (min-width: 50em) {
+  body { padding: 1em 3em; }
+  div.example, div.smallexample { margin-left: 1.1em; }
+}
+
+@media (hover: none) {
+  a.copiable-link { visibility: visible; }
+}
+
+table * { border: none; }
+
+table { border-collapse: collapse; }
+
+table > tbody > tr:nth-child(2n+1) { background-color: var(--table-color-od=
+d); }
+
+table > tbody > tr:nth-child(2n) { background-color: var(--table-color-even=
+); }
+
+div.printindex tr { background-color: unset !important; }
+
+div.example, div.smallexample { margin-left: 2.2em; border-radius: 0.3em; b=
+order: 1px solid var(--defining-border); background-color: var(--example-ba=
+ckground); padding: 0px 1em; overflow: auto; }
+
+.contents li, .shortcontents li { font-weight: bold; }
+
+.contents li li, .shortcontents li li { font-weight: normal; }
+
+blockquote { border-left: 0.5em solid red; padding-left: 1em; margin-left: =
+0px; }
+
+h1, h2, h3, h4, h5, h6 { margin: 0.5em 0px 0.7em; }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://gcc.gnu.org/gcc.css
+
+@charset "utf-8";
+
+body { background-color: white; color: black; }
+
+a:link { color: rgb(0, 102, 187); text-decoration: none; }
+
+a:visited { color: rgb(0, 51, 153); text-decoration: none; }
+
+a:hover { color: darkorange; text-decoration: none; }
+
+h1 { color: darkslategray; text-align: center; }
+
+h2 { color: darkslategray; }
+
+.highlight { color: darkslategray; font-weight: bold; }
+
+.smaller { font-size: 80%; }
+
+.left { text-align: left; }
+
+.right { text-align: right; }
+
+.center { text-align: center; margin-left: auto; margin-right: auto; }
+
+.top { vertical-align: top; }
+
+.middle { vertical-align: middle; }
+
+.width33 { width: 33%; }
+
+.border0 { border-width: 0px; }
+
+.no-margin-top { margin-top: 0px; }
+
+.twocolumns { column-count: 2; }
+
+.imgleft { margin: 5px 20px; float: left; }
+
+img.right { float: right; }
+
+td.news { width: 50%; padding-right: 8px; vertical-align: top; }
+
+td.news h2 { font-size: 1.2em; margin-top: 0px; margin-bottom: 2%; }
+
+td.news dl { margin-top: 0px; }
+
+td.news dt { color: darkslategrey; font-weight: bold; margin-top: 0.3em; }
+
+td.news dd { margin-left: 3ex; margin-top: 0.1em; margin-bottom: 0.1em; }
+
+td.news .date { color: darkslategrey; font-size: 90%; margin-left: 0.1ex; }
+
+td.status { width: 50%; padding-left: 12px; vertical-align: top; border-lef=
+t: thin solid rgb(51, 102, 204); }
+
+td.status h2 { font-size: 1.2em; margin-top: 0px; margin-bottom: 1%; }
+
+td.status dl { margin-top: 0px; }
+
+td.status .version { font-weight: bold; }
+
+td.status .regress { font-size: 80%; }
+
+td.status dd { margin-left: 3ex; }
+
+table.nav { padding-left: 32px; border-spacing: 0pt; }
+
+table.nav td { border-width: 0px; }
+
+table.navitem { width: 100%; border-spacing: 0pt; }
+
+table.navitem tr:nth-child(1) { border-color: rgb(51, 102, 204); border-sty=
+le: solid; border-width: thin; color: rgb(242, 242, 249); background-color:=
+ rgb(0, 102, 221); font-weight: bold; }
+
+table.navitem tr:nth-child(2) { padding-top: 3px; padding-left: 8px; paddin=
+g-bottom: 3px; background-color: rgb(242, 242, 249); font-size: smaller; }
+
+div.copyright { clear: both; font-size: smaller; background: rgb(242, 242, =
+249); border: thin solid rgb(51, 102, 204); padding: 4px; }
+
+div.copyright p:nth-child(3) { margin-bottom: 0px; }
+
+.bold { font-weight: bold; }
+
+.boldcyan { font-weight: bold; color: cyan; }
+
+.boldlime { font-weight: bold; color: lime; }
+
+.boldmagenta { font-weight: bold; color: magenta; }
+
+.boldred { font-weight: bold; color: red; }
+
+.boldgreen { font-weight: bold; color: green; }
+
+.boldblue { font-weight: bold; color: blue; }
+
+.red { color: red; }
+
+.green { color: green; }
+
+.blue { color: blue; }
+
+.blackbg { color: white; background-color: rgb(0, 0, 0); }
+
+blockquote.mail div:nth-child(2) { border-left: solid blue; padding-left: 4=
+pt; }
+
+table.border th { border: 2px solid; }
+
+table.cxxstatus th, table.cxxstatus td { border: 1px solid gray; }
+
+table.cxxstatus td:nth-child(3) { text-align: center; }
+
+table.cxxstatus tr.separator { background: rgb(242, 242, 249); }
+
+table.cxxdrstatus th, table.cxxdrstatus td { border: 1px solid gray; }
+
+table.cxxdrstatus td:nth-child(4) { text-align: center; }
+
+table.cxxdrstatus tr.separator { background: rgb(242, 242, 249); }
+
+table.cxxdrstatus { width: 65%; }
+
+table.ompstatus thead th, table.cxxstatus thead td { border: 1px solid gray=
+; }
+
+table.ompstatus tbody td:nth-child(2) { text-align: center; }
+
+table.ompstatus thead tr { background: rgb(242, 242, 249); }
+
+table.padding5 th, td { border: 1px solid gray; padding: 5px; }
+
+.supported { background-color: lightgreen; }
+
+.unsupported { background-color: lightsalmon; }
+
+.other { background-color: lightgray; }
+
+.partial { background-color: lightyellow; }
+
+.open { color: rgb(170, 170, 170); }
+
+pre.smallexample { font-size: medium; background: rgb(242, 242, 249); paddi=
+ng: 4px; display: inline-block; }
+
+.classpath-only { background-color: rgb(255, 255, 170); }
+
+.libgcj-only { background-color: rgb(255, 255, 170); }
+
+.VM-specific { background-color: rgb(204, 204, 255); }
+
+.GCJ-specific { background-color: rgb(204, 204, 255); }
+
+.needsmerge { background-color: rgb(255, 144, 144); }
+
+.merged { background-color: rgb(34, 255, 34); }
+
+.merged-expected-diff { background-color: rgb(34, 255, 34); }
+
+.merged-unexpected-diff { background-color: rgb(255, 68, 68); }
+------MultipartBoundary--L8lATiUWirEio4vMFiJw6b0aB3bBkKpP3BKXnwssPq------
