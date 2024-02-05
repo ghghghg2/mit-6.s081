@@ -36,6 +36,7 @@ trapinithart(void)
 void
 usertrap(void)
 {
+  uint tmpTick;
   int which_dev = 0;
 
   if((r_sstatus() & SSTATUS_SPP) != 0)
@@ -67,6 +68,23 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
+    if(which_dev == 2) {
+      if (p->ticksToAlarm != 0) {
+        acquire(&tickslock);
+        tmpTick = ticks;
+        release(&tickslock);
+        if (((tmpTick - p->alarmTick) >= p->ticksToAlarm) && (p->isInHandler != 1)) {
+          // Time to alarm
+          p->isInHandler = 1;
+          // Save the original user trapframe
+          memmove(p->bkptrapframe, p->trapframe, sizeof(struct trapframe));
+          // Make the next return to user enter handler.
+          p->trapframe->epc = p->handlerAddr;
+          // Reset the p->alarmTick for next time.
+          p->alarmTick = tmpTick;
+        }
+      }
+    }
   } else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
