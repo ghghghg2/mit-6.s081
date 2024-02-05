@@ -1,0 +1,3650 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://popovicu.com/posts/bare-metal-programming-risc-v/
+Subject: Bare metal programming with RISC-V guide
+Date: Thu, 25 Jan 2024 23:30:47 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----"
+
+
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/html
+Content-ID: <frame-93542E305E403DE1728FE647AFE9738F@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/posts/bare-metal-programming-risc-v/
+
+<!DOCTYPE html><html lang=3D"en" data-theme=3D"light" class=3D"cm-retina" c=
+ollamark=3D"crx"><head><meta http-equiv=3D"Content-Type" content=3D"text/ht=
+ml; charset=3DUTF-8"><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid=
+:css-e8c80359-fc7d-40f5-828d-4aa93ecba10b@mhtml.blink" /><link rel=3D"style=
+sheet" type=3D"text/css" href=3D"cid:css-f08b52cd-6461-46a1-9735-4bc75ed6d7=
+cf@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:cs=
+s-e6451602-6247-4c5e-8e67-9ef03a47aa6d@mhtml.blink" /><link rel=3D"styleshe=
+et" type=3D"text/css" href=3D"cid:css-ef5a239b-756e-446e-92eb-f82a31d56e8a@=
+mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-3=
+b077b3b-bc77-45d5-ad49-e9bfaf222c55@mhtml.blink" />
+   =20
+    <meta content=3D"width=3Ddevice-width" name=3D"viewport">
+    <link href=3D"https://popovicu.com/favicon.png" rel=3D"icon" type=3D"im=
+age/png">
+    <link href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/=
+" rel=3D"canonical">
+    <meta content=3D"Astro v2.6.6" name=3D"generator">
+
+    <!-- General Meta Tags -->
+    <title>Bare metal programming with RISC-V guide</title>
+    <meta content=3D"Bare metal programming with RISC-V guide" name=3D"titl=
+e">
+    <meta content=3D"Guide on coding a bare metal program with UART output =
+for RISC-V and running the emulation with QEMU. Brief overview of the RISC-=
+V boot process." name=3D"description">
+    <meta content=3D"Uros Popovic" name=3D"author">
+    <link href=3D"https://popovicu.com/sitemap-index.xml" rel=3D"sitemap">
+
+    <!-- Open Graph / Facebook -->
+    <meta content=3D"Bare metal programming with RISC-V guide" property=3D"=
+og:title">
+    <meta content=3D"Guide on coding a bare metal program with UART output =
+for RISC-V and running the emulation with QEMU. Brief overview of the RISC-=
+V boot process." property=3D"og:description">
+    <meta content=3D"https://popovicu.com/posts/bare-metal-programming-risc=
+-v/" property=3D"og:url">
+    <meta content=3D"https://popovicu.com/Bare%20metal%20programming%20with=
+%20RISC-V%20guide.png" property=3D"og:image">
+
+    <!-- Twitter -->
+    <meta content=3D"summary_large_image" property=3D"twitter:card">
+    <meta content=3D"https://popovicu.com/posts/bare-metal-programming-risc=
+-v/" property=3D"twitter:url">
+    <meta content=3D"Bare metal programming with RISC-V guide" property=3D"=
+twitter:title">
+    <meta content=3D"Guide on coding a bare metal program with UART output =
+for RISC-V and running the emulation with QEMU. Brief overview of the RISC-=
+V boot process." property=3D"twitter:description">
+    <meta content=3D"https://popovicu.com/Bare%20metal%20programming%20with=
+%20RISC-V%20guide.png" property=3D"twitter:image">
+
+    <!-- Google Font -->
+    <link href=3D"https://fonts.googleapis.com/" rel=3D"preconnect">
+    <link href=3D"https://fonts.gstatic.com/" rel=3D"preconnect" crossorigi=
+n=3D"">
+    <link href=3D"https://fonts.googleapis.com/css2?family=3DIBM+Plex+Mono:=
+ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;display=3Dswap" rel=3D"st=
+ylesheet">
+
+   =20
+
+   =20
+  <link href=3D"https://popovicu.com/_astro/about.5b2af2d6.css" rel=3D"styl=
+esheet">
+<link href=3D"https://popovicu.com/_astro/about.6e6daff0.css" rel=3D"styles=
+heet">
+<link href=3D"https://popovicu.com/_astro/_slug_.40cf44c5.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.41a32359.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.3b14054e.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.906d67ca.css" rel=3D"style=
+sheet"></head>
+  <body>
+   =20
+  <header class=3D"astro-3EF6KSR2">
+  <a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#main=
+-content" class=3D"astro-3EF6KSR2" id=3D"skip-to-content">Skip to content</=
+a>
+  <div class=3D"astro-3EF6KSR2 nav-container">
+    <div class=3D"astro-3EF6KSR2 top-nav-wrap">
+      <a href=3D"https://popovicu.com/" class=3D"astro-3EF6KSR2 logo">
+        Uros Popovic
+      </a>
+      <nav class=3D"astro-3EF6KSR2" id=3D"nav-menu">
+        <button class=3D"astro-3EF6KSR2 focus-outline hamburger-menu" aria-=
+label=3D"Open Menu" aria-controls=3D"menu-items" aria-expanded=3D"false">
+          <svg class=3D"astro-3EF6KSR2 menu-icon" xmlns=3D"http://www.w3.or=
+g/2000/svg" stroke-linecap=3D"round" stroke-linejoin=3D"round" fill=3D"none=
+" height=3D"24" stroke=3D"currentColor" stroke-width=3D"1.5" viewBox=3D"0 0=
+ 24 24" width=3D"24">
+            <line x1=3D"7" x2=3D"21" y1=3D"12" y2=3D"12" class=3D"line astr=
+o-3EF6KSR2"></line>
+            <line x1=3D"3" x2=3D"21" y1=3D"6" y2=3D"6" class=3D"line astro-=
+3EF6KSR2"></line>
+            <line x1=3D"12" x2=3D"21" y1=3D"18" y2=3D"18" class=3D"line ast=
+ro-3EF6KSR2"></line>
+            <line x1=3D"18" x2=3D"6" y1=3D"6" y2=3D"18" class=3D"astro-3EF6=
+KSR2 close"></line>
+            <line x1=3D"6" x2=3D"18" y1=3D"6" y2=3D"18" class=3D"astro-3EF6=
+KSR2 close"></line>
+          </svg>
+        </button>
+        <ul class=3D"astro-3EF6KSR2 display-none sm:flex" id=3D"menu-items"=
+>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/posts" class=3D"astro-3EF6KSR2"=
+>
+              Posts
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/tags" class=3D"astro-3EF6KSR2">
+              Tags
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/about" class=3D"astro-3EF6KSR2"=
+>
+              About
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/search" class=3D"astro-3EF6KSR2=
+ focus-outline astro-5EUNQZKT group inline-block p-3 sm:p-1" tabindex=3D"0"=
+ title=3D"Search" aria-label=3D"search">
+ =20
+              <svg class=3D"astro-3EF6KSR2 scale-125 sm:scale-100" xmlns=3D=
+"http://www.w3.org/2000/svg"><path d=3D"M19.023 16.977a35.13 35.13 0 0 1-1.=
+367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c=
+0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.33=
+7 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.1=
+21-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5=
+-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z" class=3D"astro-3EF6KSR2"></path>
+              </svg>
+           =20
+</a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <button class=3D"astro-3EF6KSR2 focus-outline" aria-label=3D"li=
+ght" aria-live=3D"polite" id=3D"theme-btn" title=3D"Toggles light &amp; dar=
+k">
+                  <svg class=3D"astro-3EF6KSR2" xmlns=3D"http://www.w3.org/=
+2000/svg" id=3D"moon-svg">
+                    <path d=3D"M20.742 13.045a8.088 8.088 0 0 1-2.077.271c-=
+2.135 0-4.14-.83-5.646-2.336a8.025 8.025 0 0 1-2.064-7.723A1 1 0 0 0 9.73 2=
+.034a10.014 10.014 0 0 0-4.489 2.582c-3.898 3.898-3.898 10.243 0 14.143a9.9=
+37 9.937 0 0 0 7.072 2.93 9.93 9.93 0 0 0 7.07-2.929 10.007 10.007 0 0 0 2.=
+583-4.491 1.001 1.001 0 0 0-1.224-1.224zm-2.772 4.301a7.947 7.947 0 0 1-5.6=
+56 2.343 7.953 7.953 0 0 1-5.658-2.344c-3.118-3.119-3.118-8.195 0-11.314a7.=
+923 7.923 0 0 1 2.06-1.483 10.027 10.027 0 0 0 2.89 7.848 9.972 9.972 0 0 0=
+ 7.848 2.891 8.036 8.036 0 0 1-1.484 2.059z" class=3D"astro-3EF6KSR2"></pat=
+h>
+                  </svg>
+                  <svg class=3D"astro-3EF6KSR2" xmlns=3D"http://www.w3.org/=
+2000/svg" id=3D"sun-svg">
+                    <path d=3D"M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.=
+007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c=
+1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 =
+12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h=
+3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2=
+.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122=
+zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z" class=3D"astro-3EF6KS=
+R2"></path>
+                  </svg>
+                </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+  <div class=3D"mx-auto max-w-3xl px-4">
+  <hr aria-hidden=3D"true" class=3D"border-skin-line">
+</div>
+</header>
+  <div class=3D"astro-VJ4TPSPI flex justify-start max-w-3xl mx-auto px-2 w-=
+full">
+    <button class=3D"astro-VJ4TPSPI flex focus-outline hover:opacity-75 mb-=
+2 mt-8">
+      <svg class=3D"astro-VJ4TPSPI" xmlns=3D"http://www.w3.org/2000/svg"><p=
+ath d=3D"M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.2=
+93z" class=3D"astro-VJ4TPSPI"></path>
+      </svg><span class=3D"astro-VJ4TPSPI">Go back</span>
+    </button>
+  </div>
+  <main class=3D"astro-VJ4TPSPI" id=3D"main-content">
+    <h1 class=3D"astro-VJ4TPSPI post-title">Bare metal programming with RIS=
+C-V guide</h1>
+    <div class=3D"astro-VJ4TPSPI flex items-center my-2 opacity-80 space-x-=
+2"><svg class=3D"inline-block fill-skin-base h-6 scale-100 w-6" xmlns=3D"ht=
+tp://www.w3.org/2000/svg" aria-hidden=3D"true"><path d=3D"M7 11h2v2H7zm0 4h=
+2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path><path d=3D"M=
+5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 =
+0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path></svg><span=
+ class=3D"sr-only">Posted on:</span><span class=3D"italic text-base">Septem=
+ber 9, 2023<span aria-hidden=3D"true"> | </span><span class=3D"sr-only">&nb=
+sp;at&nbsp;</span>12:05 PM</span></div>
+    <article class=3D"astro-VJ4TPSPI max-w-3xl mx-auto mt-8 prose" id=3D"ar=
+ticle" role=3D"article">
+      <p><iframe id=3D"twitter-widget-0" scrolling=3D"no" frameborder=3D"0"=
+ allowtransparency=3D"true" allowfullscreen=3D"true" class=3D"twitter-follo=
+w-button twitter-follow-button-rendered" style=3D"position: static; visibil=
+ity: visible; width: 153px; height: 20px;" title=3D"Twitter Follow Button" =
+src=3D"cid:frame-6F8B77B73D2AE272604749DB87B4874A@mhtml.blink" data-screen-=
+name=3D"popovicu94"></iframe></p>
+<p>Today we=E2=80=99re going to explore how to write a bare metal program f=
+or a RISC-V machine. For reproducibility, the target is a QEMU <code>riscv6=
+4 virt</code> machine.</p>
+<p>We will briefly cover the initial stages of the RISC-V machine bootup an=
+d where you can plug in your custom software to program the bare metal mach=
+ine!</p>
+<p>At the end of this article, we will write a bare metal program for our R=
+ISC-V machine and send a string =E2=80=98hello=E2=80=99 to the user, withou=
+t depending on <strong>any</strong> supporting software on the running mach=
+ine whatsoever (OS kernel, libraries, anything).</p>
+<h2 id=3D"table-of-contents">Table of contents</h2>
+<p></p><details><summary>Open Table of contents</summary><p></p>
+<ul>
+<li>
+<p><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#mac=
+hine-bootup-and-running-the-initial-software">Machine bootup and running th=
+e initial software</a></p>
+<ul>
+<li>
+<p><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#gen=
+eral-concepts">General concepts</a></p>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#qem=
+u-bootup">QEMU bootup</a></p>
+<ul>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#th=
+e-zero-stage-bootloader-zsbl">The Zero Stage Bootloader (ZSBL)</a></li>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#qe=
+mu--bios-flag">QEMU <code>-bios</code> flag</a></li>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#a-=
+note-on-the--kernel-flag">A note on the <code>-kernel</code> flag</a></li>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#ho=
+w-can-elf-files-be-used-during-the-bootup">How can <code>ELF</code> files b=
+e used during the bootup??</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#wri=
+ting-a-custom-bios-for-risc-v">Writing a custom =E2=80=9CBIOS=E2=80=9D for =
+RISC-V</a></p>
+<ul>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#in=
+teracting-with-the-user-via-uart">Interacting with the user via UART</a></l=
+i>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#co=
+ding-it-all-together">Coding it all together!</a></li>
+<li><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#ru=
+nning-the-fake-bios-on-qemu">Running the =E2=80=9Cfake BIOS=E2=80=9D on QEM=
+U</a></li>
+</ul>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/bare-metal-programming-risc-v/#i-j=
+ust-want-to-run-the-code">I just want to run the code!</a></p>
+</li>
+</ul>
+<p></p></details><p></p>
+<h2 id=3D"machine-bootup-and-running-the-initial-software">Machine bootup a=
+nd running the initial software</h2>
+<h3 id=3D"general-concepts">General concepts</h3>
+<p><em>Feel free to skip the section on general concepts if you are familia=
+r with how computers boot</em></p>
+<p>When a real machine is powered on, the hardware first runs the health ch=
+ecks and then loads the first instructions to run into its memory. Once the=
+ instructions are loaded, the processor core intializes its registers and t=
+he program counter points to the first instruction. From that point on, the=
+ software can run.</p>
+<p>In simpler setups like small microcontrollers, this is all the software =
+there is, just a single binary blob of instructions. The processor will exe=
+cute just that going forward. In a more complex setup like a laptop or a ph=
+one, there are more stages to the startup.</p>
+<p>In those more complex setups, traditionally, the first instructions are =
+the BIOS, whose task is to subsequently load the bootloader into the memory=
+ and hand-off the control to it. The bootloader is usually small and easy t=
+o load into the running memory and the processor can easily start running i=
+ts code. It proceeds to load the operating system kernel into the memory (i=
+mplementing the bootloader though is a science of its own).</p>
+<p>Each machine loads the initial software in its own way. For example, the=
+ BIOS can be stored on a separate storage chip and upon powerup, the conten=
+ts of the storage are simply filled into the memory at a fixed address and =
+the processor just executes starting from that address.</p>
+<h3 id=3D"qemu-bootup">QEMU bootup</h3>
+<p><code>riscv64 virt</code> machine, even though its virtualized, still ha=
+s its own boot sequence. It goes through multiple stages, and at the moment=
+, we will not be exploring them all. Please stay tuned for the follow-up ar=
+ticles with those details.</p>
+<p>The key to understanding this virtual machine is that, obviously, it has=
+ no chip attached to it from which to read the software (it is virtual) so =
+QEMU simulates this in some way. You might have seen the flag <code>-bios</=
+code> for QEMU examples before and hopefully now you have a strong intuitio=
+n what it could be. If you=E2=80=99re guessing this is passing the very fir=
+st instructions that your virtual RISC-V core is executing upon the startup=
+, you are <strong><em>almost correct</em></strong>.</p>
+<h4 id=3D"the-zero-stage-bootloader-zsbl">The Zero Stage Bootloader (ZSBL)<=
+/h4>
+<p>Once you power on this virtual machine, QEMU fills the memory at <code><=
+web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"c062e1=
+26-4d23-4fbf-b24e-2b4491bd8537" data-highlight-split-type=3D"both" data-hig=
+hlight-id-extra=3D"" markid=3D"65b278de9b8e5ad687a55f1c" style=3D"backgroun=
+d-color: rgb(248, 252, 70); cursor: pointer;">0x1000</web-highlight></code>=
+ with a few instructions and sets the program counter right to that address=
+. This is the equivalent of a real machine having some hardcoded ROM firmwa=
+re on the board (tucked away in some chip) and just dumping the contents in=
+to the RAM upon the bootup. You <strong><web-highlight class=3D"webhighligh=
+ts-highlight" data-highlight-id=3D"e816d7f1-caeb-4f04-bead-4a25cce34152" da=
+ta-highlight-split-type=3D"both" data-highlight-id-extra=3D"" markid=3D"65b=
+2790e9b8e5ad687a55f1e" style=3D"background-color: rgb(146, 255, 170); curso=
+r: pointer;">do not have the control</web-highlight></strong> over these in=
+structions, i.e. they are not a part of your software image, and generally,=
+ I do not see a reason why you would want to override those, and they are a=
+ctually quite useful for more complicated setups (I promise we will cover t=
+hem in a follow up article). For the curious ones, these few instructions a=
+re the <strong>Zero Stage Bootloader (<web-highlight class=3D"webhighlights=
+-highlight" data-highlight-id=3D"3c56bdba-1074-445c-a209-af42b4373058" data=
+-highlight-split-type=3D"both" data-highlight-id-extra=3D"" markid=3D"65b27=
+a169b8e5ad687a55f20" style=3D"background-color: rgb(248, 252, 70); cursor: =
+pointer;">ZSBL</web-highlight>)</strong>. The ZSBL sets up a few registers =
+for reasons we=E2=80=99ll explore in the future (right now, you can basical=
+ly ignore this register setup) and jumps to the address <code><web-highligh=
+t class=3D"webhighlights-highlight" data-highlight-id=3D"9ed3b486-d504-4a89=
+-95c6-786886927c0e" data-highlight-split-type=3D"both" data-highlight-id-ex=
+tra=3D"" markid=3D"65b279399b8e5ad687a55f1f" style=3D"background-color: rgb=
+(248, 252, 70); cursor: pointer;">0x80000000</web-highlight></code> which i=
+s where the action truly begins!</p>
+<h4 id=3D"qemu--bios-flag">QEMU <code>-bios</code> flag</h4>
+<p><code>0x80000000</code> is where the first user-provided instructions to=
+ QEMU are running, and they are loaded there as soon as the virtual machine=
+ starts. If you don=E2=80=99t pass anything, QEMU will use the default and =
+load up a piece of software called <strong>OpenSBI</strong>. The next artic=
+le in this blog will be exactly what is the concept behind SBI in RISC-V an=
+d what exactly OpenSBI is. It=E2=80=99s important to note that SBI on RISC-=
+V isn=E2=80=99t <strong>really</strong> BIOS, but something very similar. M=
+y personal guess is that the QEMU authors simply recycled the flag that was=
+ available and representing BIOS on other architectures like <code>x86</cod=
+e>. Anyway, something to keep in mind is that SBI is generally very similar=
+ to BIOS in terms of what it does, and more importantly, it is something yo=
+u can customize.</p>
+<p>The <code>-bios</code> flag is the <code>ELF</code> a binary file contai=
+ning instructions and potentially some other data, organized in sections. <=
+code>ELF</code> is the standard binary format for Linux, and the details of=
+ the <code>ELF</code> file format are way outside the scope of this article=
+, but a sufficient mental model here is that it is simply a key-value map w=
+here key is the starting address of a section, and the value is the bunch o=
+f bytes that need to be loaded into the memory at that address. Therefore, =
+<web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"d3789=
+c12-2f10-462c-854b-1697c9e8116c" data-highlight-split-type=3D"head" data-hi=
+ghlight-id-extra=3D"" markid=3D"65b27a439b8e5ad687a55f21" style=3D"backgrou=
+nd-color: rgb(248, 252, 70); cursor: pointer;">the </web-highlight><code><w=
+eb-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"d3789c1=
+2-2f10-462c-854b-1697c9e8116c" data-highlight-split-type=3D"none" data-high=
+light-id-extra=3D"" markid=3D"65b27a439b8e5ad687a55f21" style=3D"background=
+-color: rgb(248, 252, 70); cursor: pointer;">ELF</web-highlight></code><web=
+-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"d3789c12-=
+2f10-462c-854b-1697c9e8116c" data-highlight-split-type=3D"none" data-highli=
+ght-id-extra=3D"" markid=3D"65b27a439b8e5ad687a55f21" style=3D"background-c=
+olor: rgb(248, 252, 70); cursor: pointer;"> file provided to the </web-high=
+light><code><web-highlight class=3D"webhighlights-highlight" data-highlight=
+-id=3D"d3789c12-2f10-462c-854b-1697c9e8116c" data-highlight-split-type=3D"n=
+one" data-highlight-id-extra=3D"" markid=3D"65b27a439b8e5ad687a55f21" style=
+=3D"background-color: rgb(248, 252, 70); cursor: pointer;">-bios</web-highl=
+ight></code><web-highlight class=3D"webhighlights-highlight" data-highlight=
+-id=3D"d3789c12-2f10-462c-854b-1697c9e8116c" data-highlight-split-type=3D"n=
+one" data-highlight-id-extra=3D"" markid=3D"65b27a439b8e5ad687a55f21" style=
+=3D"background-color: rgb(248, 252, 70); cursor: pointer;"> flag should fil=
+l out the memory starting at </web-highlight><code><web-highlight class=3D"=
+webhighlights-highlight" data-highlight-id=3D"d3789c12-2f10-462c-854b-1697c=
+9e8116c" data-highlight-split-type=3D"none" data-highlight-id-extra=3D"" ma=
+rkid=3D"65b27a439b8e5ad687a55f21" style=3D"background-color: rgb(248, 252, =
+70); cursor: pointer;">0x80000000</web-highlight></code><web-highlight clas=
+s=3D"webhighlights-highlight" data-highlight-id=3D"d3789c12-2f10-462c-854b-=
+1697c9e8116c" data-highlight-split-type=3D"tail" data-highlight-id-extra=3D=
+"" markid=3D"65b27a439b8e5ad687a55f21" style=3D"background-color: rgb(248, =
+252, 70); cursor: pointer;"> (and this is indeed what QEMU=E2=80=99s defaul=
+t OpenSBI image does)</web-highlight>.</p>
+<h4 id=3D"a-note-on-the--kernel-flag">A note on the <code>-kernel</code> fl=
+ag</h4>
+<p>If you have been booting an operating system with QEMU before (e.g. Linu=
+x), you have likely used the <code>-kernel</code> flag. It is basically the=
+ same thing as the <code>-bios</code> flag: you can pass it an <code>ELF</c=
+ode> image which covers some other memory region, and conceptually it will =
+just dump the bytes in the memory. We won=E2=80=99t be using this flag toda=
+y, we=E2=80=99ll cover its usage in the following articles.</p>
+<h4 id=3D"how-can-elf-files-be-used-during-the-bootup">How can <code>ELF</c=
+ode> files be used during the bootup??</h4>
+<p>Even though conceptually <code>ELF</code> files represent just ways to f=
+ill in the memory, they are definitely not super simple that you can write =
+a quick parser in one afternoon. A careful reader may wonder how does the m=
+achine then know to parse out the contents mapped to some address <code>0x1=
+2345678</code> from the <code>ELF</code> file and load the memory with thos=
+e. This would be a great observation =E2=80=94 in our case, we are using a =
+virtual machine and we are basically simulating a machine which conceptuall=
+y has such intelligent digital circuitry or amazingly complex initial softw=
+are bootloader that is available in the machine=E2=80=99s memory right upon=
+ the powerup. That is, of course, not what happens in the real machines. Th=
+e software that is loaded upon the powerup is stored on the machine storage=
+ as a flat binary blob that is blindly just dumped into the memory upon the=
+ powerup, there is really no parsing involved, but since we=E2=80=99re deal=
+ing with a <strong>virtual</strong> machine here, the sky is the limit, we =
+are not bound by the complexities of manufacturing the hardware that does a=
+ny of this.</p>
+<h2 id=3D"writing-a-custom-bios-for-risc-v">Writing a custom =E2=80=9CBIOS=
+=E2=80=9D for RISC-V</h2>
+<p>We have established that <code>0x80000000</code> is the location of the =
+first user-provided instruction that the machine executes. I provided it as=
+ just a fact, and if you really want a little more background as to why thi=
+s might be so, you can <a href=3D"https://github.com/qemu/qemu/blob/master/=
+hw/riscv/virt.c#L78-L99">start from here</a>. Basically, <web-highlight cla=
+ss=3D"webhighlights-highlight" data-highlight-id=3D"f4b30fe7-a5f9-423c-bd2e=
+-195b227ceddc" data-highlight-split-type=3D"head" data-highlight-id-extra=
+=3D"" markid=3D"65b27b0a9b8e5ad687a55f22" style=3D"background-color: rgb(24=
+8, 252, 70); cursor: pointer;">what we see here is that DRAM is mapped to s=
+tart at the </web-highlight><code><web-highlight class=3D"webhighlights-hig=
+hlight" data-highlight-id=3D"f4b30fe7-a5f9-423c-bd2e-195b227ceddc" data-hig=
+hlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=3D"65b27b0a9=
+b8e5ad687a55f22" style=3D"background-color: rgb(248, 252, 70); cursor: poin=
+ter;">0x80000000</web-highlight></code><web-highlight class=3D"webhighlight=
+s-highlight" data-highlight-id=3D"f4b30fe7-a5f9-423c-bd2e-195b227ceddc" dat=
+a-highlight-split-type=3D"tail" data-highlight-id-extra=3D"" markid=3D"65b2=
+7b0a9b8e5ad687a55f22" style=3D"background-color: rgb(248, 252, 70); cursor:=
+ pointer;"> in the address space</web-highlight> (if you don=E2=80=99t know=
+ what this means, don=E2=80=99t worry, it will not be too relevant for the =
+rest of this article).</p>
+<p>Let=E2=80=99s begin by building an <code>ELF</code> file that will lay s=
+ome processor instructions at address <code>0x80000000</code> that will giv=
+e the user a message =E2=80=98hello=E2=80=99!</p>
+<h3 id=3D"interacting-with-the-user-via-uart">Interacting with the user via=
+ UART</h3>
+<p>Those who have done embedded systems programming in the past are surely =
+familiar with the concept of UART. UART is a very simple device used for th=
+e most basic form of input/output: there is one wire for input (receiving, =
+known as <code>RX</code>) and one wire for output (transmit, known as <code=
+>TX</code>), and one bit goes onto the wire at the time. If you=E2=80=99re =
+connecting two devices to speak to each other over UART, one device=E2=80=
+=99s <code>TX</code> is the other device=E2=80=99s <code>RX</code>, and the=
+ other way around. If you=E2=80=99re reading this article and have not done=
+ anything with UART before, I strongly suggest at least getting the cheapes=
+t possible Arduino and having it speak to your computer through a USB-to-UA=
+RT cable. The concept would be identical to what we=E2=80=99re doing here, =
+but you would be doing it for real, and it will make more sense, since the =
+scenario here is entirely virtualized.</p>
+<p>QEMU virtualizes an UART device on the virtual machine, and our software=
+ can access it. When you open the QEMU=E2=80=99s serial port (UART) section=
+, <web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"44f=
+85ff4-955d-4951-aa88-16862ed0fbe9" data-highlight-split-type=3D"head" data-=
+highlight-id-extra=3D"" markid=3D"65b27bd79b8e5ad687a55f23" style=3D"backgr=
+ound-color: rgb(146, 255, 170); cursor: pointer;">what happens is basically=
+ when you press a keyboard button, the code for that button is sent out of =
+your host=E2=80=99s </web-highlight><code><web-highlight class=3D"webhighli=
+ghts-highlight" data-highlight-id=3D"44f85ff4-955d-4951-aa88-16862ed0fbe9" =
+data-highlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=3D"6=
+5b27bd79b8e5ad687a55f23" style=3D"background-color: rgb(146, 255, 170); cur=
+sor: pointer;">TX</web-highlight></code><web-highlight class=3D"webhighligh=
+ts-highlight" data-highlight-id=3D"44f85ff4-955d-4951-aa88-16862ed0fbe9" da=
+ta-highlight-split-type=3D"none" data-highlight-id-extra=3D"" markid=3D"65b=
+27bd79b8e5ad687a55f23" style=3D"background-color: rgb(146, 255, 170); curso=
+r: pointer;"> to the VM=E2=80=99s </web-highlight><code><web-highlight clas=
+s=3D"webhighlights-highlight" data-highlight-id=3D"44f85ff4-955d-4951-aa88-=
+16862ed0fbe9" data-highlight-split-type=3D"none" data-highlight-id-extra=3D=
+"" markid=3D"65b27bd79b8e5ad687a55f23" style=3D"background-color: rgb(146, =
+255, 170); cursor: pointer;">RX</web-highlight></code><web-highlight class=
+=3D"webhighlights-highlight" data-highlight-id=3D"44f85ff4-955d-4951-aa88-1=
+6862ed0fbe9" data-highlight-split-type=3D"none" data-highlight-id-extra=3D"=
+" markid=3D"65b27bd79b8e5ad687a55f23" style=3D"background-color: rgb(146, 2=
+55, 170); cursor: pointer;"> and when the VM outputs something on its </web=
+-highlight><code><web-highlight class=3D"webhighlights-highlight" data-high=
+light-id=3D"44f85ff4-955d-4951-aa88-16862ed0fbe9" data-highlight-split-type=
+=3D"none" data-highlight-id-extra=3D"" markid=3D"65b27bd79b8e5ad687a55f23" =
+style=3D"background-color: rgb(146, 255, 170); cursor: pointer;">TX</web-hi=
+ghlight></code><web-highlight class=3D"webhighlights-highlight" data-highli=
+ght-id=3D"44f85ff4-955d-4951-aa88-16862ed0fbe9" data-highlight-split-type=
+=3D"tail" data-highlight-id-extra=3D"" markid=3D"65b27bd79b8e5ad687a55f23" =
+style=3D"background-color: rgb(146, 255, 170); cursor: pointer;">, it will =
+be rendered to you graphically in the terminal</web-highlight> (so you don=
+=E2=80=99t have to otherwise decode the electrical signals from the simulat=
+ed board :)), e.g. if the VM sends out 8 bits representing <code>65</code>,=
+ your QEMU will render the character <code>a</code>, since that is its ASCI=
+I code.</p>
+<p>We know that QEMU maps UART at the address <code>0x10000000</code> (you =
+can check it in their source code) and the device that is virtualized here =
+is <code>NS16550A</code>. The details do not matter here: for the purposes =
+of the article, what this means is if you send an 8-bit value to that addre=
+ss from your software, that will be sent out on the <code>TX</code> wire of=
+ the virtualized UART device. Practically, that means if you go to QEMU=E2=
+=80=99s serial port, the character you wrote to <code>0x10000000</code> wil=
+l be rendered in your console.</p>
+<h3 id=3D"coding-it-all-together">Coding it all together!</h3>
+<p>With all this knowledge in mind, now we can write the code. The <code>EL=
+F</code> file we are about to build will lay out a few instructions at <cod=
+e>0x80000000</code> to print the characters, =E2=80=98h=E2=80=99, =E2=80=98=
+e=E2=80=99, =E2=80=98l=E2=80=99, =E2=80=98l=E2=80=99 and =E2=80=98o=E2=80=
+=99 in succession to the address <code>0x10000000</code>. Finally, the code=
+ should then get stuck in an infinite loop (so that QEMU doesn=E2=80=99t cr=
+ash for any strange reason and we can inspect the output)</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">	.global =
+_start</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	.</span><span style=3D"=
+color:#61afef">section .text</span><span style=3D"color:#abb2bf">.bios</spa=
+n></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#61afef">_start:</span><span styl=
+e=3D"color:#abb2bf">	addi a0, x0, </span><span style=3D"color:#d19a66">0x68=
+</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	li a1, </span><span sty=
+le=3D"color:#d19a66">0x10000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	sb a0, (a1)</span><span=
+ style=3D"color:#7f848e;font-style:italic"> # 'h'</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	addi a0, x0, </span><sp=
+an style=3D"color:#d19a66">0x65</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	sb a0, (a1)</span><span=
+ style=3D"color:#7f848e;font-style:italic"> # 'e'</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	addi a0, x0, </span><sp=
+an style=3D"color:#d19a66">0x6C</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	sb a0, (a1)</span><span=
+ style=3D"color:#7f848e;font-style:italic"> # 'l'</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	addi a0, x0, </span><sp=
+an style=3D"color:#d19a66">0x6C</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	sb a0, (a1)</span><span=
+ style=3D"color:#7f848e;font-style:italic"> # 'l'</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	addi a0, x0, </span><sp=
+an style=3D"color:#d19a66">0x6F</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	sb a0, (a1)</span><span=
+ style=3D"color:#7f848e;font-style:italic"> # 'o'</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#c678dd">loop</span><span style=
+=3D"color:#abb2bf">:	j </span><span style=3D"color:#c678dd">loop</span></sp=
+an></code></pre>
+<p>You can save this file as <code>hello.s</code>. Let=E2=80=99s assemble t=
+his file into the machine code. In my case (and likely in yours), I am usin=
+g a cross-platform toolchain, meaning that I am developing on a platform di=
+fferent from the target platform. Concretely, I am developing this software=
+ on an <code>x86</code> machine and building for a <code>riscv64</code> mac=
+hine.</p>
+<p>To assemble this file, I run the following:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">riscv64-l=
+inux-gnu-as -march=3Drv64i -mabi=3Dlp64 -o hello.o -c hello.s</span></span>=
+</code></pre>
+<p>The exact command may be different depending on what kind of assembler y=
+ou have for <code>riscv64</code>, this is the tool I have obtained through =
+my system=E2=80=99s package manager for Debian. I leave it to the reader to=
+ obtain the correct toolchain for building <code>riscv64</code> software, i=
+t should generally be a matter of just obtaining the right software package=
+ from the Internet.</p>
+<p>Now, the code is only assembled, meaning that we have the software instr=
+uctions in the machine code format, but this binary is still not ready to g=
+o and act as our fake BIOS. We need to use a <strong>linker</strong> and dr=
+ive its behavior with a <strong>linker</strong> script to ensure that the i=
+nstructions we have generated will be laid out at <code>0x80000000</code> a=
+s we intended. Let=E2=80=99s write the linker script.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">MEMORY {<=
+/span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  dram_space (rwx) : ORI=
+GIN =3D 0x80000000, LENGTH =3D 128</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">}</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">SECTIONS {</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  .text : {</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf">    hello.o(.text.bios)<=
+/span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  } &gt; dram_space</spa=
+n></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">}</span></span></code></=
+pre>
+<p>We won=E2=80=99t be covering what all this means, but tl;dr is we now ha=
+ve a way to put those instructions exactly where we want them. Let=E2=80=99=
+s verify with <code>objdump</code>.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">riscv64-l=
+inux-gnu-objdump -D hello</span></span></code></pre>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">Disassemb=
+ly of section .text:</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0000000080000000 &lt;.te=
+xt&gt;:</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000000:	06800513  =
+        	li	a0,104</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000004:	100005b7  =
+        	lui	a1,0x10000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000008:	00a58023  =
+        	sb	a0,0(a1) # 0x10000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    8000000c:	06500513  =
+        	li	a0,101</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000010:	00a58023  =
+        	sb	a0,0(a1)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000014:	06c00513  =
+        	li	a0,108</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000018:	00a58023  =
+        	sb	a0,0(a1)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    8000001c:	06c00513  =
+        	li	a0,108</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000020:	00a58023  =
+        	sb	a0,0(a1)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000024:	06f00513  =
+        	li	a0,111</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    80000028:	00a58023  =
+        	sb	a0,0(a1)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">    8000002c:	0000006f  =
+        	j	0x8000002c</span></span></code></pre>
+<h3 id=3D"running-the-fake-bios-on-qemu">Running the =E2=80=9Cfake BIOS=E2=
+=80=9D on QEMU</h3>
+<p>QEMU can now be fired up by running the following command:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt -bios hello</span></span></code></pre>
+<p>To see what happens on UART, click the <code>View</code> button in the t=
+op menu and switch to the serial port view. The output should be like this:=
+</p>
+<div>
+  <img alt=3D"Bare metal QEMU 'fake BIOS'" class=3D"mx-auto" decoding=3D"as=
+ync" height=3D"490" loading=3D"lazy" src=3D"https://popovicu.com/assets/qem=
+u_bare_metal_hello.png.webp" width=3D"729">
+</div>
+<h2 id=3D"i-just-want-to-run-the-code">I just want to run the code!</h2>
+<p>Head over to the <a href=3D"https://github.com/popovicu/risc-v-bare-meta=
+l-fake-bios">Github repo</a> for this article, run the <code>make</code> co=
+mmand and that will do everything we described above. You can then launch Q=
+EMU.</p>
+    </article>
+
+    <ul class=3D"astro-VJ4TPSPI tags-container">
+      <li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/risc-v" class=3D"astro-BLWJYJPT grou=
+p pr-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">risc-v</span>
+  </a>
+</li><li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/bare-metal" class=3D"astro-BLWJYJPT =
+group pr-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">bare-metal</span>
+  </a>
+</li>
+    </ul>
+  </main>
+  <footer class=3D"astro-SZ7XMLTE mt-auto">
+  <div class=3D"mx-auto max-w-3xl px-0">
+  <hr aria-hidden=3D"true" class=3D"border-skin-line">
+</div>
+  <div class=3D"astro-SZ7XMLTE footer-wrapper">
+    <div class=3D"astro-UPU6FZXR flex social-icons">
+  <a href=3D"https://github.com/popovicu" class=3D"inline-block astro-5EUNQ=
+ZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D" Uros Popovic=
+ on Github">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+    <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+    <path d=3D"M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2=
+c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.=
+1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2=
+ 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.=
+5 2v3.5"></path>
+  </svg>
+     =20
+</a><a href=3D"https://linkedin.com/in/upopovic" class=3D"inline-block astr=
+o-5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros P=
+opovic on LinkedIn">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+    <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+    <rect height=3D"16" rx=3D"2" width=3D"16" x=3D"4" y=3D"4"></rect>
+    <line x1=3D"8" x2=3D"8" y1=3D"11" y2=3D"16"></line>
+    <line x1=3D"8" x2=3D"8" y1=3D"8" y2=3D"8.01"></line>
+    <line x1=3D"12" x2=3D"12" y1=3D"16" y2=3D"11"></line>
+    <path d=3D"M16 16v-3a2 2 0 0 0 -4 0"></path>
+  </svg>
+     =20
+</a><a href=3D"https://twitter.com/popovicu94" class=3D"inline-block astro-=
+5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros Pop=
+ovic on Twitter">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+      <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+      <path d=3D"M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.=
+335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0=
+ 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423=
+ 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -=
+3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z"></path>
+    </svg>
+     =20
+</a><a href=3D"https://www.reddit.com/user/urosp" class=3D"inline-block ast=
+ro-5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros =
+Popovic on Reddit">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+      <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+      <path d=3D"M12 8c2.648 0 5.028 .826 6.675 2.14a2.5 2.5 0 0 1 2.326 4.=
+36c0 3.59 -4.03 6.5 -9 6.5c-4.875 0 -8.845 -2.8 -9 -6.294l-1 -.206a2.5 2.5 =
+0 0 1 2.326 -4.36c1.646 -1.313 4.026 -2.14 6.674 -2.14z"></path>
+      <path d=3D"M12 8l1 -5l6 1"></path>
+      <circle cx=3D"19" cy=3D"4" r=3D"1"></circle>
+      <circle cx=3D"9" cy=3D"13" r=3D".5" fill=3D"currentColor"></circle>
+      <circle cx=3D"15" cy=3D"13" r=3D".5" fill=3D"currentColor"></circle>
+      <path d=3D"M10 17c.667 .333 1.333 .5 2 .5s1.333 -.167 2 -.5"></path>
+    </svg>
+     =20
+</a>
+</div>
+    <div class=3D"astro-SZ7XMLTE copyright-wrapper">
+      <span class=3D"astro-SZ7XMLTE">Copyright =C2=A9 2023</span>
+      <span class=3D"astro-SZ7XMLTE separator">&nbsp;|&nbsp;</span>
+      <span class=3D"astro-SZ7XMLTE">All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+  <!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><di=
+v class=3D"cm-popover" id=3D"cm-popover" style=3D"width: auto; left: 627.70=
+3px; top: 8088.8px; display: none;">                <div class=3D"cm-popove=
+r__arrow">                    <span class=3D"cm-popover__arrow-bg" style=3D=
+"margin-left: -8px;"></span>                </div>                <div clas=
+s=3D"cm-popover__raw-open" style=3D"display: block;">Mark</div>            =
+<iframe class=3D"cm-popover__iframe" src=3D"cid:frame-A6D1DA197370093E95E83=
+80B02DEC204@mhtml.blink" style=3D"width: 10px; display: none; height: 139px=
+;"></iframe></div><iframe scrolling=3D"no" frameborder=3D"0" allowtranspare=
+ncy=3D"true" src=3D"cid:frame-FFE6062EBBA16591C6D013C0BB0C3B5B@mhtml.blink"=
+ title=3D"Twitter settings iframe" style=3D"display: none;"></iframe><div i=
+d=3D"webhighlights-notifications"></div><webhighlights-extension></webhighl=
+ights-extension><webhighlights-sidebar><template shadowmode=3D"open"><!----=
+>
+      <!--?lit$846191128$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$846191128$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$846191128$--><!--?-->
+      <!--?lit$846191128$-->
+    </template></main-component>
+         =20
+      <!--?lit$846191128$--><!--?-->
+      <!--?lit$846191128$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox class=
+=3D"" style=3D"left: 925px; top: 207.5px; --bookmark-details-header-padding=
+: 0 6px 0 6px; --bookmark-details-main-padding: 0 0 0 0; --bookmark-details=
+-grid-item-padding: 0 6px; --mark-blockquote-padding: 2px 4px 0px 6px;"><te=
+mplate shadowmode=3D"open"><!---->
+      <!--?lit$846191128$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$846191128$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker style=3D"=
+position: fixed; left: 1137px; top: 528px;"><template shadowmode=3D"open"><=
+!---->
+      <!--?lit$846191128$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX" style=3D"--bookmark-details-header-padding: 0 6px 0 6px; -=
+-bookmark-details-main-padding: 0 0 0 0; --bookmark-details-grid-item-paddi=
+ng: 0 6px; --mark-blockquote-padding: 2px 4px 0px 6px;"><template shadowmod=
+e=3D"open"><!---->
+      <!--?lit$846191128$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker><iframe id=3D"rufous-sandbox" scrolli=
+ng=3D"no" frameborder=3D"0" allowtransparency=3D"true" allowfullscreen=3D"t=
+rue" style=3D"position: absolute; visibility: hidden; display: none; width:=
+ 0px; height: 0px; padding: 0px; border: none;" title=3D"Twitter analytics =
+iframe"></iframe></body></html>
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-e8c80359-fc7d-40f5-828d-4aa93ecba10b@mhtml.blink
+
+@charset "utf-8";
+
+:where(img) { height: auto; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-f08b52cd-6461-46a1-9735-4bc75ed6d7cf@mhtml.blink
+
+@charset "utf-8";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-e6451602-6247-4c5e-8e67-9ef03a47aa6d@mhtml.blink
+
+@charset "utf-8";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00b0783b; --wh-primary-light: #53e3a6; --wh-primary-dark=
+: #007f4b; --wh-primary-dark-hover: #017444; --wh-primary-shadow: #00b07841=
+; --wh-primary-shadow-2: #00b07870; --wh-primary-border-color: #c8c8c870; -=
+-secondary-color: #3d4455; --secondary-color-hover: #3a4052; --secondary-co=
+lor-transparent: #3d44556b; --secondary-light: #4c556d; --secondary-dark: #=
+252934; --secondary-dark-hover: #191b22; --secondary-dark-transparent: #2e2=
+d2d46; --highlight-color: #92ffaa; --error-color: #d62d4c; --warning-color:=
+ #ffcc00; --error-info: #14854e; --success-color: #4BB543; --font-color: #2=
+f3237; --font-color-light: #626364; --font-color-dark: #252525; --wh-font-f=
+amily: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--red-600); --wh-danger-color-hover: var(--red=
+-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-bg-base=
+: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500); --w=
+h-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(--wh-se=
+condary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-border=
+-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong: var(=
+--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-back-st=
+rong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-secondar=
+y-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hover-str=
+ong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-100); --=
+wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--wh-seco=
+ndary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-front-st=
+rong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-secondar=
+y-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-border-fr=
+ont: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%); --wh=
+-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0, 0%, 1=
+00%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(255, 2=
+55, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-light: rg=
+ba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63); --wh=
+-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, 0%, 10=
+0%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-note-edi=
+tor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: hsl(22=
+1, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hover: va=
+r(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05); --w=
+h-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(220, 2=
+2%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --wh-bg-=
+notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gray: rg=
+b(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0=
+.1),
+      /* 2. shadow ring =F0=9F=91=87 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075)=
+,
+      /* 3. multiple soft shadows =F0=9F=91=87 */ 0 0.3px 0.4px hsla(230, 1=
+3%, 9%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-ef5a239b-756e-446e-92eb-f82a31d56e8a@mhtml.blink
+
+@charset "utf-8";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-3b077b3b-bc77-45d5-ad49-e9bfaf222c55@mhtml.blink
+
+@charset "utf-8";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap
+
+@charset "utf-8";
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa2Hdgv-s.woff2") format("woff2"); unicode-r=
+ange: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F=
+; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa0Xdgv-s.woff2") format("woff2"); unicode-r=
+ange: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa2ndgv-s.woff2") format("woff2"); unicode-r=
+ange: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+3=
+00-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa23dgv-s.woff2") format("woff2"); unicode-r=
+ange: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+2=
+0A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa1Xdg.woff2") format("woff2"); unicode-rang=
+e: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, =
+U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,=
+ U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1jcoQLNg.woff2") format("woff2"); unico=
+de-range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-=
+FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1hMoQLNg.woff2") format("woff2"); unico=
+de-range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1j8oQLNg.woff2") format("woff2"); unico=
+de-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0,=
+ U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1jsoQLNg.woff2") format("woff2"); unico=
+de-range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020,=
+ U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1gMoQ.woff2") format("woff2"); unicode-=
+range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+3=
+08, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2=
+215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iIq129k.woff2") format("woff2"); unicode-rang=
+e: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1isq129k.woff2") format("woff2"); unicode-rang=
+e: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iAq129k.woff2") format("woff2"); unicode-rang=
+e: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-=
+301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iEq129k.woff2") format("woff2"); unicode-rang=
+e: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0=
+-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2") format("woff2"); unicode-range:=
+ U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+=
+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U=
++FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/about.5b2af2d6.css
+
+@charset "utf-8";
+
+*, ::before, ::after { box-sizing: border-box; border-width: 0px; border-st=
+yle: solid; border-color: currentcolor; }
+
+::before, ::after { --tw-content: ""; }
+
+html { line-height: 1.5; text-size-adjust: 100%; tab-size: 4; font-family: =
+ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Ro=
+boto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji"=
+, "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; font-feature-set=
+tings: normal; font-variation-settings: normal; }
+
+body { margin: 0px; line-height: inherit; }
+
+hr { height: 0px; color: inherit; border-top-width: 1px; }
+
+abbr:where([title]) { text-decoration: underline dotted; }
+
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+
+a { color: inherit; text-decoration: inherit; }
+
+b, strong { font-weight: bolder; }
+
+code, kbd, samp, pre { font-family: "IBM Plex Mono", monospace; font-size: =
+1em; }
+
+small { font-size: 80%; }
+
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-ali=
+gn: baseline; }
+
+sub { bottom: -0.25em; }
+
+sup { top: -0.5em; }
+
+table { text-indent: 0px; border-color: inherit; border-collapse: collapse;=
+ }
+
+button, input, optgroup, select, textarea { font-family: inherit; font-size=
+: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin:=
+ 0px; padding: 0px; }
+
+button, select { text-transform: none; }
+
+button, [type=3D"button"], [type=3D"reset"], [type=3D"submit"] { appearance=
+: button; background-color: transparent; background-image: none; }
+
+progress { vertical-align: baseline; }
+
+::-webkit-inner-spin-button, ::-webkit-outer-spin-button { height: auto; }
+
+[type=3D"search"] { appearance: textfield; outline-offset: -2px; }
+
+::-webkit-search-decoration { appearance: none; }
+
+::-webkit-file-upload-button { appearance: button; font: inherit; }
+
+summary { display: list-item; }
+
+blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre { margin: 0p=
+x; }
+
+fieldset { margin: 0px; padding: 0px; }
+
+legend { padding: 0px; }
+
+ol, ul, menu { list-style: none; margin: 0px; padding: 0px; }
+
+textarea { resize: vertical; }
+
+input::placeholder, textarea::placeholder { opacity: 1; color: rgb(156, 163=
+, 175); }
+
+button, [role=3D"button"] { cursor: pointer; }
+
+:disabled { cursor: default; }
+
+img, svg, video, canvas, audio, iframe, embed, object { display: block; ver=
+tical-align: middle; }
+
+img, video { max-width: 100%; height: auto; }
+
+[hidden] { display: none; }
+
+:root, html[data-theme=3D"light"] { --color-fill: 251, 254, 251; --color-te=
+xt-base: 40, 39, 40; --color-accent: 0, 108, 172; --color-card: 230, 230, 2=
+30; --color-card-muted: 205, 205, 205; --color-border: 236, 233, 233; }
+
+html[data-theme=3D"dark"] { --color-fill: 33, 39, 55; --color-text-base: 23=
+4, 237, 243; --color-accent: 255, 107, 1; --color-card: 52, 63, 96; --color=
+-card-muted: 138, 51, 2; --color-border: 171, 75, 8; }
+
+#sun-svg, html[data-theme=3D"dark"] #moon-svg { display: none; }
+
+#moon-svg, html[data-theme=3D"dark"] #sun-svg { display: block; }
+
+body { display: flex; min-height: 100vh; flex-direction: column; --tw-bg-op=
+acity: 1; background-color: rgba(var(--color-fill),var(--tw-bg-opacity)); f=
+ont-family: "IBM Plex Mono", monospace; --tw-text-opacity: 1; color: rgba(v=
+ar(--color-text-base),var(--tw-text-opacity)); }
+
+body ::selection { background-color: rgba(var(--color-accent),var(--tw-bg-o=
+pacity)); --tw-bg-opacity: .7; --tw-text-opacity: 1; color: rgba(var(--colo=
+r-fill),var(--tw-text-opacity)); }
+
+body::selection { background-color: rgba(var(--color-accent),var(--tw-bg-op=
+acity)); --tw-bg-opacity: .7; --tw-text-opacity: 1; color: rgba(var(--color=
+-fill),var(--tw-text-opacity)); }
+
+section, footer { margin-left: auto; margin-right: auto; max-width: 48rem; =
+padding-left: 1rem; padding-right: 1rem; }
+
+a { outline-width: 2px; outline-offset: 1px; outline-color: rgb(var(--color=
+-accent)); }
+
+a:focus-visible { text-decoration-line: none; outline-style: dashed; }
+
+svg { display: inline-block; height: 1.5rem; width: 1.5rem; fill: rgb(var(-=
+-color-text-base)); }
+
+.group:hover svg { fill: rgb(var(--color-accent)); }
+
+svg.icon-tabler { display: inline-block; height: 1.5rem; width: 1.5rem; --t=
+w-scale-x: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translat=
+e-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x))=
+ skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)=
+); fill: transparent; stroke: currentcolor; stroke-width: 2; opacity: 0.9; =
+}
+
+.group:hover svg.icon-tabler { fill: transparent; }
+
+@media (min-width: 640px) {
+  svg.icon-tabler { --tw-scale-x: 1.1; --tw-scale-y: 1.1; transform: transl=
+ate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) s=
+kew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) sca=
+leY(var(--tw-scale-y)); }
+}
+
+.prose :is(:where(h1, h2, h3, h4, h5, h6, th):not(:where([class~=3D"not-pro=
+se"] *))) { margin-bottom: 0.75rem !important; --tw-text-opacity: 1 !import=
+ant; color: rgba(var(--color-text-base),var(--tw-text-opacity)) !important;=
+ }
+
+.prose :is(:where(h3):not(:where([class~=3D"not-prose"] *))) { font-style: =
+italic; }
+
+.prose :is(:where(p):not(:where([class~=3D"not-prose"] *))) { --tw-text-opa=
+city: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opacit=
+y)) !important; }
+
+.prose :is(:where(a):not(:where([class~=3D"not-prose"] *))) { text-underlin=
+e-offset: 8px; --tw-text-opacity: 1 !important; color: rgba(var(--color-tex=
+t-base),var(--tw-text-opacity)) !important; text-decoration-style: dashed !=
+important; }
+
+.prose :is(:where(a):not(:where([class~=3D"not-prose"] *))):hover { --tw-te=
+xt-opacity: 1; color: rgba(var(--color-accent),var(--tw-text-opacity)); }
+
+.prose :is(:where(blockquote):not(:where([class~=3D"not-prose"] *))) { --tw=
+-border-opacity: .5; opacity: 0.8; border-left-color: rgba(var(--color-acce=
+nt),var(--tw-border-opacity)) !important; }
+
+.prose :is(:where(figcaption):not(:where([class~=3D"not-prose"] *))) { opac=
+ity: 0.7; --tw-text-opacity: 1 !important; color: rgba(var(--color-text-bas=
+e),var(--tw-text-opacity)) !important; }
+
+.prose :is(:where(strong):not(:where([class~=3D"not-prose"] *))) { --tw-tex=
+t-opacity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-o=
+pacity)) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *))) { border-rad=
+ius: 0.25rem; background-color: rgba(var(--color-card),var(--tw-bg-opacity)=
+); --tw-bg-opacity: .75; padding: 0.25rem; --tw-text-opacity: 1 !important;=
+ color: rgba(var(--color-text-base),var(--tw-text-opacity)) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *)))::before { --=
+tw-content: "" !important; content: var(--tw-content) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *)))::after { --t=
+w-content: "" !important; content: var(--tw-content) !important; }
+
+.prose :is(:where(pre):not(:where([class~=3D"not-prose"] *))) { --tw-text-o=
+pacity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opac=
+ity)) !important; }
+
+.prose :is(:where(ol):not(:where([class~=3D"not-prose"] *))) { --tw-text-op=
+acity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opaci=
+ty)) !important; }
+
+.prose :is(:where(ul):not(:where([class~=3D"not-prose"] *))) { overflow-x: =
+clip; --tw-text-opacity: 1 !important; color: rgba(var(--color-text-base),v=
+ar(--tw-text-opacity)) !important; }
+
+.prose :is(:where(table):not(:where([class~=3D"not-prose"] *))) { --tw-text=
+-opacity: 1; color: rgba(var(--color-text-base),var(--tw-text-opacity)); }
+
+.prose :is(:where(th):not(:where([class~=3D"not-prose"] *))) { border-width=
+: 1px; --tw-border-opacity: 1; border-color: rgba(var(--color-border),var(-=
+-tw-border-opacity)); }
+
+.prose :is(:where(td):not(:where([class~=3D"not-prose"] *))) { border-width=
+: 1px; --tw-border-opacity: 1; border-color: rgba(var(--color-border),var(-=
+-tw-border-opacity)); }
+
+.prose :is(:where(img):not(:where([class~=3D"not-prose"] *))) { margin-left=
+: auto; margin-right: auto; border-width: 2px; --tw-border-opacity: 1; bord=
+er-color: rgba(var(--color-border),var(--tw-border-opacity)); margin-top: 0=
+.5rem !important; }
+
+.prose :is(:where(hr):not(:where([class~=3D"not-prose"] *))) { --tw-border-=
+opacity: 1 !important; border-color: rgba(var(--color-border),var(--tw-bord=
+er-opacity)) !important; }
+
+.prose a:hover { --tw-text-opacity: 1 !important; color: rgba(var(--color-a=
+ccent),var(--tw-text-opacity)) !important; }
+
+.prose thead th:first-child, tbody td:first-child, tfoot td:first-child { p=
+adding-left: 0.571429em; }
+
+.prose h2#table-of-contents { margin-bottom: 0.5rem; }
+
+.prose details { display: inline-block; cursor: pointer; user-select: none;=
+ --tw-text-opacity: 1; color: rgba(var(--color-text-base),var(--tw-text-opa=
+city)); }
+
+.prose summary { outline-width: 2px; outline-offset: 1px; outline-color: rg=
+b(var(--color-accent)); }
+
+.prose summary:focus-visible { text-decoration-line: none; outline-style: d=
+ashed; }
+
+.prose h2#table-of-contents + p { display: none; }
+
+html { overflow-y: scroll; }
+
+::-webkit-scrollbar { width: 0.75rem; }
+
+::-webkit-scrollbar-track { --tw-bg-opacity: 1; background-color: rgba(var(=
+--color-fill),var(--tw-bg-opacity)); }
+
+::-webkit-scrollbar-thumb { --tw-bg-opacity: 1; background-color: rgba(var(=
+--color-card),var(--tw-bg-opacity)); }
+
+::-webkit-scrollbar-thumb:hover { --tw-bg-opacity: 1; background-color: rgb=
+a(var(--color-card-muted),var(--tw-bg-opacity)); }
+
+code { white-space: pre; overflow: scroll; }
+
+*, ::before, ::after { --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; =
+--tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; -=
+-tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: =
+; --tw-pinch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-=
+from-position: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ;=
+ --tw-ordinal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-s=
+pacing: ; --tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-widt=
+h: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5)=
+; --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-sha=
+dow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightnes=
+s: ; --tw-contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; -=
+-tw-saturate: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --t=
+w-backdrop-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale:=
+ ; --tw-backdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacit=
+y: ; --tw-backdrop-saturate: ; --tw-backdrop-sepia: ; }
+
+::backdrop { --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; --tw-trans=
+late-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y=
+: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: ; --tw-pin=
+ch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-from-posit=
+ion: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ; --tw-ordi=
+nal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-spacing: ; =
+--tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-width: 0px; --=
+tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5); --tw-rin=
+g-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #=
+0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightness: ; --tw-=
+contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; --tw-satura=
+te: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --tw-backdrop=
+-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale: ; --tw-ba=
+ckdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacity: ; --tw-=
+backdrop-saturate: ; --tw-backdrop-sepia: ; }
+
+.prose { color: var(--tw-prose-body); max-width: 65ch; }
+
+.prose :where(p):not(:where([class~=3D"not-prose"] *)) { margin-top: 1.25em=
+; margin-bottom: 1.25em; }
+
+.prose :where([class~=3D"lead"]):not(:where([class~=3D"not-prose"] *)) { co=
+lor: var(--tw-prose-lead); font-size: 1.25em; line-height: 1.6; margin-top:=
+ 1.2em; margin-bottom: 1.2em; }
+
+.prose :where(a):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-pr=
+ose-links); text-decoration: underline; font-weight: 500; }
+
+.prose :where(strong):not(:where([class~=3D"not-prose"] *)) { color: var(--=
+tw-prose-bold); font-weight: 600; }
+
+.prose :where(a strong):not(:where([class~=3D"not-prose"] *)) { color: inhe=
+rit; }
+
+.prose :where(blockquote strong):not(:where([class~=3D"not-prose"] *)) { co=
+lor: inherit; }
+
+.prose :where(thead th strong):not(:where([class~=3D"not-prose"] *)) { colo=
+r: inherit; }
+
+.prose :where(ol):not(:where([class~=3D"not-prose"] *)) { list-style-type: =
+decimal; margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; =
+}
+
+.prose :where(ol[type=3D"A"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: upper-alpha; }
+
+.prose :where(ol[type=3D"a"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: lower-alpha; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: up=
+per-alpha; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: lo=
+wer-alpha; }
+
+.prose :where(ol[type=3D"I"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: upper-roman; }
+
+.prose :where(ol[type=3D"i"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: lower-roman; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: up=
+per-roman; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: lo=
+wer-roman; }
+
+.prose :where(ol[type=3D"1"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: decimal; }
+
+.prose :where(ul):not(:where([class~=3D"not-prose"] *)) { list-style-type: =
+disc; margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; }
+
+.prose :where(ol > li):not(:where([class~=3D"not-prose"] *))::marker { font=
+-weight: 400; color: var(--tw-prose-counters); }
+
+.prose :where(ul > li):not(:where([class~=3D"not-prose"] *))::marker { colo=
+r: var(--tw-prose-bullets); }
+
+.prose :where(hr):not(:where([class~=3D"not-prose"] *)) { border-color: var=
+(--tw-prose-hr); border-top-width: 1px; margin-top: 3em; margin-bottom: 3em=
+; }
+
+.prose :where(blockquote):not(:where([class~=3D"not-prose"] *)) { font-weig=
+ht: 500; font-style: italic; color: var(--tw-prose-quotes); border-left-wid=
+th: 0.25rem; border-left-color: var(--tw-prose-quote-borders); quotes: "=E2=
+=80=9C" "=E2=80=9D" "=E2=80=98" "=E2=80=99"; margin-top: 1.6em; margin-bott=
+om: 1.6em; padding-left: 1em; }
+
+.prose :where(blockquote p:first-of-type):not(:where([class~=3D"not-prose"]=
+ *))::before { content: open-quote; }
+
+.prose :where(blockquote p:last-of-type):not(:where([class~=3D"not-prose"] =
+*))::after { content: close-quote; }
+
+.prose :where(h1):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 800; font-size: 2.25em; margin-top: 0px; margi=
+n-bottom: 0.888889em; line-height: 1.11111; }
+
+.prose :where(h1 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 900; color: inherit; }
+
+.prose :where(h2):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 700; font-size: 1.5em; margin-top: 2em; margin=
+-bottom: 1em; line-height: 1.33333; }
+
+.prose :where(h2 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 800; color: inherit; }
+
+.prose :where(h3):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 600; font-size: 1.25em; margin-top: 1.6em; mar=
+gin-bottom: 0.6em; line-height: 1.6; }
+
+.prose :where(h3 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 700; color: inherit; }
+
+.prose :where(h4):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; =
+line-height: 1.5; }
+
+.prose :where(h4 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 700; color: inherit; }
+
+.prose :where(img):not(:where([class~=3D"not-prose"] *)) { margin-top: 2em;=
+ margin-bottom: 2em; }
+
+.prose :where(figure > *):not(:where([class~=3D"not-prose"] *)) { margin-to=
+p: 0px; margin-bottom: 0px; }
+
+.prose :where(figcaption):not(:where([class~=3D"not-prose"] *)) { color: va=
+r(--tw-prose-captions); font-size: 0.875em; line-height: 1.42857; margin-to=
+p: 0.857143em; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *)) { color: var(--tw=
+-prose-code); font-weight: 600; font-size: 0.875em; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *))::before { content=
+: "`"; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *))::after { content:=
+ "`"; }
+
+.prose :where(a code):not(:where([class~=3D"not-prose"] *)) { color: inheri=
+t; }
+
+.prose :where(h1 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; }
+
+.prose :where(h2 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; font-size: 0.875em; }
+
+.prose :where(h3 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; font-size: 0.9em; }
+
+.prose :where(h4 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; }
+
+.prose :where(blockquote code):not(:where([class~=3D"not-prose"] *)) { colo=
+r: inherit; }
+
+.prose :where(thead th code):not(:where([class~=3D"not-prose"] *)) { color:=
+ inherit; }
+
+.prose :where(pre):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-=
+prose-pre-code); background-color: var(--tw-prose-pre-bg); overflow-x: auto=
+; font-weight: 400; font-size: 0.875em; line-height: 1.71429; margin-top: 1=
+.71429em; margin-bottom: 1.71429em; border-radius: 0.375rem; padding: 0.857=
+143em 1.14286em; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *)) { background-=
+color: transparent; border-width: 0px; border-radius: 0px; padding: 0px; fo=
+nt-weight: inherit; color: inherit; font-size: inherit; font-family: inheri=
+t; line-height: inherit; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *))::before { con=
+tent: none; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *))::after { cont=
+ent: none; }
+
+.prose :where(table):not(:where([class~=3D"not-prose"] *)) { width: 100%; t=
+able-layout: auto; text-align: left; margin-top: 2em; margin-bottom: 2em; f=
+ont-size: 0.875em; line-height: 1.71429; }
+
+.prose :where(thead):not(:where([class~=3D"not-prose"] *)) { border-bottom-=
+width: 1px; border-bottom-color: var(--tw-prose-th-borders); }
+
+.prose :where(thead th):not(:where([class~=3D"not-prose"] *)) { color: var(=
+--tw-prose-headings); font-weight: 600; vertical-align: bottom; padding-rig=
+ht: 0.571429em; padding-bottom: 0.571429em; padding-left: 0.571429em; }
+
+.prose :where(tbody tr):not(:where([class~=3D"not-prose"] *)) { border-bott=
+om-width: 1px; border-bottom-color: var(--tw-prose-td-borders); }
+
+.prose :where(tbody tr:last-child):not(:where([class~=3D"not-prose"] *)) { =
+border-bottom-width: 0px; }
+
+.prose :where(tbody td):not(:where([class~=3D"not-prose"] *)) { vertical-al=
+ign: baseline; }
+
+.prose :where(tfoot):not(:where([class~=3D"not-prose"] *)) { border-top-wid=
+th: 1px; border-top-color: var(--tw-prose-th-borders); }
+
+.prose :where(tfoot td):not(:where([class~=3D"not-prose"] *)) { vertical-al=
+ign: top; }
+
+.prose { --tw-prose-body: #374151; --tw-prose-headings: #111827; --tw-prose=
+-lead: #4b5563; --tw-prose-links: #111827; --tw-prose-bold: #111827; --tw-p=
+rose-counters: #6b7280; --tw-prose-bullets: #d1d5db; --tw-prose-hr: #e5e7eb=
+; --tw-prose-quotes: #111827; --tw-prose-quote-borders: #e5e7eb; --tw-prose=
+-captions: #6b7280; --tw-prose-code: #111827; --tw-prose-pre-code: #e5e7eb;=
+ --tw-prose-pre-bg: #1f2937; --tw-prose-th-borders: #d1d5db; --tw-prose-td-=
+borders: #e5e7eb; --tw-prose-invert-body: #d1d5db; --tw-prose-invert-headin=
+gs: #fff; --tw-prose-invert-lead: #9ca3af; --tw-prose-invert-links: #fff; -=
+-tw-prose-invert-bold: #fff; --tw-prose-invert-counters: #9ca3af; --tw-pros=
+e-invert-bullets: #4b5563; --tw-prose-invert-hr: #374151; --tw-prose-invert=
+-quotes: #f3f4f6; --tw-prose-invert-quote-borders: #374151; --tw-prose-inve=
+rt-captions: #9ca3af; --tw-prose-invert-code: #fff; --tw-prose-invert-pre-c=
+ode: #d1d5db; --tw-prose-invert-pre-bg: rgb(0 0 0 / 50%); --tw-prose-invert=
+-th-borders: #4b5563; --tw-prose-invert-td-borders: #374151; font-size: 1re=
+m; line-height: 1.75; }
+
+.prose :where(video):not(:where([class~=3D"not-prose"] *)) { margin-top: 2e=
+m; margin-bottom: 2em; }
+
+.prose :where(figure):not(:where([class~=3D"not-prose"] *)) { margin-top: 2=
+em; margin-bottom: 2em; }
+
+.prose :where(li):not(:where([class~=3D"not-prose"] *)) { margin-top: 0.5em=
+; margin-bottom: 0.5em; }
+
+.prose :where(ol > li):not(:where([class~=3D"not-prose"] *)) { padding-left=
+: 0.375em; }
+
+.prose :where(ul > li):not(:where([class~=3D"not-prose"] *)) { padding-left=
+: 0.375em; }
+
+.prose :where(.prose > ul > li p):not(:where([class~=3D"not-prose"] *)) { m=
+argin-top: 0.75em; margin-bottom: 0.75em; }
+
+.prose :where(.prose > ul > li > :first-child):not(:where([class~=3D"not-pr=
+ose"] *)) { margin-top: 1.25em; }
+
+.prose :where(.prose > ul > li > :last-child):not(:where([class~=3D"not-pro=
+se"] *)) { margin-bottom: 1.25em; }
+
+.prose :where(.prose > ol > li > :first-child):not(:where([class~=3D"not-pr=
+ose"] *)) { margin-top: 1.25em; }
+
+.prose :where(.prose > ol > li > :last-child):not(:where([class~=3D"not-pro=
+se"] *)) { margin-bottom: 1.25em; }
+
+.prose :where(ul ul, ul ol, ol ul, ol ol):not(:where([class~=3D"not-prose"]=
+ *)) { margin-top: 0.75em; margin-bottom: 0.75em; }
+
+.prose :where(hr + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h2 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h3 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h4 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(thead th:first-child):not(:where([class~=3D"not-prose"] *)) {=
+ padding-left: 0px; }
+
+.prose :where(thead th:last-child):not(:where([class~=3D"not-prose"] *)) { =
+padding-right: 0px; }
+
+.prose :where(tbody td, tfoot td):not(:where([class~=3D"not-prose"] *)) { p=
+adding: 0.571429em; }
+
+.prose :where(tbody td:first-child, tfoot td:first-child):not(:where([class=
+~=3D"not-prose"] *)) { padding-left: 0px; }
+
+.prose :where(tbody td:last-child, tfoot td:last-child):not(:where([class~=
+=3D"not-prose"] *)) { padding-right: 0px; }
+
+.prose :where(.prose > :first-child):not(:where([class~=3D"not-prose"] *)) =
+{ margin-top: 0px; }
+
+.prose :where(.prose > :last-child):not(:where([class~=3D"not-prose"] *)) {=
+ margin-bottom: 0px; }
+
+.display-none { display: none; }
+
+.focus-outline { outline-width: 2px; outline-offset: 1px; outline-color: rg=
+b(var(--color-accent)); }
+
+.focus-outline:focus-visible { text-decoration-line: none; outline-style: d=
+ashed; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0px; margi=
+n: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: now=
+rap; border-width: 0px; }
+
+.pointer-events-none { pointer-events: none; }
+
+.visible { visibility: visible; }
+
+.static { position: static; }
+
+.fixed { position: fixed; }
+
+.absolute { position: absolute; }
+
+.relative { position: relative; }
+
+.sticky { position: sticky; }
+
+.inset-y-0 { top: 0px; bottom: 0px; }
+
+.-top-full { top: -100%; }
+
+.left-0 { left: 0px; }
+
+.left-16 { left: 4rem; }
+
+.z-50 { z-index: 50; }
+
+.col-span-2 { grid-column: span 2 / span 2; }
+
+.mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.my-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+
+.my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+
+.my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+
+.my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+
+.my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+
+.my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+
+.-mr-5 { margin-right: -1.25rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+
+.mb-14 { margin-bottom: 3.5rem; }
+
+.mb-2 { margin-bottom: 0.5rem; }
+
+.mb-28 { margin-bottom: 7rem; }
+
+.mb-6 { margin-bottom: 1.5rem; }
+
+.mb-8 { margin-bottom: 2rem; }
+
+.ml-4 { margin-left: 1rem; }
+
+.mr-2 { margin-right: 0.5rem; }
+
+.mr-4 { margin-right: 1rem; }
+
+.mt-2 { margin-top: 0.5rem; }
+
+.mt-4 { margin-top: 1rem; }
+
+.mt-8 { margin-top: 2rem; }
+
+.mt-auto { margin-top: auto; }
+
+.block { display: block; }
+
+.inline-block { display: inline-block; }
+
+.inline { display: inline; }
+
+.flex { display: flex; }
+
+.table { display: table; }
+
+.grid { display: grid; }
+
+.contents { display: contents; }
+
+.hidden { display: none; }
+
+.h-6 { height: 1.5rem; }
+
+.w-44 { width: 11rem; }
+
+.w-6 { width: 1.5rem; }
+
+.w-full { width: 100%; }
+
+.max-w-3xl { max-width: 48rem; }
+
+.flex-1 { flex: 1 1 0%; }
+
+.scale-100 { --tw-scale-x: 1; --tw-scale-y: 1; transform: translate(var(--t=
+w-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--t=
+w-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--t=
+w-scale-y)); }
+
+.scale-110 { --tw-scale-x: 1.1; --tw-scale-y: 1.1; transform: translate(var=
+(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var=
+(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var=
+(--tw-scale-y)); }
+
+.scale-125 { --tw-scale-x: 1.25; --tw-scale-y: 1.25; transform: translate(v=
+ar(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(v=
+ar(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(v=
+ar(--tw-scale-y)); }
+
+.scale-75 { --tw-scale-x: .75; --tw-scale-y: .75; transform: translate(var(=
+--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(=
+--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(=
+--tw-scale-y)); }
+
+.scale-90 { --tw-scale-x: .9; --tw-scale-y: .9; transform: translate(var(--=
+tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--=
+tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--=
+tw-scale-y)); }
+
+.scale-95 { --tw-scale-x: .95; --tw-scale-y: .95; transform: translate(var(=
+--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(=
+--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(=
+--tw-scale-y)); }
+
+.select-none { user-select: none; }
+
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0px, 1fr)); }
+
+.grid-rows-4 { grid-template-rows: repeat(4, minmax(0px, 1fr)); }
+
+.flex-col { flex-direction: column; }
+
+.flex-wrap { flex-wrap: wrap; }
+
+.items-start { align-items: flex-start; }
+
+.items-center { align-items: center; }
+
+.justify-start { justify-content: flex-start; }
+
+.justify-center { justify-content: center; }
+
+.justify-between { justify-content: space-between; }
+
+.gap-x-2 { column-gap: 0.5rem; }
+
+.gap-y-2 { row-gap: 0.5rem; }
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) { --tw-space-x-reverse: 0; mar=
+gin-right: calc(.5rem * var(--tw-space-x-reverse)); margin-left: calc(.5rem=
+ * calc(1 - var(--tw-space-x-reverse))); }
+
+.self-end { align-self: flex-end; }
+
+.whitespace-nowrap { white-space: nowrap; }
+
+.rounded { border-radius: 0.25rem; }
+
+.border { border-width: 1px; }
+
+.border-skin-fill { --tw-border-opacity: 1; border-color: rgba(var(--color-=
+text-base),var(--tw-border-opacity)); }
+
+.border-skin-line { --tw-border-opacity: 1; border-color: rgba(var(--color-=
+border),var(--tw-border-opacity)); }
+
+.border-opacity-40 { --tw-border-opacity: .4; }
+
+.bg-skin-accent { --tw-bg-opacity: 1; background-color: rgba(var(--color-ac=
+cent),var(--tw-bg-opacity)); }
+
+.bg-skin-fill { --tw-bg-opacity: 1; background-color: rgba(var(--color-fill=
+),var(--tw-bg-opacity)); }
+
+.fill-skin-accent { fill: rgb(var(--color-accent)); }
+
+.fill-skin-base { fill: rgb(var(--color-text-base)); }
+
+.p-2 { padding: 0.5rem; }
+
+.p-3 { padding: 0.75rem; }
+
+.p-4 { padding: 1rem; }
+
+.px-0 { padding-left: 0px; padding-right: 0px; }
+
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+.pb-6 { padding-bottom: 1.5rem; }
+
+.pl-10 { padding-left: 2.5rem; }
+
+.pl-2 { padding-left: 0.5rem; }
+
+.pr-2 { padding-right: 0.5rem; }
+
+.pr-3 { padding-right: 0.75rem; }
+
+.text-center { text-align: center; }
+
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+
+.text-9xl { font-size: 8rem; line-height: 1; }
+
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+.font-bold { font-weight: 700; }
+
+.font-medium { font-weight: 500; }
+
+.font-semibold { font-weight: 600; }
+
+.lowercase { text-transform: lowercase; }
+
+.capitalize { text-transform: capitalize; }
+
+.italic { font-style: italic; }
+
+.tracking-wider { letter-spacing: 0.05em; }
+
+.text-skin-accent { --tw-text-opacity: 1; color: rgba(var(--color-accent),v=
+ar(--tw-text-opacity)); }
+
+.text-skin-base { --tw-text-opacity: 1; color: rgba(var(--color-text-base),=
+var(--tw-text-opacity)); }
+
+.text-skin-inverted { --tw-text-opacity: 1; color: rgba(var(--color-fill),v=
+ar(--tw-text-opacity)); }
+
+.underline { text-decoration-line: underline; }
+
+.decoration-dashed { text-decoration-style: dashed; }
+
+.decoration-wavy { text-decoration-style: wavy; }
+
+.decoration-2 { text-decoration-thickness: 2px; }
+
+.underline-offset-4 { text-underline-offset: 4px; }
+
+.underline-offset-8 { text-underline-offset: 8px; }
+
+.opacity-50 { opacity: 0.5; }
+
+.opacity-75 { opacity: 0.75; }
+
+.opacity-80 { opacity: 0.8; }
+
+.outline { outline-style: solid; }
+
+.ring { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-o=
+ffset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-i=
+nset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color); b=
+ox-shadow: var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shad=
+ow, 0 0 #0000); }
+
+.filter { filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) va=
+r(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) =
+var(--tw-sepia) var(--tw-drop-shadow); }
+
+.transition-all { transition-property: all; transition-timing-function: cub=
+ic-bezier(0.4, 0, 0.2, 1); transition-duration: 0.15s; }
+
+.transition-opacity { transition-property: opacity; transition-timing-funct=
+ion: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 0.15s; }
+
+.duration-75 { transition-duration: 75ms; }
+
+.placeholder\:italic::placeholder { font-style: italic; }
+
+.placeholder\:text-opacity-75::placeholder { --tw-text-opacity: .75; }
+
+.hover\:-top-0:hover { top: 0px; }
+
+.hover\:-top-0\.5:hover { top: -0.125rem; }
+
+.hover\:rotate-12:hover { --tw-rotate: 12deg; transform: translate(var(--tw=
+-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw=
+-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw=
+-scale-y)); }
+
+.hover\:rotate-6:hover { --tw-rotate: 6deg; transform: translate(var(--tw-t=
+ranslate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-s=
+kew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-s=
+cale-y)); }
+
+.hover\:text-skin-accent:hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); }
+
+.hover\:text-skin-base:hover { --tw-text-opacity: 1; color: rgba(var(--colo=
+r-text-base),var(--tw-text-opacity)); }
+
+.hover\:underline:hover { text-decoration-line: underline; }
+
+.hover\:opacity-75:hover { opacity: 0.75; }
+
+.focus\:border-skin-accent:focus { --tw-border-opacity: 1; border-color: rg=
+ba(var(--color-accent),var(--tw-border-opacity)); }
+
+.focus\:outline-none:focus { outline: transparent solid 2px; outline-offset=
+: 2px; }
+
+.focus-visible\:no-underline:focus-visible { text-decoration-line: none; }
+
+.focus-visible\:underline-offset-0:focus-visible { text-underline-offset: 0=
+px; }
+
+.prose-img\:border-0 :is(:where(img):not(:where([class~=3D"not-prose"] *)))=
+ { border-width: 0px; }
+
+@media (min-width: 640px) {
+  .sm\:static { position: static; }
+  .sm\:my-0 { margin-top: 0px; margin-bottom: 0px; }
+  .sm\:my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+  .sm\:mb-3 { margin-bottom: 0.75rem; }
+  .sm\:ml-0 { margin-left: 0px; }
+  .sm\:ml-2 { margin-left: 0.5rem; }
+  .sm\:mt-0 { margin-top: 0px; }
+  .sm\:inline { display: inline; }
+  .sm\:flex { display: flex; }
+  .sm\:hidden { display: none; }
+  .sm\:w-auto { width: auto; }
+  .sm\:scale-100 { --tw-scale-x: 1; --tw-scale-y: 1; transform: translate(v=
+ar(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(v=
+ar(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(v=
+ar(--tw-scale-y)); }
+  .sm\:flex-row { flex-direction: row; }
+  .sm\:flex-row-reverse { flex-direction: row-reverse; }
+  .sm\:items-center { align-items: center; }
+  .sm\:justify-end { justify-content: flex-end; }
+  .sm\:gap-x-5 { column-gap: 1.25rem; }
+  .sm\:space-x-4 > :not([hidden]) ~ :not([hidden]) { --tw-space-x-reverse: =
+0; margin-right: calc(1rem * var(--tw-space-x-reverse)); margin-left: calc(=
+1rem * calc(1 - var(--tw-space-x-reverse))); }
+  .sm\:p-1 { padding: 0.25rem; }
+  .sm\:px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .sm\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+}
+
+a:where(.astro-5EUNQZKT):hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); }
+
+#skip-to-content:where(.astro-3EF6KSR2) { position: absolute; top: -100%; l=
+eft: 4rem; z-index: 50; --tw-bg-opacity: 1; background-color: rgba(var(--co=
+lor-accent),var(--tw-bg-opacity)); padding: 0.5rem 0.75rem; --tw-text-opaci=
+ty: 1; color: rgba(var(--color-fill),var(--tw-text-opacity)); transition-pr=
+operty: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); tran=
+sition-duration: 0.15s; }
+
+#skip-to-content:where(.astro-3EF6KSR2):focus { top: 1rem; }
+
+.nav-container:where(.astro-3EF6KSR2) { margin-left: auto; margin-right: au=
+to; display: flex; max-width: 48rem; flex-direction: column; align-items: c=
+enter; justify-content: space-between; }
+
+@media (min-width: 640px) {
+  .nav-container:where(.astro-3EF6KSR2) { flex-direction: row; }
+}
+
+.top-nav-wrap:where(.astro-3EF6KSR2) { position: relative; display: flex; w=
+idth: 100%; align-items: flex-start; justify-content: space-between; paddin=
+g: 1rem; }
+
+@media (min-width: 640px) {
+  .top-nav-wrap:where(.astro-3EF6KSR2) { align-items: center; padding-top: =
+2rem; padding-bottom: 2rem; }
+}
+
+.logo:where(.astro-3EF6KSR2) { position: absolute; padding-top: 0.25rem; pa=
+dding-bottom: 0.25rem; font-size: 1.25rem; line-height: 1.75rem; font-weigh=
+t: 600; }
+
+@media (min-width: 640px) {
+  .logo:where(.astro-3EF6KSR2) { position: static; font-size: 1.5rem; line-=
+height: 2rem; }
+}
+
+.hamburger-menu:where(.astro-3EF6KSR2) { align-self: flex-end; padding: 0.5=
+rem; }
+
+@media (min-width: 640px) {
+  .hamburger-menu:where(.astro-3EF6KSR2) { display: none; }
+}
+
+.hamburger-menu:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { height:=
+ 1.5rem; width: 1.5rem; --tw-scale-x: 1.25; --tw-scale-y: 1.25; transform: =
+translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rota=
+te)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x=
+)) scaleY(var(--tw-scale-y)); fill: rgb(var(--color-text-base)); }
+
+nav:where(.astro-3EF6KSR2) { display: flex; width: 100%; flex-direction: co=
+lumn; align-items: center; --tw-bg-opacity: 1; background-color: rgba(var(-=
+-color-fill),var(--tw-bg-opacity)); }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) { margin-left: 0.5rem; flex-direction: row; ju=
+stify-content: flex-end; }
+  nav:where(.astro-3EF6KSR2) > :not([hidden]):where(.astro-3EF6KSR2) ~ :not=
+([hidden]):where(.astro-3EF6KSR2) { --tw-space-x-reverse: 0; margin-right: =
+calc(1rem * var(--tw-space-x-reverse)); margin-left: calc(1rem * calc(1 - v=
+ar(--tw-space-x-reverse))); }
+  nav:where(.astro-3EF6KSR2) { padding-top: 0px; padding-bottom: 0px; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) { margin-top: 1rem; di=
+splay: grid; width: 11rem; grid-template-columns: repeat(2, minmax(0px, 1fr=
+)); grid-template-rows: repeat(4, minmax(0px, 1fr)); gap: 0.5rem; }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) { margin-left: 0px; =
+margin-top: 0px; width: auto; gap: 0px 1.25rem; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) { grid-column: span 2 / span 2; display: flex; align-items: center; jus=
+tify-content: center; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) a:where(.astro-3EF6KSR2) { width: 100%; padding: 0.75rem 1rem; text-ali=
+gn: center; font-weight: 500; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) a:where(.astro-3EF6KSR2):hover { --tw-text-opacity: 1; color: rgba(var(=
+--color-accent),var(--tw-text-opacity)); }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6=
+KSR2) a:where(.astro-3EF6KSR2) { margin-top: 0px; margin-bottom: 0px; paddi=
+ng: 0.25rem 0.5rem; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2):nth-child(4) a:where(.astro-3EF6KSR2) { width: auto; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2):nth-child(4), nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:w=
+here(.astro-3EF6KSR2):nth-child(5) { grid-column: span 1 / span 1; }
+
+nav:where(.astro-3EF6KSR2) a:where(.astro-3EF6KSR2).active { text-decoratio=
+n-line: underline; text-decoration-style: wavy; text-decoration-thickness: =
+2px; text-underline-offset: 4px; }
+
+nav:where(.astro-3EF6KSR2) a:where(.astro-3EF6KSR2).active svg:where(.astro=
+-3EF6KSR2) { fill: rgb(var(--color-accent)); }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) { padding: 0.25rem=
+; }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) svg:where(.astro-3=
+EF6KSR2) { height: 1.5rem; width: 1.5rem; fill: rgb(var(--color-text-base))=
+; }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) svg:where(.astro-3=
+EF6KSR2):hover { fill: rgb(var(--color-accent)); }
+
+#theme-btn:where(.astro-3EF6KSR2) { padding: 0.75rem; }
+
+@media (min-width: 640px) {
+  #theme-btn:where(.astro-3EF6KSR2) { padding: 0.25rem; }
+}
+
+#theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { --tw-scale-x=
+: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translate-x),var(=
+--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(va=
+r(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+#theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2):hover { --tw-r=
+otate: 12deg; transform: translate(var(--tw-translate-x),var(--tw-translate=
+-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)=
+) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+@media (min-width: 640px) {
+  #theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { --tw-scale=
+-x: 1; --tw-scale-y: 1; transform: translate(var(--tw-translate-x),var(--tw=
+-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--=
+tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+}
+
+.menu-icon:where(.astro-3EF6KSR2) line:where(.astro-3EF6KSR2) { transition-=
+property: opacity; transition-duration: 75ms; transition-timing-function: c=
+ubic-bezier(0.4, 0, 0.2, 1); }
+
+.menu-icon:where(.astro-3EF6KSR2) .close:where(.astro-3EF6KSR2) { opacity: =
+0; }
+
+.menu-icon:where(.astro-3EF6KSR2).is-active .line:where(.astro-3EF6KSR2) { =
+opacity: 0; }
+
+.menu-icon:where(.astro-3EF6KSR2).is-active .close:where(.astro-3EF6KSR2) {=
+ opacity: 1; }
+
+.social-icons:where(.astro-UPU6FZXR) { flex-wrap: wrap; justify-content: ce=
+nter; gap: 0.25rem; }
+
+.link-button:where(.astro-UPU6FZXR) { padding: 0.5rem; }
+
+.link-button:where(.astro-UPU6FZXR):hover { --tw-rotate: 6deg; transform: t=
+ranslate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotat=
+e)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)=
+) scaleY(var(--tw-scale-y)); }
+
+@media (min-width: 640px) {
+  .link-button:where(.astro-UPU6FZXR) { padding: 0.25rem; }
+}
+
+footer:where(.astro-SZ7XMLTE) { width: 100%; }
+
+.footer-wrapper:where(.astro-SZ7XMLTE) { display: flex; flex-direction: col=
+umn; align-items: center; justify-content: space-between; padding-top: 1.5r=
+em; padding-bottom: 1.5rem; }
+
+@media (min-width: 640px) {
+  .footer-wrapper:where(.astro-SZ7XMLTE) { flex-direction: row-reverse; pad=
+ding-top: 1rem; padding-bottom: 1rem; }
+}
+
+.link-button:where(.astro-SZ7XMLTE) { margin-top: 0.25rem; margin-bottom: 0=
+.25rem; padding: 0.5rem; }
+
+.link-button:where(.astro-SZ7XMLTE):hover { --tw-rotate: 6deg; transform: t=
+ranslate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotat=
+e)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)=
+) scaleY(var(--tw-scale-y)); }
+
+.link-button:where(.astro-SZ7XMLTE) svg:where(.astro-SZ7XMLTE) { --tw-scale=
+-x: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translate-x),va=
+r(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(=
+var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+.copyright-wrapper:where(.astro-SZ7XMLTE) { margin-top: 0.5rem; margin-bott=
+om: 0.5rem; display: flex; flex-direction: column; align-items: center; whi=
+te-space: nowrap; }
+
+@media (min-width: 640px) {
+  .copyright-wrapper:where(.astro-SZ7XMLTE) { flex-direction: row; }
+}
+
+.separator:where(.astro-SZ7XMLTE) { display: none; }
+
+@media (min-width: 640px) {
+  .separator:where(.astro-SZ7XMLTE) { display: inline; }
+}
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/about.6e6daff0.css
+
+@charset "utf-8";
+
+.breadcrumb:where(.astro-ILHXCYM7) { width: 100%; max-width: 48rem; margin:=
+ 2rem auto 0.25rem; padding-left: 1rem; padding-right: 1rem; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) { display: inline; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) a:where(.astro-ILHXCYM7) { text-transform: capitalize; opacity:=
+ 0.7; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) span:where(.astro-ILHXCYM7) { opacity: 0.7; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7):not(:last-child) a:where(.astro-ILHXCYM7):hover { opacity: 1; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.40cf44c5.css
+
+@charset "utf-8";
+
+#main-content:where(.astro-HSP6OTUF) { width: 100%; max-width: 48rem; margi=
+n-left: auto; margin-right: auto; padding-bottom: 3rem; padding-left: 1rem;=
+ padding-right: 1rem; }
+
+#main-content:where(.astro-HSP6OTUF) h1:where(.astro-HSP6OTUF) { font-size:=
+ 1.5rem; font-weight: 600; line-height: 2rem; }
+
+@media (width >=3D 640px) {
+  #main-content:where(.astro-HSP6OTUF) h1:where(.astro-HSP6OTUF) { font-siz=
+e: 1.875rem; line-height: 2.25rem; }
+}
+
+#main-content:where(.astro-HSP6OTUF) p:where(.astro-HSP6OTUF) { margin-top:=
+ 0.5rem; margin-bottom: 1.5rem; font-style: italic; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.41a32359.css
+
+@charset "utf-8";
+
+a:where(.astro-BLWJYJPT) { text-decoration-line: underline; text-decoration=
+-style: dashed; position: relative; }
+
+a:where(.astro-BLWJYJPT):hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); top: -0.125rem; }
+
+a:where(.astro-BLWJYJPT):focus-visible { padding: 0.25rem; }
+
+a:where(.astro-BLWJYJPT) svg:where(.astro-BLWJYJPT) { --tw-scale-x: .95; --=
+tw-scale-y: .95; transform: translate(var(--tw-translate-x),var(--tw-transl=
+ate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y)=
+)scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y)); --tw-text-opacity: 1; =
+color: rgba(var(--color-text-base),var(--tw-text-opacity)); opacity: 0.8; w=
+idth: 1.5rem; height: 1.5rem; margin-right: -1.25rem; }
+
+.group:where(.astro-BLWJYJPT):hover a:where(.astro-BLWJYJPT) svg:where(.ast=
+ro-BLWJYJPT) { fill: rgb(var(--color-accent)); }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.3b14054e.css
+
+@charset "utf-8";
+
+main:where(.astro-VJ4TPSPI) { width: 100%; max-width: 48rem; margin-left: a=
+uto; margin-right: auto; padding-bottom: 3rem; padding-left: 1rem; padding-=
+right: 1rem; }
+
+.post-title:where(.astro-VJ4TPSPI) { --tw-text-opacity: 1; color: rgba(var(=
+--color-accent),var(--tw-text-opacity)); font-size: 1.5rem; font-weight: 60=
+0; line-height: 2rem; }
+
+.tags-container:where(.astro-VJ4TPSPI) { margin-top: 2rem; margin-bottom: 2=
+rem; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.906d67ca.css
+
+@charset "utf-8";
+
+.pagination-wrapper:where(.astro-EENKY23Y) { justify-content: center; margi=
+n-top: auto; margin-bottom: 2rem; display: flex; }
+
+.disabled:where(.astro-EENKY23Y) { pointer-events: none; user-select: none;=
+ opacity: 0.5; }
+
+.disabled:where(.astro-EENKY23Y):hover { --tw-text-opacity: 1; color: rgba(=
+var(--color-text-base),var(--tw-text-opacity)); }
+
+.group:where(.astro-EENKY23Y):hover .disabled:where(.astro-EENKY23Y) { fill=
+: rgb(var(--color-text-base)); }
+
+.group:where(.astro-EENKY23Y):hover .disabled-svg:where(.astro-EENKY23Y) { =
+fill: rgb(var(--color-text-base)) !important; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: image/webp
+Content-Transfer-Encoding: base64
+Content-Location: https://popovicu.com/assets/qemu_bare_metal_hello.png.webp
+
+UklGRgIMAABXRUJQVlA4TPYLAAAv2EJ6ANVYorZdceMoy1nOkpmZZxq00KJBCy20CKMWAS0CDWHm
+6JxpCAxPGBsCWgSaMaBFQItApaPkMA9PaDtVF0rqPp1SnYyvb3y75RrbY9lusCWPJNtq2dFx1W3Z
+FSjPn7HcRpIkSbKdin30l+ROuySccNRGkiT5kUCXP4Irarb/kBhJktRk4QNrxWb1mkMM2P+XPs/j
+78zqPPGupyGRPP4yr5N815BIki/zOo/t3oaR5EJDMnA0AVxJ2w5TMKw89s6oJvnJUVaUfZuvhc6M
+xOXknQPzk4YkPk5NXomTV5UWIPeN4/jiP04+79TlpTh5Y3iYHSePbEdQeexlUJN3HtS+R05JmECk
+r8XkqByaI6MmIZVQlMl/kHc6qRjCwyxr9y7HqYaPJB1E48qZyBl4jjOHn7SAKd4qdy4HSU3KBXLy
+zq2SRpQ9mwzRnfDeM3KcxIadMc2GPcqfB9eE05KY+sBAvSZH6ip1NZrEhNZaH6hv9zfp1uu+tGhe
+KsqfAUN4nJOEIvm4DLakSMfQsLJiZDja9aV+ITJaKtuPxPOqdZUTkTeqvkIyivGkMOAkx5IyGIUn
+VR/A2fAyptnwSZk2+b7VaD24rBF5bFnoJoc2y6rJNfKdfc06Mv7El3Qt659YGz41WlHkpbIajeGB
+TqhVylC6icfQsLJE8kPLGg62/igyGpU7ZalpVMmeGvlbJpzBxELwNZRLMYQ0WvEJRe6Zcdk3SjqI
+j+6MaZQ9VlFu77ayMthcea1U1ozVrEale6xU2tWN0CXbrGbrVGQMZZoN4XH+rxx/krZxOU48iIb1
+dGxkJE3WL5Ey0BQhaNGwji2ZtxCOjDy3LKsaONurBhG5b3sSx2lzJYlHl1GNsuJ/uuTQoQlFyvqo
+hz1/nvD2VLzRBRr1VDxvzdolx1umHNnrecbwML+pv+J4nlP5P+kgPvoyrPGKZzLuO4EU5lRpRlSQ
+jCFoqar0eitW5Az5T22BPMN4mD0P3c4Ix0OzgKqHBz/g2A4wGeMaZWd443mNRj3e27CjvMzrPLIz
+r/PIakgkj7zM6zy8TOwo3mZ1ikt+P0v+3mZ1Rl77+r86ZnV27Hj1w6zOjoa0Y9s2vgNdTvgO0qKP
+X5Jtm4UfnHMb34EeJxvfQer6BHtN0iT8+G1aXhxu77D5i/jateE21am2AE3F5uFcCLdT1r8yU86r
+0uyLezZE0iRE/haEdrmbk55/tNUgIDvILgFTsvEn3XXwJDIebtv8yLSTJRE/TNaMY0rb+ldxm/9x
+ttZ3cyTonQOSWhHxsNGfc07cgQ7/UhRu8z+yS4Esp/nh0rYJx/CBbbfKlZx4ItnNK/U+37Fi4bb9
+KlcmZP52ZEsOr51Ic6E1DueRjHBey6IOlTmBoXPzR7hN50oLNpWYtWqSBLn8MLf/Olvf4bxSUIrb
+JhxuMC280pVAhV/LgySVnXD6Oc92vt8W44/Da+Ek6lnOtMCpoByaBIjDmZmRZ+dJDm3R6KFtwknA
++bGtHQGXc/15VTyO/3Rxfmf6zLlPPXu2WPiNRBpXsTnnvK+DV/wnUYQzSeSDqBAcXqSUgPM4weg6
+u72dVwr9CLjcX1W4l1envb3Qz+fYnJhzcGvPNI/fiQZ/dkb+HTmFIldSaiZswgv3ooE7xJH1ej0Q
+/9HFtdbJV9DJbQ1cjg+380PzIDMyxPdNHJOO5r5TEz5c44/0iQdxwlkAj5MK/fJFoZvooKmUnDOT
+RcHluBXOH6ePF99vChz1OUhTDl6US0C4E//hnKs0yXvRzuijUrgxyLMsuhq0jE1JPwouxx1fuzVb
++JP4z405M9yso7KCHlujX15rz46lnuEzzoHp/2O5jj5enV9mSruzmp9UAm7roThU4zYCQY4f2UJx
+Oe+0VmDWYXNuI/BLM+TP8LDKi+SH/OfQgE6aRbnQV9TH4IQjMGxcjt+YksN5j69VuG3KvUYFWZkk
+LODoWtjBlGyim53Cq11wQY7uwJxbFqK+YpC8Tk9biseUyG4pvD6RIIha4C0a7H3Tjpn9Zx9M7D/U
+8/jXf9yszrYn3j3xeczqDJrXYf7zr4MIkVZFvZrI+tSm0VsIHS02Zh39lTLnDwCRVkV9mgK0iI3Z
+m+ygo8XGrKO/Usb84SkDIm2K+1o0oEtTQFyj/rPvubZ0/KKms4zAHULtWoGeFumuQ6yg1tBbKcN7
+XCOEoF2SoEgQLglOTBsJmiLdG+ZQBESTJgQJbT23xrITThFE+qaBWRPKoDNArwXpa0EdIG1kJDAT
+SqVM7oTf11MuCSgS+CUhgMCFKYoEfZIypkkTmsOBDQC27Gupo6MGPgBcRCPtLUjStJERwOwolTI5
+RHL1ho4/kcQHnDmp+08kowD7xnF9cVdMTyiFCAkBuL9kXyu4KwTKbAlmQqtfCcAWKUtRCI8UKIqC
+4H1huR/tmSUCCNOBaRKERsIpxIDWLAhYIZkYEClfA2JyfSeYd0CtHEgurwi37v4l+AwQ0tiCOkCB
+1sAq4BBKUitlbt/PobXzXo10wLm4axhr6koucMNnjRKaEbklzp0r1E6Mynjl3nVm+c+D60lly2MX
+1oQzDJRPgqJI8g6ns5rfaqkgmkQh/7my2hVBLiaVB5csp4qA4q5ssdwD0Behurt0Zj0p1Forg89A
+g9AidagDxGrgFTDwkvRKGduHVegBAPB2dQJ0tCwA3EsB6JTdAL2hA4iEE0wWtHSNaBDPkxVp3qNy
+zeAQhX5bAODIJYAQMOHcqtQpl0YBABJTage4dQIB1FpDoDPQILVIHeoA0Rp4BRy8JK1SBseaKSWX
+EALKE+IIAYfmwkKw5BjAh4GDIODYbIGEOo5s4fjyW6iQFSneAnxZAg5NSEDLjYAARXLNpH4VcEq+
+zEgMgCXIYrEYOC2AWmtlsBkg14I0tqAOEKuBVcDBS9IqZXC4KD0ljUh+GX1E0xHMuZXtqKUGwZsO
+QQgj1H5ZKmXZBCL1gdyq4UIEuFMyMQAAggQ6A/RakL4WgjZADKwCAUJJSqUMjqpcMgAATSUHILne
+j0HlQgAg1K6tW+U/AIBwagCEPgjeNHaSCmG84wJAlO50fABAWd67lPHlXRAUkBlgpLEFZYA4aAUi
+eEl6pYztFEnrWNMCFMFw6KxQNe8ClUKxWg/EunPJbPVKCir1YKt24E8z08C9iaCauBDGqP+cWXGu
+xZcYabhpT8y7966O7EfKQJQpJ0ZyjfYACcIMwufCcvAWaYA2QAxahQ+7HKwkpVJGR2JmkPOfD0fB
+OzXvN8oinSPTV9g+CtCba2lsVCmG48uxwZ93poF5k0E1KUKDAtpLLe4C0nENGBto3DX+IQint8+X
+YC4VCdIMblQgMwKEFilDHSBWg1wB+TlaklgpE1wXAvKCjiCs7LiXomt5xv1J0zIDoCiSvQcFoFL0
+QqQFn/RNY1CQrakFQaStBXGA5BrkCmgNeqUMZyU/7avcyM/R7RD0LKg7aARJkaaGdCG4UITS+GI9
+gu0gxZo6A7xFmhD06VAqoDXSWymju6qh6P5dF5vfARrfK8dbyO+hmQv6WPotZICmwzt13kIG2NDC
+W5TN6z9kK2ATiTAjP87999pEkrmfxGYsUDn3/2uTSAUy9v+kAJuxbDpk6Bm85+cX33tzlk3ljMjQ
+07cHaUyZlJzJnDLBoMEKfgGdYrksCQLmMrlcr8QF3q7MgcSwDkUjwMgKhvZFL/3F2sgUzFfuQH6B
+PSn/gFwuyBKm8AkmcCMf6GNHbcdn6F/DNzBdWUwulyvauVyXtoU9oo9LyedyueypmK7MI5fLZSPk
+Pk4ZiasPN4TKsWTN101wfCCbmNDkuiSB/+UJAuQzpi2ttf4v8BU++I+G3fXu4McgCrQim3wH05bc
+FC6lZvX60YBTcdfAyQL9XbWhHSb2a1QadGZjvSXNvA7zH+Y/zH+Y/zD/Yf7D/If5D/Mf5j/Mf5j/
+MP9h/sP8h/kP8x/mP8x/mP8w/2H+w/yH+Q/zH+Y/zH+Y/zD/Yf7D/If5D/Mf5j/Mf5j/MP9h/sP8
+h/kP8x/mP8x/mP8w/2H+w/yH+Q/zH+Y/zH+Y/zD/Yf7D/If5D/Mf5j/Mf5j/MP9h/sP8h/kP8x/m
+P5sNcg==
+
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/html
+Content-ID: <frame-FFE6062EBBA16591C6D013C0BB0C3B5B@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://platform.twitter.com/widgets/widget_iframe.2f70fb173b9000da126c79afe2098f02.html?origin=https%3A%2F%2Fpopovicu.com
+
+<!DOCTYPE html><html><head><meta http-equiv=3D"Content-Type" content=3D"tex=
+t/html; charset=3DUTF-8"><meta chartset=3D"utf-8">
+<title>Twitter Widget Iframe</title>
+</head><body>
+
+
+</body></html>
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/html
+Content-ID: <frame-6F8B77B73D2AE272604749DB87B4874A@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://platform.twitter.com/widgets/follow_button.2f70fb173b9000da126c79afe2098f02.en.html#dnt=false&id=twitter-widget-0&lang=en&screen_name=popovicu94&show_count=false&show_screen_name=true&size=m&time=1706194853384
+
+<!DOCTYPE html><html data-scribe=3D"page:button" lang=3D"en" class=3D" en">=
+<head><meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DUTF=
+-8"><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-29cf4952-ad9=
+b-4fd6-9558-89ae12958686@mhtml.blink" />
+ =20
+  <title>X Follow Button</title>
+  <base target=3D"_blank">
+  <link rel=3D"dns-prefetch" href=3D"https://twitter.com/">
+  <link rel=3D"profile" href=3D"http://microformats.org/profile/hcard">
+ =20
+</head>
+<body data-scribe=3D"section:follow" class=3D" ltr ready ncount">
+<div id=3D"widget">
+  <div class=3D"btn-o" contextmenu=3D"menu" data-scribe=3D"component:button=
+"><a id=3D"follow-button" class=3D"btn" title=3D"Follow @popovicu94 on X" h=
+ref=3D"https://twitter.com/intent/follow?original_referer=3Dhttps%3A%2F%2Fp=
+opovicu.com%2F&amp;ref_src=3Dtwsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5E=
+follow%7Ctwgr%5Epopovicu94&amp;region=3Dfollow_link&amp;screen_name=3Dpopov=
+icu94"><i></i><span class=3D"label" id=3D"l">Follow <b>@popovicu94</b></spa=
+n></a></div><div class=3D"count-o" id=3D"c" data-scribe=3D"component:count"=
+><i></i><u></u><a id=3D"count" class=3D"note" href=3D"https://twitter.com/i=
+ntent/user?original_referer=3Dhttps%3A%2F%2Fpopovicu.com%2F&amp;ref_src=3Dt=
+wsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5Epopovicu94&amp=
+;region=3Dcount_link&amp;screen_name=3Dpopovicu94"></a></div>
+</div>
+<div style=3D"display:none">
+  <menu type=3D"context" id=3D"menu" data-scribe=3D"component:contextmenu">
+    <menuitem id=3D"m-follow" label=3D"Follow user"></menuitem>
+    <menuitem id=3D"m-profile" label=3D"View user on X"></menuitem>
+    <menuitem id=3D"m-tweet" label=3D"Send post to user"></menuitem>
+  </menu>
+</div>
+
+
+
+</body></html>
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-29cf4952-ad9b-4fd6-9558-89ae12958686@mhtml.blink
+
+@charset "utf-8";
+
+html { margin: 0px; padding: 0px; font: 12px / 18px "Helvetica Neue", Arial=
+, sans-serif; color: rgb(51, 51, 51); user-select: none; }
+
+body { margin: 0px; padding: 0px; background: 0px 0px; }
+
+a { outline: 0px; text-decoration: none; }
+
+body.rtl { direction: rtl; }
+
+#widget { display: inline-block; white-space: nowrap; overflow: hidden; tex=
+t-align: left; }
+
+#count, .btn, .btn .label, .btn-o, .count-o { display: inline-block; vertic=
+al-align: top; zoom: 1; }
+
+.btn-o { max-width: 100%; }
+
+.btn { position: relative; height: 20px; box-sizing: border-box; padding: 1=
+px 12px; background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); border-=
+radius: 9999px; font-weight: 500; cursor: pointer; }
+
+.rtl .btn { padding: 1px 12px; }
+
+.btn:active, .btn:focus, .btn:hover { background-color: rgb(51, 51, 51); }
+
+.btn:active { box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 5px inset; }
+
+.xl .btn:active { box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 7px inset; }
+
+.btn i { position: relative; top: 2px; display: inline-block; width: 14px; =
+height: 14px; background: url("data:image/svg+xml,%3C%3Fxml version=3D'1.0'=
+ encoding=3D'utf-8'%3F%3E%3Csvg viewBox=3D'0 0 32 32' fill=3D'none' xmlns=
+=3D'http://www.w3.org/2000/svg'%3E%3Crect width=3D'32' height=3D'32' fill=
+=3D'none'/%3E%3Cpath d=3D'M17.9686 14.1623L26.7065 4H24.6358L17.0488 12.823=
+8L10.9891 4H4L13.1634 17.3432L4 28H6.07069L14.0827 18.6817L20.4822 28H27.47=
+14L17.9681 14.1623H17.9686ZM15.1326 17.4607L14.2041 16.132L6.81679 5.55961H=
+9.99723L15.9589 14.0919L16.8873 15.4206L24.6368 26.5113H21.4564L15.1326 17.=
+4612V17.4607Z' fill=3D'white'/%3E%3C/svg%3E%0A") 0px 0px no-repeat transpar=
+ent; }
+
+.btn .label { margin-left: 3px; white-space: nowrap; }
+
+.btn .label b { font-weight: 500; white-space: nowrap; }
+
+.rtl .btn .label { margin-right: 3px; }
+
+.rtl .btn .label b { display: inline-block; direction: ltr; }
+
+.xl { font-size: 13px; line-height: 26px; }
+
+.xl .btn { height: 28px; border-radius: 9999px; padding: 1px 12px; }
+
+.rtl.xl .btn { padding: 1px 12px; }
+
+.xl .btn i { top: 4px; height: 18px; width: 18px; }
+
+.xl .btn .label { margin-left: 4px; }
+
+.rtl.xl .btn .label { margin-right: 4px; }
+
+.aria { position: absolute; left: -999em; }
+
+.rtl .aria { left: auto; right: -999em; }
+
+.count-o { position: relative; background: rgb(255, 255, 255); border: 1px =
+solid rgb(130, 154, 171); border-radius: 4px; visibility: hidden; min-heigh=
+t: 18px; min-width: 15px; text-align: center; }
+
+#count { white-space: nowrap; color: rgb(41, 47, 51); }
+
+#count:focus, #count:hover { color: rgb(51, 51, 51); text-decoration: under=
+line; }
+
+.ncount .count-o { display: none; }
+
+.count-ready .count-o { visibility: visible; }
+
+.count-o i, .count-o u { position: absolute; zoom: 1; line-height: 0; width=
+: 0px; height: 0px; left: 0px; top: 50%; margin: -4px 0px 0px -4px; border-=
+width: 4px 4px 4px 0px; border-top-style: solid; border-right-style: solid;=
+ border-bottom-style: solid; border-top-color: transparent; border-bottom-c=
+olor: transparent; border-image: initial; border-right-color: rgb(130, 154,=
+ 171); border-left-style: initial; border-left-color: initial; }
+
+.count-o u { margin-left: -3px; border-right-color: rgb(255, 255, 255); }
+
+.rtl .count-o i, .rtl .count-o u { left: auto; right: 0px; margin: -4px -4p=
+x 0px 0px; border-width: 4px 0px 4px 4px; border-top-style: solid; border-b=
+ottom-style: solid; border-left-style: solid; border-top-color: transparent=
+; border-bottom-color: transparent; border-image: initial; border-left-colo=
+r: rgb(130, 154, 171); border-right-style: initial; border-right-color: ini=
+tial; }
+
+.rtl .count-o u { margin-right: -3px; border-left-color: rgb(255, 255, 255)=
+; }
+
+.hcount .count-o { margin: 0px 0px 0px 5px; }
+
+.hcount.rtl .count-o { margin: 0px 5px 0px 0px; }
+
+.hcount #count { padding: 0px 8px; }
+
+.xl .count-o { font-size: 11px; border-radius: 4px; }
+
+.xl.hcount .count-o { margin: 0px 0px 0px 6px; }
+
+.xl.rtl.hcount .count-o { margin: 0px 6px 0px 0px; }
+
+.xl.hcount .count-o i, .xl.hcount .count-o u { margin: -5px 0px 0px -5px; b=
+order-width: 5px 5px 5px 0px; }
+
+.xl.hcount .count-o u { margin-left: -4px; }
+
+.xl.rtl.hcount .count-o i, .xl.rtl.hcount .count-o u { margin: -5px -5px 0p=
+x 0px; border-width: 5px 0px 5px 5px; }
+
+.xl.rtl.hcount .count-o u { margin-right: -4px; }
+
+.xl #count { padding: 0px 8px; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/html
+Content-ID: <frame-2F82F88C8FDB9B07AACA933A8A88AFC2@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+
+<html class=3D"SandboxRoot"><head><meta http-equiv=3D"Content-Type" content=
+=3D"text/html; charset=3DUTF-8"><link rel=3D"stylesheet" type=3D"text/css" =
+href=3D"cid:css-42d089bf-4e36-49d1-bac2-372600e1af56@mhtml.blink" /><base t=
+arget=3D"_blank"></head><body></body></html>
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-42d089bf-4e36-49d1-bac2-372600e1af56@mhtml.blink
+
+@charset "utf-8";
+
+.SandboxRoot { display: none; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/html
+Content-ID: <frame-A6D1DA197370093E95E8380B02DEC204@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: chrome-extension://kbpjikgngikhhpbjddnenemoonpbfikm/iframe.html?lang=en&protocol=https:
+
+<!DOCTYPE html><html collamark=3D"crx"><head><meta http-equiv=3D"Content-Ty=
+pe" content=3D"text/html; charset=3DUTF-8">
+
+<link rel=3D"stylesheet" href=3D"chrome-extension://kbpjikgngikhhpbjddnenem=
+oonpbfikm/collamark_iframe.css">
+</head>
+<body class=3D"lang-en">
+<div class=3D"container chrome cm-retina">
+    <div class=3D"header">
+        <button class=3D"close">=C3=97</button>
+        <span class=3D"logo cm-pen cm-pen--0">Let's mark the best</span>
+        <a class=3D"choose-a-pen cm-pen cm-pen--0" href=3D"chrome-extension=
+://kbpjikgngikhhpbjddnenemoonpbfikm/iframe.html?lang=3Den&amp;protocol=3Dht=
+tps:#" style=3D"display: inline-block;"></a>
+
+        <!--
+        <?php if($this->tank_auth->is_logged_in()){ ?>
+            <a class=3D'logo' href=3D'http://collamark.com' target=3D'_blan=
+k'>CollaMark</a>
+            <?php if($msgReplies){ ?>
+            e
+                <a target=3D'_blank' href=3D'https://collamark.com/#/msgs' =
+class=3D'message-item message-item--replies'><?php echo $msgReplies; ?>new =
+reply</a>
+            <?php } ?>
+
+            <?php if($msgLikes){ ?>
+                <a target=3D'_blank' href=3D'https://collamark.com/#/msgs/l=
+ikes' class=3D'message-item message-item--likes'><?php echo $msgLikes; ?> n=
+ew like </a>
+            <?php } ?>
+
+        <?php }else { ?>
+            <span class=3D'slogan'>Let's mark the best</span>
+            < <a class=3D'pop-opener login' href=3D'#' data-pop=3D'login'>l=
+ogin</a>
+        <?php } ?>
+        -->
+    </div>
+    <div class=3D"view">
+        <div class=3D"page"><div class=3D"cm-share__adding">
+    <textarea placeholder=3D"say something" class=3D"cm-share__textarea cli=
+ck-select"></textarea>
+</div>
+
+<p class=3D"cm-share__options">
+    <button class=3D"cm-share__submit"> Mark </button>
+    <a href=3D"chrome-extension://kbpjikgngikhhpbjddnenemoonpbfikm/iframe.h=
+tml?lang=3Den&amp;protocol=3Dhttps:#" class=3D"cm-share__privacy public"></=
+a>
+    <a href=3D"chrome-extension://kbpjikgngikhhpbjddnenemoonpbfikm/iframe.h=
+tml?lang=3Den&amp;protocol=3Dhttps:#" class=3D"cm-share__insert-tag" data-c=
+aller=3D"share">tag</a>
+</p>
+</div>
+        <div class=3D"popover" style=3D"display: none;">
+            <button class=3D"close pop-closer">=C3=97</button>
+            <div class=3D"content">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+</body></html>
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: chrome-extension://kbpjikgngikhhpbjddnenemoonpbfikm/collamark_iframe.css
+
+@charset "utf-8";
+
+* { box-sizing: border-box; }
+
+html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, b=
+lockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, i=
+mg, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i=
+, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, cap=
+tion, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, emb=
+ed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, se=
+ction, summary, time, mark, audio, video { margin: 0px; padding: 0px; borde=
+r: 0px; font: inherit; vertical-align: baseline; }
+
+article, aside, details, figcaption, figure, footer, header, hgroup, menu, =
+nav, section { display: block; }
+
+body { line-height: 1; }
+
+ol, ul { list-style: none; }
+
+blockquote, q { quotes: none; }
+
+blockquote::before, blockquote::after, q::before, q::after { content: none;=
+ }
+
+table { border-collapse: collapse; border-spacing: 0px; }
+
+@font-face { font-family: collamark; src: url("/css/fonts/collamark.woff?su=
+nderI") format("woff"), url("/css/fonts/collamark.ttf?sunderI") format("tru=
+etype"); font-weight: normal; font-style: normal; }
+
+.icon-forward, .icon-share, .icon-comment, .icon-thumbs-up, .icon-thumbs-do=
+wn, .icon-quote, .icon-help, .icon-facebook, .icon-googleplus, .icon-twitte=
+r, .icon-arrow-left, .icon-arrow-down, .icon-arrow-up, .icon-arrow-right, .=
+icon-arrow-left2, .icon-arrow-down2, .icon-arrow-up2, .icon-uniE611, .icon-=
+cross, .icon-ccw, .icon-shuffle, .icon-heart, .icon-star, .icon-chat, .icon=
+-cog, .icon-language, .icon-adjust, .icon-sun, .icon-earth, .icon-export, .=
+icon-location, .icon-eye, .icon-camera, .icon-leaf, .icon-lock, .icon-lock-=
+open, .icon-cloud, .icon-sina-weibo, .icon-search, .icon-list, .icon-quill,=
+ .header .choose-a-pen, .pen-preview:hover, .pen-preview.using { font-famil=
+y: collamark; speak: none; font-style: normal; font-weight: normal; font-va=
+riant: normal; text-transform: none; line-height: 20px; font-size: 20px; -w=
+ebkit-font-smoothing: antialiased; }
+
+.icon-forward::before, .icon-share::before, .icon-comment::before, .icon-th=
+umbs-up::before, .icon-thumbs-down::before, .icon-quote::before, .icon-help=
+::before, .icon-facebook::before, .icon-googleplus::before, .icon-twitter::=
+before, .icon-arrow-left::before, .icon-arrow-down::before, .icon-arrow-up:=
+:before, .icon-arrow-right::before, .icon-arrow-left2::before, .icon-arrow-=
+down2::before, .icon-arrow-up2::before, .icon-uniE611::before, .icon-cross:=
+:before, .icon-ccw::before, .icon-shuffle::before, .icon-heart::before, .ic=
+on-star::before, .icon-chat::before, .icon-cog::before, .icon-language::bef=
+ore, .icon-adjust::before, .icon-sun::before, .icon-earth::before, .icon-ex=
+port::before, .icon-location::before, .icon-eye::before, .icon-camera::befo=
+re, .icon-leaf::before, .icon-lock::before, .icon-lock-open::before, .icon-=
+cloud::before, .icon-sina-weibo::before, .icon-search::before, .icon-list::=
+before, .icon-quill::before, .header .choose-a-pen::before, .pen-preview:ho=
+ver::before, .pen-preview.using::before { font-size: 18px; vertical-align: =
+middle; }
+
+.icon-forward::before { content: "=EE=98=80"; }
+
+.icon-share::before { content: "=EE=98=81"; }
+
+.icon-comment::before { content: "=EE=98=82"; }
+
+.icon-thumbs-up::before { content: "=EE=98=83"; }
+
+.icon-thumbs-down::before { content: "=EE=98=84"; }
+
+.icon-quote::before { content: "=EE=98=85"; }
+
+.icon-help::before { content: "=EE=98=86"; }
+
+.icon-facebook::before { content: "=EE=98=87"; }
+
+.icon-googleplus::before { content: "=EE=98=88"; }
+
+.icon-twitter::before { content: "=EE=98=89"; }
+
+.icon-arrow-left::before { content: "=EE=98=8A"; }
+
+.icon-arrow-down::before { content: "=EE=98=8B"; }
+
+.icon-arrow-up::before { content: "=EE=98=8C"; }
+
+.icon-arrow-right::before { content: "=EE=98=8D"; }
+
+.icon-arrow-left2::before { content: "=EE=98=8E"; }
+
+.icon-arrow-down2::before { content: "=EE=98=8F"; }
+
+.icon-arrow-up2::before { content: "=EE=98=90"; }
+
+.icon-uniE611::before { content: "=EE=98=91"; }
+
+.icon-cross::before { content: "=EE=98=92"; }
+
+.icon-ccw::before { content: "=EE=98=93"; }
+
+.icon-shuffle::before { content: "=EE=98=94"; }
+
+.icon-heart::before { content: "=EE=98=95"; }
+
+.icon-star::before { content: "=EE=98=96"; }
+
+.icon-chat::before { content: "=EE=98=97"; }
+
+.icon-cog::before { content: "=EE=98=98"; }
+
+.icon-language::before { content: "=EE=98=99"; }
+
+.icon-adjust::before { content: "=EE=98=9A"; }
+
+.icon-sun::before { content: "=EE=98=9B"; }
+
+.icon-earth::before { content: "=EE=98=9C"; }
+
+.icon-export::before { content: "=EE=98=9D"; }
+
+.icon-location::before { content: "=EE=98=9E"; }
+
+.icon-eye::before { content: "=EE=98=9F"; }
+
+.icon-camera::before { content: "=EE=98=A0"; }
+
+.icon-leaf::before { content: "=EE=98=A1"; }
+
+.icon-lock::before { content: "=EE=98=A2"; }
+
+.icon-lock-open::before { content: "=EE=98=A3"; }
+
+.icon-cloud::before { content: "=EE=98=A4"; }
+
+.icon-sina-weibo::before { content: "=EE=98=A5"; }
+
+.icon-search::before { content: "=EE=98=A6"; }
+
+.icon-list::before { content: "=EE=98=A8"; }
+
+.icon-quill::before, .header .choose-a-pen::before, .pen-preview:hover::bef=
+ore, .pen-preview.using::before { content: "=EE=98=A9"; }
+
+.container.mobile { padding: 0px 10px; }
+
+.container.mobile .header { margin-bottom: 5px; }
+
+.container.mobile .header .logo { font-size: 16px; }
+
+.container.mobile .message { font-size: 1.4em; }
+
+.container.mobile .cm-share__textarea { width: 100%; height: 50px; border-r=
+adius: 0px; font-size: 16px; }
+
+.container.mobile .reply-area { width: 100%; }
+
+.container.mobile .textarea-reply { width: 250px; border-radius: 0px; }
+
+.container.mobile .textarea-reply { height: 30px; font-size: 16px; }
+
+.container.mobile .cm-share__submit { height: 26px; padding: 2px 12px; bord=
+er: 1px solid rgb(85, 85, 85); }
+
+.container.mobile .cm-share__privacy { font-size: 1.4em; }
+
+.container.mobile .cm-share__reply { right: 2px; }
+
+.container.mobile .mark-list { max-height: 240px; overflow: auto; }
+
+.container.mobile .mark-item { font-size: 1.4em; line-height: 1.2; margin: =
+5px 0px; }
+
+.container.mobile .mark-item__username { text-decoration: none; font-weight=
+: bold; color: rgb(51, 51, 51); }
+
+.container.mobile .mark-item__text { color: rgb(85, 85, 85); }
+
+.container.mobile .mark-item__reply { display: none; margin-left: 10px; }
+
+body { font-size: 62.5%; color: rgb(51, 51, 51); -webkit-font-smoothing: an=
+tialiased; }
+
+input, textarea, button { -webkit-font-smoothing: antialiased; }
+
+button { font-weight: bold; }
+
+.container { font-family: sans-serif; }
+
+.header { height: 20px; line-height: 20px; margin-bottom: 10px; text-align:=
+ left; position: relative; font-size: 1.5em; color: rgb(51, 51, 51); }
+
+.header .slogan { color: rgb(51, 51, 51); text-decoration: none; margin-rig=
+ht: 10px; }
+
+.header .choose-a-pen { display: none; height: 21px; margin: 0px 0px 0px -5=
+px; border: none; font-size: 22px; line-height: 21px; color: rgb(0, 0, 0); =
+vertical-align: top; text-decoration: none; background: none !important; }
+
+.header .choose-a-pen::before { display: inline-block; height: 21px; line-h=
+eight: 21px; vertical-align: top; }
+
+.header .choose-a-pen:hover { color: rgb(171, 99, 21); }
+
+.login, .username, .logo { color: rgb(51, 51, 51); text-decoration: none; b=
+order-bottom: none; }
+
+.logo { padding-right: 10px; font-size: 16px; }
+
+.message-item { display: inline-block; margin-left: 5px; color: rgb(255, 25=
+5, 255); background-color: rgb(171, 99, 21); padding: 0px 5px; border-radiu=
+s: 5px; text-decoration: none; font-size: 12px; border: 0px; }
+
+a { text-decoration: none; border-bottom: 1px solid rgb(51, 51, 51); line-h=
+eight: 1.5; font-size: 15px; color: rgb(85, 85, 85); }
+
+a:hover { color: rgb(51, 51, 51); }
+
+input, textarea { margin: 0px; border: 1px solid rgb(136, 136, 136); outlin=
+e: none; box-sizing: border-box; }
+
+input:hover, input:active, textarea:hover, textarea:active { border-color: =
+rgb(51, 51, 51); }
+
+button { margin: 0px; }
+
+.close { padding: 0px; background-color: transparent; cursor: pointer; bord=
+er: 0px; font-size: 25px; font-weight: bold; line-height: 20px; color: rgb(=
+0, 0, 0); text-shadow: rgb(255, 255, 255) 0px 1px 0px; opacity: 0.4; text-d=
+ecoration: none; position: absolute; right: 5px; -webkit-box-align: center;=
+ text-align: center; font-family: "Helvetica Neue", Helvetica, Arial, sans-=
+serif; width: 15px; margin-top: -3px; outline: none; }
+
+.close.pop-closer { z-index: 100; top: 0px; right: 0px; left: 0px; }
+
+.close:hover { opacity: 0.8; }
+
+.error-msg { margin-bottom: 10px; font-size: 1.5em; color: rgb(85, 85, 85);=
+ }
+
+.cm-share__quote-text { display: none; font-family: sans-serif; margin: 0px=
+ 0px 10px; font-size: 1.2em; text-overflow: ellipsis; height: 20px; white-s=
+pace: nowrap; overflow: hidden; color: rgb(136, 136, 136); user-select: non=
+e; }
+
+.cm-share__quote-text span { display: inline; line-height: 1.4; }
+
+.cm-share__share-page { font-size: 14px; line-height: 1.5; margin: 10px 0px=
+; text-align: center; }
+
+.cm-share__textarea, .textarea-reply { width: 100%; height: 50px; box-sizin=
+g: border-box; resize: none; outline: none; padding: 5px; font-size: 13px; =
+border-color: rgb(204, 204, 204); color: rgb(51, 51, 51); max-height: 72px;=
+ overflow: hidden; }
+
+.cm-share__textarea:focus, .cm-share__textarea:hover, .textarea-reply:focus=
+, .textarea-reply:hover { border-color: rgb(153, 153, 153); box-shadow: rgb=
+a(0, 0, 0, 0.2) 0px 0px 5px inset; }
+
+.cm-share__textarea.error, .textarea-reply.error { border-color: red; }
+
+.cm-share__textarea { margin: 5px auto; }
+
+.reply-area { position: relative; margin: 15px 0px; }
+
+.textarea-reply { height: 30px; width: 265px; line-height: 20px; }
+
+.cm-share__adding { text-align: center; }
+
+.cm-share__submit, .cm-share__reply, .tags__button-add { box-sizing: border=
+-box; border: 1px solid rgb(85, 85, 85); font-family: sans-serif; font-size=
+: 1.4em; padding: 1px 8px; line-height: 20px; cursor: pointer; background-c=
+olor: rgb(102, 102, 102); color: rgb(255, 255, 255); box-shadow: rgba(0, 0,=
+ 0, 0.3) 0px 1px; letter-spacing: 1px; outline: none; }
+
+.cm-share__submit:hover, .cm-share__reply:hover, .tags__button-add:hover { =
+background-color: rgb(85, 85, 85); border-color: rgb(51, 51, 51); }
+
+.cm-share__submit, .cm-share__reply { margin: 10px 0px 0px; height: 24px; }
+
+.cm-share__reply { position: absolute; top: 0px; right: 0px; line-height: 2=
+6px; height: 30px; margin: 0px; width: 60px; box-shadow: none; }
+
+.cm-share__privacy { display: inline-block; vertical-align: top; font-size:=
+ 12px; margin: 12px 0px 0px 10px; }
+
+.lang-en .cm-share__privacy.public::before { content: "public"; }
+
+.lang-en .cm-share__privacy.private::before { content: "private"; }
+
+.lang-zh .cm-share__privacy.public::before { content: "=E5=85=AC=E5=BC=80";=
+ }
+
+.lang-zh .cm-share__privacy.private::before { content: "=E7=A7=81=E5=AF=86"=
+; }
+
+.lang-ja .cm-share__privacy.public::before { content: "=E5=85=AC=E9=96=8B";=
+ }
+
+.lang-ja .cm-share__privacy.private::before { content: "=E3=83=97=E3=83=A9=
+=E3=82=A4=E3=83=99=E3=83=BC=E3=83=88"; }
+
+.cm-share__choose-pen { display: inline-block; margin: 12px 0px 0px 10px; f=
+ont-size: 12px; vertical-align: top; }
+
+.cm-share__insert-tag { display: inline-block; float: right; margin-top: 12=
+px; font-size: 14px; line-height: 20px; max-width: 160px; overflow: hidden;=
+ text-overflow: ellipsis; }
+
+.cm-share__insert-tag::before { content: "#"; display: inline-block; height=
+: 20px; margin-right: 2px; font-size: 14px; line-height: 20px; font-weight:=
+ bold; vertical-align: top; }
+
+.popover { display: none; position: absolute; inset: 0px; margin: auto; z-i=
+ndex: 200; background-color: rgba(255, 255, 255, 0.98); overflow: hidden; }
+
+.popover .content { padding-left: 25px; }
+
+.popover .seperator { font-size: 1.3em; font-style: italic; line-height: 40=
+px; color: rgb(153, 153, 153); }
+
+.login-title { font-size: 1.6em; text-align: left; margin: 0px 0px 10px; }
+
+.login-method li { display: inline-block; margin: 0px 10px 10px 0px; font-s=
+ize: 1.4em; }
+
+.login-text { font-size: 1.3em; line-height: 1.5; color: rgb(85, 85, 85); }
+
+.login-link { text-decoration: none; border-bottom: 1px solid rgb(153, 153,=
+ 153); color: rgb(51, 51, 51); }
+
+.mark-list { max-height: 240px; overflow: auto; }
+
+.mark-item { font-size: 1.4em; line-height: 1.2; margin: 5px 0px; position:=
+ relative; }
+
+.mark-item.can_remove .mark-item__option--remove { display: inline; }
+
+.mark-item.can_hide_for_site .mark-item__option--hide-for-site { display: i=
+nline; }
+
+.mark-item__username { text-decoration: none; border: none; font-weight: bo=
+ld; color: rgb(51, 51, 51); }
+
+.mark-item__username:hover { border-bottom: 1px solid rgb(85, 85, 85); }
+
+.mark-item__text { color: rgb(85, 85, 85); border: none; }
+
+.mark-item__text:hover { border-bottom: 1px solid rgb(85, 85, 85); }
+
+.mark-item__options { display: none; }
+
+.mark-item__option { margin-left: 5px; font-size: 12px; }
+
+.mark-item__option.mark-item__option--hide-for-site, .mark-item__option.mar=
+k-item__option--remove { color: rgb(255, 51, 51); border-color: rgb(255, 51=
+, 51); display: none; }
+
+.mark-item:hover .mark-item__options { display: inline-block; position: abs=
+olute; top: 1px; right: 0px; padding-left: 20px; background-color: rgba(255=
+, 255, 255, 0.9); }
+
+.mark-item__badge { display: none; padding: 0px 5px; margin-right: 5px; fon=
+t-size: 11px; line-height: 15px; background-color: rgb(171, 99, 21); border=
+-radius: 3px; color: rgb(255, 255, 255); }
+
+.mark-item--private .mark-item__badge--private { display: inline-block; }
+
+.mark-item--private .mark-item__option--share { display: none; }
+
+.list-tags, .pen-store { font-size: 1.4em; max-height: 100px; overflow: hid=
+den; margin-bottom: 5px; }
+
+.pen-store { max-height: 120px; }
+
+.item-tag { display: inline-block; margin: 0px 10px 10px 0px; font-size: 14=
+px; cursor: pointer; }
+
+.tags__input-new { box-sizing: border-box; display: inline-block; padding: =
+3px 10px; width: 140px; font-size: 14px; vertical-align: top; }
+
+.tags__button-add { display: inline-block; vertical-align: top; margin-left=
+: 5px; font-size: 14px; }
+
+.tags__no-tag { float: right; margin-right: 5px; font-size: 14px; }
+
+.share__title { font-size: 1.5em; }
+
+.share__link { padding: 3px 6px; font-size: 1.2em; border: 1px solid rgb(20=
+4, 204, 204); margin: 10px 0px; outline: none; width: 200px; }
+
+.share__sns-item { display: inline-block; margin: 0px 10px 10px 0px; }
+
+.tpl { display: none; }
+
+.tip-loading { font-size: 1.4em; }
+
+.pen-preview { display: inline-block; height: 24px; width: 80px; margin: 0p=
+x 15px 15px 0px; vertical-align: top; text-align: right; cursor: pointer; }
+
+.pen-preview::before { display: inline-block; height: 21px; line-height: 21=
+px; vertical-align: top; }
+
+.pen-preview:hover { opacity: 0.7; }
+
+.cm-pen { background-repeat: repeat-x; }
+
+.cm-pen--0 { background-color: rgba(0, 0, 0, 0.2); }
+
+.cm-pen--0::before { color: rgb(85, 85, 85); }
+
+.cm-pen--1 { background-color: rgb(230, 255, 230); }
+
+.cm-pen--1::before { color: green; }
+
+.cm-pen--2 { background-color: rgb(255, 224, 224); }
+
+.cm-pen--2::before { color: red; }
+
+.cm-pen--3 { background-color: rgb(224, 224, 255); }
+
+.cm-pen--3::before { color: rgb(26, 123, 162); }
+
+.cm-pen--4 { background-color: rgba(243, 236, 68, 0.64); }
+
+.cm-pen--4::before { color: rgb(180, 170, 55); }
+
+.cm-pen--5 { background-color: rgba(0, 0, 0, 0.2); border-bottom: 2px solid=
+ rgb(85, 85, 85); }
+
+.cm-pen--5::before { color: rgb(85, 85, 85); }
+
+.cm-pen--6 { background-color: rgb(230, 255, 230); border-bottom: 2px solid=
+ green; }
+
+.cm-pen--6::before { color: green; }
+
+.cm-pen--7 { background-color: rgb(255, 224, 224); border-bottom: 2px solid=
+ red; }
+
+.cm-pen--7::before { color: red; }
+
+.cm-pen--8 { background-color: rgb(224, 224, 255); border-bottom: 2px solid=
+ rgb(26, 123, 162); }
+
+.cm-pen--8::before { color: rgb(26, 123, 162); }
+
+.cm-pen--9 { background-color: rgba(243, 236, 68, 0.64); border-bottom: 2px=
+ solid rgb(180, 170, 55); }
+
+.cm-pen--9::before { color: rgb(180, 170, 55); }
+
+.cm-pen--10 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAhUlEQVQImWXOrQ3CUAB=
+F4a+09RjCBgiSOhYAgq95ohNWVHQAAiyA40ewATBCXwOmJASuvSfn3iSE8MIJ66Zpnr4SQphgh2=
+KEMwrshuIPwjkpy3Kc5/kWC9zSNF1C3/cHzHDsum6TQFVV0xjjHvPhhsF0iTGu2rZ9JJ+pHxiuW=
+Zat6rq+wxvS4C6p84gMLQAAAABJRU5ErkJggg=3D=3D"); background-size: 10px 5px; b=
+ackground-repeat: repeat-x; background-position: left bottom; padding-botto=
+m: 3px; }
+
+.cm-retina .cm-pen--10 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAA3UlEQVQo=
+kZ3SS07DMBCA4X8S9TTOSboqyBOqFsS64jzseQiBIqsn6a6K2fQEXKGKhgWJ6pqUR2dlecafZmy=
+Lqhpf0ZnZbQjhhX9EXdfXZvYAlABFkitF5NF7vzwXG8DuHHQMA7pCRK6AfYY+q+rqFKaqKzN7yr=
+C9mdVl27bvVVVF4CIpEGDqnPuIMW5yDLjva1JsHkJYlwB/RX/DyBJ47y9F5A2YJNsG3PXrH7FvY=
+N/FAsjvZ3i4oz0RuWma5jU9nxYAEGPcOud2wIzDtyo4/mKj2GiHQ5wYH0bGTOMT5MZ03CwzghwA=
+AAAASUVORK5CYII=3D"); }
+
+.cm-pen--10::before { color: rgb(85, 85, 85); }
+
+.cm-pen--11 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAb0lEQVQImW3NsQnCQAB=
+A0XeCqW2CG1gI17mAkSylzTVmqZC4gF2ihRuoGySFNkEU/PWDHyQvdDI7e0/fVXKDBnGGHtGgUc=
+n/IfRBskCNDW7YTvSEFc4oAzhaGrVYo5tgxAWF5BE+q18MV3OFgzu8AQMrHLxqDYLSAAAAAElFT=
+kSuQmCC"); background-size: 10px 5px; background-repeat: repeat-x; backgrou=
+nd-position: left bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--11 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAAxUlEQVQo=
+kZ3SPU4CQRQA4G92472kpVILNQixNh6C5RD2ijFQeYY9AB0JNp7AK5DNWgyEYRkVedXkvTdf5uc=
+FlVaMRnBv7M1/ojLEM0ooklKp9WLi7lRsCzYnoRkMTSG4wbqDvpp4+BGLtWkHW+O6VPvQs8Jl0h=
+DQ1/OltjjAWk+bnhS7VXmPwLHoH5hOgcoV5jhLsq3gcbP6FTsEIzrIvM/24/ZzwcjYLN2eNsSoL=
+Z37xIXdWBX2RyyL5U+4O2nu+mSumcY3hIRB2eP3+qcAAAAASUVORK5CYII=3D"); }
+
+.cm-pen--11::before { color: green; }
+
+.cm-pen--12 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAT0lEQVQImW2OQQrAIAw=
+E5wlerND//8abtgdfM71ECNJAIOxOlkVQGELlGKGGJ8L8gzMkTIQi9BCWcMeu0LpQ9ncT3pS8kx=
+7hOvtk2Ljb9j/lsT4BYMwwfwAAAABJRU5ErkJggg=3D=3D"); background-size: 10px 5px=
+; background-repeat: repeat-x; background-position: left bottom; padding-bo=
+ttom: 3px; }
+
+.cm-retina .cm-pen--12 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAAa0lEQVQo=
+kZ3RSwrAIAyE4f+MdtXHBbz/TqTTjYUgalTBjZn5IIhA5WbBzeIRPKUrgTDgMlpjP5h30BYmyAg=
+OQaoGryAOsFgytpME4Q9Moy5mgi46jZlC6KHLmEGvzke13s4h5qB7mLO+u+YHGEXU27RRxy0AAA=
+AASUVORK5CYII=3D"); }
+
+.cm-pen--12::before { color: red; }
+
+.cm-pen--13 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAl0lEQVQImW2NPw7BYBx=
+A3+/r95ktpTGZDJJvcwEVlzAY3KIsnbhFJQaXkHIBW8vgBFo30H8WEhFvfnlPeqtdAyR1XU7um8=
+WDL7wgcpXSMWCVQApYpXTsBZH7TxJIpR9u28/COQAj4OYYMwaoiuIEDIBzy1RTAegs910t5REYA=
+sk7aoFLZfCzcJ7LZ/UjA1zLRvv5epYBvADhJC6ijltYAQAAAABJRU5ErkJggg=3D=3D"); back=
+ground-size: 10px 5px; background-repeat: repeat-x; background-position: le=
+ft bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--13 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAAv0lEQVQo=
+kZ3RTQ7BUBSG4fcjFtHaFQmCMhY70A5Zgphqb4SRXWER0hwDITdX6+8bnp8nOfcqTgvjntLQ9LJ=
+KdvyQaJGPJW2BJkDD6zWF5VHqRv9iD7D8B63CgLJhqA9cA9S1Mzerw9qZm0kqAuxqoieAKHVdYX=
+ug5Q2YpPlpmWxCzMzWgAJscFlOjs/iN+gnjKBBlBUdGYcqFOAT9gICxItiiAjf5/FxQU3JeZXs/=
+f0X8A3qpxKrBaH2fKg4088NDHdkTTEZd4AAAAAASUVORK5CYII=3D"); }
+
+.cm-pen--13::before { color: rgb(26, 123, 162); }
+
+.cm-pen--14 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAl0lEQVQImW2NoQrCQAB=
+A3+3utFqGf2AQBgZhacGJCBbBYPADDVfGQFZkGgRBsG0a/AP1C9x206Ig4suP98TK+E8gc2gMJ/=
+PdnS8SE7g1RQp4Dogc8GqKNDGB+08CkYso6rV02VwDfeBirRoASFltgQ5wLPVjJADipd+Wig3QB=
+bJ31ANOWslwPNvfxGf1IwOcbUU4XRyuAC96ZDALOTuHmwAAAABJRU5ErkJggg=3D=3D"); back=
+ground-size: 10px 5px; background-repeat: repeat-x; background-position: le=
+ft bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--14 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAAxElEQVQo=
+kZ3RSQrCQBCF4b8MXsnkDupGiREHXIvnEbcOSEwCbox3CF5JQrlwoO0kDnmrpqr7g6qWNHaVe3I=
+VmXX9bM8fSSN3grAGHICG0XNEdXNKvHFd7AnmddAyDMgbogTA1UJ3aezNK7HYmyNsLeyKyEAAzp=
+HbVyEEmsYFBVl0BtmqgKFLQCxs2PGz46v4C/oNw2qQJl4P1UMZ+jh+xAogwDlujRSx9/P8uLeaq=
+E7bwSU03xfAD6iZUqwShMrxoWRMMzfhrmbaEIHpDAAAAABJRU5ErkJggg=3D=3D"); }
+
+.cm-pen--14::before { color: rgb(180, 170, 55); }
+
+.cm-pen--15 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAABQAAAAFCAYAAABFA8wzAAAABmJLR0QA/wD/AP+gvaeTAAAAIklEQVQYlWMMDQ39z4A=
+EVq9ezQhjo8vhAsh6mIjRMArwAgC55wgEWZSHnQAAAABJRU5ErkJggg=3D=3D"); background=
+-size: 20px 5px; background-repeat: repeat-x; background-position: left bot=
+tom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--15 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAACgAAAAKCAYAAADGmhxQAAAABmJLR0QA/wD/AP+gvaeTAAAALElEQVQ4=
+jWMMDQ39z4AHrF69mhGbOCF9pAJc9jBR0xJagFEHjoJRMApGOgAAqLQICIceJBcAAAAASUVORK5=
+CYII=3D"); }
+
+.cm-pen--15::before { color: rgb(85, 85, 85); }
+
+.cm-pen--16 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAABQAAAAFCAYAAABFA8wzAAAABmJLR0QA/wD/AP+gvaeTAAAAIUlEQVQYlWNkaGD4z4A=
+MGhgYkdiocrgAkh4mojSMAnwAAPnFBAQXk++AAAAAAElFTkSuQmCC"); background-size: 2=
+0px 5px; background-repeat: repeat-x; background-position: left bottom; pad=
+ding-bottom: 3px; }
+
+.cm-retina .cm-pen--16 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAACgAAAAKCAYAAADGmhxQAAAABmJLR0QA/wD/AP+gvaeTAAAAKklEQVQ4=
+jWNkaGD4z4APNDAw4hDHr49UgMMeJqpaQgMw6sBRMApGwUgHAJ+8BAgtb1xqAAAAAElFTkSuQmC=
+C"); }
+
+.cm-pen--16::before { color: green; }
+
+.cm-pen--17 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAABQAAAAFCAYAAABFA8wzAAAABmJLR0QA/wD/AP+gvaeTAAAAIklEQVQYlWP8z8DwnwE=
+JMDIwMMLY6HK4ALIeJmI0jAK8AAAXnAQEgzq2hQAAAABJRU5ErkJggg=3D=3D"); background=
+-size: 20px 5px; background-repeat: repeat-x; background-position: left bot=
+tom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--17 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAACgAAAAKCAYAAADGmhxQAAAABmJLR0QA/wD/AP+gvaeTAAAAK0lEQVQ4=
+jWP8z8DwnwEPYGRgYMQmTkgfqQCXPUzUtIQWYNSBo2AUjIKRDgDZTAQIDvsCFQAAAABJRU5ErkJ=
+ggg=3D=3D"); }
+
+.cm-pen--17::before { color: red; }
+
+.cm-pen--18 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAABQAAAAFCAYAAABFA8wzAAAABmJLR0QA/wD/AP+gvaeTAAAAIklEQVQYlWOUql70nwE=
+JPGuNY4Sx0eVwAWQ9TMRoGAV4AQDGJwgE4z+64gAAAABJRU5ErkJggg=3D=3D"); background=
+-size: 20px 5px; background-repeat: repeat-x; background-position: left bot=
+tom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--18 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAACgAAAAKCAYAAADGmhxQAAAABmJLR0QA/wD/AP+gvaeTAAAALElEQVQ4=
+jWOUql70nwEPeNYax4hNnJA+UgEue5ioaQktwKgDR8EoGAUjHQAAwTQICL/UsoAAAAAASUVORK5=
+CYII=3D"); }
+
+.cm-pen--18::before { color: rgb(26, 123, 162); }
+
+.cm-pen--19 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAABQAAAAFCAYAAABFA8wzAAAABmJLR0QA/wD/AP+gvaeTAAAAIklEQVQYlWPcssr8PwM=
+S8Ak7yQhjo8vhAsh6mIjRMArwAgDatwgEFxCi6QAAAABJRU5ErkJggg=3D=3D"); background=
+-size: 20px 5px; background-repeat: repeat-x; background-position: left bot=
+tom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--19 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAACgAAAAKCAYAAADGmhxQAAAABmJLR0QA/wD/AP+gvaeTAAAALElEQVQ4=
+jWPcssr8PwMe4BN2khGbOCF9pAJc9jBR0xJagFEHjoJRMApGOgAA6lQICIb8vHMAAAAASUVORK5=
+CYII=3D"); }
+
+.cm-pen--19::before { color: rgb(180, 170, 55); }
+
+.cm-pen--20 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAnElEQVQImW3KsQnCUBR=
+A0ft+DMQFUjiBmAFsU9rLg2zgAGLhBBZqaWuXICQIOkdKyQA2wm+EWP88e/HUR1T1Bczrun7yR1=
+EUkxBC68zsAFxVdfyb8jwfhRAuwMk1TXM0swdw+81pmu6BPsuynQCoaiQiZzObAlvnnB+GYQ3M4=
+jheVFX1jgC6rjNVvXvvPyKyMbOliLRJkqzKsuwBvuvRPOJZjx2LAAAAAElFTkSuQmCC"); back=
+ground-size: 20px 5px; background-repeat: repeat-x; background-position: le=
+ft bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--20 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAABYUlEQVQo=
+kaXOvUtbURjH8e9zTxIXoQEnswiCECT1D3AQdCkFh+TmHAloK7Rwh0IHFxGcnJzEuRncRHLupUM=
+VF1/AWV0T0C3QtdxB+oLQp8sN+BJo1Gc75/f8PjzinFMR2fXeL/GCcc59AaIASFV10Vr7+bmYtd=
+YBEfAzUNV3wF8R2bLWTj8Vq9fr4yLSzJ4rpt1uX1UqlQCYE5G35XJ5r9Pp3AyCOeeGReQIGAOSO=
+I7XAgDv/QaQACVjzFkYhqMDYCbrvAYugfcAQZZroVD4CFwAE8aYw0ajUfqPuQm8AX4AjTiOfwHI=
+3Y1arTaSy+VOgSngu6ouJ0ly8uCygohsq+on4I+IzHvvj3v5PRCgWq0W8/n8V2A2+zoAdoCuiFR=
+UdRWYBH6LyIL3fv9u/xEIEEVRPk3TNVVdB4b6rFwHQbDYarXOHwZ9wd6EYThqjPkAzACvRKQLfC=
+sWi61ms3nbr/MPxBhoP6Kp9d4AAAAASUVORK5CYII=3D"); }
+
+.cm-pen--20::before { color: rgb(85, 85, 85); }
+
+.cm-pen--21 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAdElEQVQImW3NsQ1BURi=
+A0fNfEsQGJhALWMEEhtCK4lVup3jotGpRSDSmUIoBNBKN5CVqWsX96pN8IXtiLHsolQ1wTcIaJ1=
+u9AmrjIOySpQ1uGucCrtH4WgU4arnbY4gKL8wx0jFRecffJmGKGbq46KstfOAHsW8ZH7fr0IMAA=
+AAASUVORK5CYII=3D"); background-size: 20px 5px; background-repeat: repeat-x=
+; background-position: left bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--21 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAABHklEQVQo=
+kaXPsUtbcRTF8c970rqIFpySRSi4iPoHOIgKIgVXRQitUKFCwaEOEiiYlyE6Fed06FQQRRysuFR=
+Dna2rg90Ewak4iFUj/XXoEzQGFT3bveecL/eSCBJfPVWJskSIcYycoqlHw4pG8A6nMV7jr+CTRM=
+8jLnsp+JxOHxr8sK9PjAG8MmhRxckDYU34jjasSOTj1ChiBVlV20oy98KWNaSdLuxq9gbi1A6Yw=
+E+0q9qQyN4J3DOPIfzGmGl/ILoRmtPqQgXdOBQZV7BV8+ZzLOA9zjEssXll3wT+L7zAKvrTzbrI=
+F5EDQadgBh04ExlV8O16/TYQyp45khd8RGOdxC+xnFk7tUZ94JVKMi69FfSiBQdYk7FkUrVe5R/=
+gmEbjWsgRqAAAAABJRU5ErkJggg=3D=3D"); }
+
+.cm-pen--21::before { color: green; }
+
+.cm-pen--22 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAZUlEQVQImXXNsQ2CYAB=
+E4S9gQ6xsLZzAKZjCPSht3IAR0B2sLO0kzCFjnA1/Q+S6u3vJE+ZwspFwDF+hC1No/kC78A7XMt=
+zDaw2HPjxDVYY6PMIntOEchqUf1poqXBbVGG5hX/4f/wYq3jt9kWgAAAAASUVORK5CYII=3D");=
+ background-size: 20px 5px; background-repeat: repeat-x; background-positio=
+n: left bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--22 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAAA1klEQVQo=
+kaXQMSvFYRiG8d9JlBLKdIzyDWQxWBgZDGZlsPkIymw32C06G4vJF6BEWc4oRplEpNvynDrpr4P=
+z1rvcz3VfPe8rJBwb8oSjEOG5pLtDyDbL8SKshc/wHpb+IZvrW2qnF+5X8Bjaf5BNhNvqdvoHrd=
+CpQfc30jASzqtzFca/A5PhsoDrMDtAeFDsU5j/CZoJNwU+hJUGZiwcFvMWVgc9ZTpcVCHhLGyEh=
+bAV7ip/DeuDvqYnHQ17tUEabjcsNnVbA8RtbGMZU7jHKU5afDR1vgBtJYLy/s7RrwAAAABJRU5E=
+rkJggg=3D=3D"); }
+
+.cm-pen--22::before { color: red; }
+
+.cm-pen--23 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAApUlEQVQImWOUql70nOE=
+Pg/mzzrhHDFiAbMNyqb+/f59hYvzP0MPAwrhOpnAVJ4aqhv0sf//8XsH4n2Eq09O2uF4GBoYr/7=
+h+bERXLP37cTfDf4ZPT9nutTMyMDAwMISuYpZU/zGP4T+DBhMjQ+WffwyvmBkZiv8zMGix/mX2e=
+NQR/Z4RYU0Dk9QvpTAGJoYsxn8MHP+Z/m/7+4Ox+2VP3FcGBgYGAJq4O/hLIx9oAAAAAElFTkSu=
+QmCC"); background-size: 20px 5px; background-repeat: repeat-x; background-=
+position: left bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--23 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAABZklEQVQo=
+kaXMvyvEcRzH8ef78+0wKArJVyIl5ddiMyiTxUrKuSvqlDJYhDOc3DHpZjcQl+RcEjKhzPgLbHL=
+HIEzc+fJ9G1DnRyLv8f16vR5iB1cUWE1HfF7+cZXBlQWFgAHugD57annkH1i3QgC4NyLaD7iozN=
+vBeNtfsfLx1VqFGIAioyYV9u8iOgN4UHejejJe8VusLJQotKznLaBYVZKXkf6YAUiHfdOqkkTEd=
+sQ9+hXanbA8TiYJNIOcWg/5PgDzmopm82QQOAGpc4S9qtCa/ZNn12fngE7gxjzTexHteQCQ3FLl=
+xHKJGjkEWoCUqPGnZr0HuZ3GUCLv1slGQYeBLKJd6bB//z3/AALUhJaKHx1rE+h4e+0quojRc+N=
+KkyJjQAOQAXrSEd9O7v4LCNAaWPBclRaMq0gQyP/a0DPXWH1XM97jz8m34PtVT8YrntABFWlHtQ=
+jhXFW37evM+mlsyPlu8wI9EYOHZHZyngAAAABJRU5ErkJggg=3D=3D"); }
+
+.cm-pen--23::before { color: rgb(26, 123, 162); }
+
+.cm-pen--24 { background-image: url("data:image/png;base64,iVBORw0KGgoAAAAN=
+SUhEUgAAAAoAAAAFCAYAAAB8ZH1oAAAABmJLR0QA/wD/AP+gvaeTAAAAp0lEQVQImW3LvwpBURz=
+A8e/vnEv+vIEnEKu6yWJjuEYW5QGsJpvNgNFqpTMoJavFQLFIHsCiLEohuZ1jssh3/nxlbvyzI/=
+Qrtd2JP83GhZTW4VYh9AVvakw+/ouWy6KndTgBGaqguhkgckhgZ7/4fnn2gNv2uO4KgDFVnXSnk=
+RPSCte21l5QugVkeEfKQX11le/d6aByWb+GoylIzDoW0dejV2rs7wAf8wM4u3L9wX4AAAAASUVO=
+RK5CYII=3D"); background-size: 20px 5px; background-repeat: repeat-x; backg=
+round-position: left bottom; padding-bottom: 3px; }
+
+.cm-retina .cm-pen--24 { background-image: url("data:image/png;base64,iVBOR=
+w0KGgoAAAANSUhEUgAAABQAAAAKCAYAAAC0VX7mAAAABmJLR0QA/wD/AP+gvaeTAAABbElEQVQo=
+kaXOzytlcRjH8ffzda8bKbdssFQ2fqXuYFATK4s51+6eqxiKMqUsZqMpK83CStYs7KQ599fgJAu=
+UlcvlL7BTU1ay8vOc81igmLnJj8/u6fM8rx5xnQ5FddlKHgzxgbhOxwIwboBzRAbd1OfJd2Op9g=
+QwDlwYEf0GBKjOuanOrjdjmbY6VBYfxh/ma+LAVZVfQBgNUpuZWM1rMcfpqcA3f4AokLbs/UUDY=
+Nn5GSAN1Hp+aPc1qOMkSsq5TAPNwNEFZhjAAIig5oYx4BCo9/zQxupKd+1LYBkns0AfcOZjBmx7=
+7xJAni5ls+1VEU92FFqAvyrBSDxR2H7+WWNpuVbMI0yAXqPGspL5rcf+GQiQy7VGw7eRLNALoIg=
+LwZIgJ6g2ITIFNABXqmLHk/n1p/f/gQCHC7HwaTT0E9FpkEiRleMgCAb7BwqFf4ui4GM2M7Eazw=
++PCvpFoZL7L9eqz73fn74f3Ra7uQOYzIGnLExACQAAAABJRU5ErkJggg=3D=3D"); }
+
+.cm-pen--24::before { color: rgb(180, 170, 55); }
+
+.ps-container .ps-scrollbar-x-rail { position: absolute; bottom: 3px; heigh=
+t: 8px; border-radius: 4px; opacity: 0; transition: background-color 0.2s l=
+inear 0s, opacity 0.2s linear 0s; }
+
+.ps-container:hover .ps-scrollbar-x-rail, .ps-container.hover .ps-scrollbar=
+-x-rail { opacity: 0.6; }
+
+.ps-container .ps-scrollbar-x-rail:hover, .ps-container .ps-scrollbar-x-rai=
+l.hover { background-color: rgb(238, 238, 238); opacity: 0.9; }
+
+.ps-container .ps-scrollbar-x-rail.in-scrolling { background-color: rgb(238=
+, 238, 238); opacity: 0.9; }
+
+.ps-container .ps-scrollbar-y-rail { position: absolute; right: 3px; width:=
+ 8px; border-radius: 4px; opacity: 0; transition: background-color 0.2s lin=
+ear 0s, opacity 0.2s linear 0s; }
+
+.ps-container:hover .ps-scrollbar-y-rail, .ps-container.hover .ps-scrollbar=
+-y-rail { opacity: 0.6; }
+
+.ps-container .ps-scrollbar-y-rail:hover, .ps-container .ps-scrollbar-y-rai=
+l.hover { background-color: rgb(238, 238, 238); opacity: 0.9; }
+
+.ps-container .ps-scrollbar-y-rail.in-scrolling { background-color: rgb(238=
+, 238, 238); opacity: 0.9; }
+
+.ps-container .ps-scrollbar-x { position: absolute; bottom: 0px; height: 8p=
+x; background-color: rgb(170, 170, 170); border-radius: 4px; transition: ba=
+ckground-color 0.2s linear 0s; }
+
+.ps-container.ie6 .ps-scrollbar-x { font-size: 0px; }
+
+.ps-container .ps-scrollbar-x-rail:hover .ps-scrollbar-x, .ps-container .ps=
+-scrollbar-x-rail.hover .ps-scrollbar-x { background-color: rgb(153, 153, 1=
+53); }
+
+.ps-container .ps-scrollbar-y { position: absolute; right: 0px; width: 8px;=
+ background-color: rgb(170, 170, 170); border-radius: 4px; transition: back=
+ground-color 0.2s linear 0s; }
+
+.ps-container.ie6 .ps-scrollbar-y { font-size: 0px; }
+
+.ps-container .ps-scrollbar-y-rail:hover .ps-scrollbar-y, .ps-container .ps=
+-scrollbar-y-rail.hover .ps-scrollbar-y { background-color: rgb(153, 153, 1=
+53); }
+
+.ps-container.ie .ps-scrollbar-x, .ps-container.ie .ps-scrollbar-y { visibi=
+lity: hidden; }
+
+.ps-container.ie:hover .ps-scrollbar-x, .ps-container.ie:hover .ps-scrollba=
+r-y, .ps-container.ie.hover .ps-scrollbar-x, .ps-container.ie.hover .ps-scr=
+ollbar-y { visibility: visible; }
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH----
+Content-Type: font/woff
+Content-Transfer-Encoding: base64
+Content-Location: chrome-extension://kbpjikgngikhhpbjddnenemoonpbfikm/css/fonts/collamark.woff?sunderI
+
+d09GRk9UVE8AABl4AAoAAAAAGTAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABDRkYgAAAA9AAAFUYA
+ABVGNMiFOk9TLzIAABY8AAAAYAAAAGAIIvzfY21hcAAAFpwAAABMAAAATBpVzIBnYXNwAAAW6AAA
+AAgAAAAIAAAAEGhlYWQAABbwAAAANgAAADYA6HIvaGhlYQAAFygAAAAkAAAAJAPnAgtobXR4AAAX
+TAAAALgAAAC4VQAIfW1heHAAABgEAAAABgAAAAYALlAAbmFtZQAAGAwAAAFLAAABS+SX4fNwb3N0
+AAAZWAAAACAAAAAgAAMAAAEABAQAAQEBCmNvbGxhbWFyawABAgABADr4HAL4GwP4GAQeCgAZU/+L
+ix4KABlT/4uLDAeLa/iY+HoFHQAAAXIPHQAAAXcRHQAAAAkdAAAVPRIALwEBChMVFxofJCkuMzg9
+QkdMUVZbYGVqb3R5foOIjZKXnKGmq7C1ur/Eyc7T2N3i5+xjb2xsYW1hcmtjb2xsYW1hcmt1MHUx
+dTIwdUU2MDB1RTYwMXVFNjAydUU2MDN1RTYwNHVFNjA1dUU2MDZ1RTYwN3VFNjA4dUU2MDl1RTYw
+QXVFNjBCdUU2MEN1RTYwRHVFNjBFdUU2MEZ1RTYxMHVFNjExdUU2MTJ1RTYxM3VFNjE0dUU2MTV1
+RTYxNnVFNjE3dUU2MTh1RTYxOXVFNjFBdUU2MUJ1RTYxQ3VFNjFEdUU2MUV1RTYxRnVFNjIwdUU2
+MjF1RTYyMnVFNjIzdUU2MjR1RTYyNXVFNjI2dUU2Mjd1RTYyOHVFNjI5AAACAYkALAAuAgABAAQA
+BwAKAA0AMgCtAOQBPgGYAeQCqALdA9MEXQScBNsFGgVZBZIFywYFBj4GjAbXB2AHjwexCB0I0woc
+C50NJg4cDnoOvA8jD9YQFhCHEPURNxIQEmkSlhMLE2b8lA78lA78lA77lA73wfdIFYv7BPdN9z/7
+Tfc5iykF+3SLWPuOi4vK9wXmlvcNiwgO+BT3LhV5i3uFfoEI+xnbBYuPjI+Lj4uQio+Ljwj3GdsF
+mIGbhZ2LtYuurou1i7VormGLYYtoaIthi4eMh4uGCPsZOwV+lXuReYthi2hpi2CLYa5ptYudi5uR
+mJUI9xk6BYuHioeLh4tgrmm1i7WLrq2Ltou1aK5hiwgO+C74LhX7yIsFb4t0dItuCIv7RwWLb6J0
+p4sI8ovxPovY8osFp4uioounCIv3RwWLqHSib4sIDvfx974ViJTp31TPfptgL01haXQ8WotwCIv7
+QwWLavcRaeuLrou+93CLrYuu+wCLh5QI+3GIFXqLT4GLRgiL+xEFi0bHg5yLnItgmou2CIv3NwWL
+uLaaeosIDvc39zcVjoItN8JHmHu258m1raLavIumCIv3QwWLq/sRriuLaItY+3CLaIto9wCMj4II
+93GNFZyLx5aL0AiL9xAFi9FPk3qLeou2fItgCIv7NwWLXWB8nIsIDvcS+BkVYotpaYtgi2GtaLSL
+1Yta+ygniwiLZwX3RovQ9+b7QIsI92uLFWKLaWmLYIthrWi0i9WLWvsoJ4sIi2cF90aL0Pfm+0CL
+CA73kfhmFfsWiSMgjfsWjPsW9iP3Fo33Fo3z9on3For3FiDz+xaJCIr8DxWKiwV3jH2Zi5+Mn5mZ
+n4sIjIsFn4qZfIt3inh9fXeLCN/3OxWHhYCCfoEIfYEFg4WGhYqGiYaKiouCCIuJVIuMjwWLnoyW
+k5WXmaadjYyOjo+OjY+Rk46Ri5GLk4iThpKGkoKPfot+i4KGhYOGgoiCi4IIi4hTi4uOBYytl6Si
+mpqUnZCgi6aLooSdfp5+lHeLcYt8hn6CfggO+BT4ERVCiwWCi4J/i3wIi1bmi4tAMIuL+3Y0i4v3
+dj2Li9bZi4u4BYvKt7/IiwjUi4s7BQ6+9+sVi2WYb6R7n36jiZiLjouNi42Li4uHcp5xCIqLBWqL
+IISLM4sx7Yafi42LjIuLi4uLjIuOi5eLrI2qmrOen6yLuou4bKZ1n32Xf5WLlQiLlZSTlpWcm5yh
+i7aLsIakbZuOjJaMkYybjaOOi5gIi477CosFiov7CoaL+wAI91L7ehWNZ2xwXYhch2WgiK+KnZOc
+mpiamZ+Too2Oi42Ljou2i6lyjWkIbPeTFZdieWFwg4eKiIuIi3GLcqSCr4WfjJyRnJGclZaZjo6M
+joyPi6mLn36XYAj3WzMVi9dai4s/PouLWtiLiz68i4vY14uLvD+LBQ74gPgMFXmEeYZ3iJ+Xmp6S
+onmAdoN1hnqecZdwi1WLYGCLVYuEjIOMhDuPRLJbxYN9hnqLegiLaZxtpXp7jHyPfpKLi4uKi4uL
+XK1kt4KDiYKKgouFi4WLhY2YZK5vtoppcmJ7XosIg4uDjIOLtnC+e8KL90WL7fcni/cUi4+Kj4uP
+npmcnJieCA73ufgHFYCAI/sBi4uFhYiEi4OLhI6EkYWLi/P7ApaBlYGfipaWl5aLm3+YCCvv6+8F
+l5mLm3+WgJZ3ioGBCA74IPefFYGA+wIji4uGhYOIhIuEi4OOhpGLi/sC84GWgJaKnpeXlpaajJl/
+CO8r7+sFmZeaipaAl3+KeICACA74IPdWFYGV+wL0i4uGkYONhIuEi4OJhoWLi/sCIoGBgICKeJd/
+loCaipmXCO/r7ysFmX+ajJaWl5eKnoCWCA73b/gHFZaA8/sBi4uRhY6Ei4OLhIiEhYWLiyP7AoCB
+gYF3ioCWf5aLm5eYCOvvK+8Ff5mLm5eWlpafipWBCA74BbMVkYWLf4WEhISAi4SSCPtd918FhJKL
+lpKSCPdd914FkpKWi5KEkYSLgIWECPtL+1L3S/tSBQ7N9+sVhJKAi4SEhISLgJKECPde+1wFkoSX
+i5KSCPde91wFkpKLloSShJKAi4SECPtS+0v7UvdLBQ74UvcKFZKElouSkpKSi5aEkgj7XvdcBYSS
+f4uEhAj7XvtcBYSEi4CShJKElouSkgj3UvdL91L7SwUO9yOzFYSFi3+ShJKElouSkgj3XfdfBZGS
+i5aFkgj7XfdeBYSSgIuEhISEi4CShAj3S/tS+0v7UgUO+AP3KhVF29HcBZeXi59/l3+XeIt/fwhH
+PUfZBX+XeIt/f39/i3eXfwjROkU7BX9/i3eXf5d/nouXlwjP2c89BZd/nouXl5eXi59/lwgO97P4
+TBX7BYsuMIj7BQhMi+oi6fRCiwWN39DP4Ivii9FEizSLNEVFNItpi2uWcZ8IZ2QFrm+4eruL9wiL
+6emL9wiL9wgt6fsIiwgO+Bb3zxWdi4tY9wDn+wDni055iwUti1ZFW01hU2dbUIsIVYuLQ8GLBemL
+wNK7yLXDr7vGiwj7i14Vj5CPkI+RlZiVmZeZaapio1WLCFWLi0PBiwWti6V7pHMI9537EBV5iwVn
+i3CdcaaIh4mIiIeAfX97fXuuabVxxIsInYuLTvcA5/sA54tYBQ74TPgQFWCyRotgZAhucG6mBWCy
+RotgZFtfi0O7Xwj3TPs990z3PQW7t4vTW7cIDveU+FwVyPtA9ziL+xomu/tG+x/1+x8hu/dG+xrw
+9ziLBQ73KPdCFYv3MyqLBW+LdHSLbwiL+y4Fi2+idKeLCKWLiz7Y2PcUiwWni6Kii6cIi7oFiYqJ
+i4qLCPtIiwX3zfezFft7iwVvi3R0i28Ii/th90eL2D6L2KWLBaeLoqKLpwiL9y4Fi6d0om+LCA74
+Qvd6FYumm6CkmoeahZmDmW+DdZZ4nniehaKSp36SfZF8j3xzcXpwi3CLcZx8o3yHfYV+hAiSb4V0
+eHh4eHWAb5ODfYV9h3ykfJt2i3CLcXtwcn2PfJF8k36nkqGFnnieeJF1hG8ImISZhZqGmqSlnKaL
+pouleppympCZkZiShKeRoZ6enp6hlqeEk5mRmY+acpl7oYulCPtCLhVXi2K1i76Lv7S1v4u/i7Vh
+i1eLWGFhV4sIDviO92QVe7depVCLiYuJi4mKCIrABYuL45qNjI6LjI6KjouOh56KjouOiYuIi4iK
+O4CLi4uLi72LjouOiYyIi4eLd4uIiwiJi4mJi4mLiIxTi4uLiz19iYuIiomKjImLiZBxi4mLiY2K
+jouOjNOXi4sIjFgFb4N5fn9+d3eAb4tvi2Okc66G3IK945u1p2V2Qk9hioqJiY2JjImYfI2IjYmO
+jIyMCMu3qdJ3wwj7UTkVco6LoIuYi5+UoJmak5SWkpePCI37AQWCh4CKgIwIyZkVjPUFjYuNi42L
+n4ueh5WGlYVmS25wCPt591kVio2JjImLCFmLBYiLiYqLiYBpPfuMioqLiouKjYsIt4sFjYuMjIuM
+i4yl34uLCOSLBYuLpTeLioyKi4qNiwi3iwWNi4uMi4yLjDz3jIGtCEj7NhWw9xqw+xpBiwUO+Hr3
+jxWHi3uLhot9i4CCi3+LgJaCmYuQi5uLj4uai5aUi5aLl4CUfIsI+3r3DBU9i0xMiz2LPcpN2YvZ
+i8rJi9mL2UzKPYsIjvuHFU+LXrmLw4vEuLnHiwiL+2EF+0vxFYuXgJR9i4aLe4uHi3yLgIKLf4uA
+loKai4+Lm4uQi5mLlpSLlgj3SPdIFZaLlJaLmYuQi5uLkIuZgpaAi4CLgoCLfYuGi3uLhot9lICW
+iwiL+/sVgIuCgIt9i4aLe4uGi32Uf5aLlouUl4uZi5CLm4uQi5mCloCLCPdR9+cVlZWMmoOTg5N9
+iYGBiIh+f4mIgYGJfJODk4OajZWVjY6Yl46OCPv8+8EViYh+f4iIgYGKfJODk4OZjZWVjo6Yl42O
+lZWNmYOTg5N8ioGBCJb33hWBlX2Ng4ODg4x8lYGOiJh/jYiVgZqJk5OTk4magZWJjn6XiI4I98L7
++xWNiJh/joiVgZmJk5OTk4qagZWIjn6XiY6BlXyMg4ODg419lYEIDvh6948Vh4t7i4aLfYuAgot/
+i4CWgpmLkIubi4+LmouWlIuWi5eAlHyLCPt69wwVPYtMTIs9iz3KTdmL2YvKyYvZi9lMyj2LCIv7
+hxVSi165i8OLxLi5xIvEi7hdi1KLU15dUosI+0jxFYuXgJR9i4aLe4uHi3yLgIKLf4uAloKai4+L
+m4uQi5mLlpSLlgj3SPdIFZaLlJaLmYuQi5uLkIuZgpaAi4CLgoCLfYuGi3uLhot9lICWiwiL+/sV
+gIuCgIt9i4aLe4uGi32Uf5aLlouUl4uZi5CLm4uQi5mCloCLCPdR9+cVlZWMmoOTg5N9iYGBiIh+
+f4mIgYGJfJODk4OajZWVjY6Yl46OCPv8+8EViYh+f4iIgYGKfJODk4OZjZWVjo6Yl42OlZWNmYOT
+g5N8ioGBCJb33hWBlX2Ng4ODg4x8lYGOiJh/jYiVgZqJk5OTk4magZWJjn6XiI4I98L7+xWNiJh/
+joiVgZmJk5OTk4qagZWIjn6XiY6BlXyMg4ODg419lYEIDveU+HAV+xyL+wL7Aov7HIv7G/cC+wL3
+HIv3HIv3AvcCi/cbi/cc+wL3Avsciwj3ZvuKFYtbel9waISRgpuTnJOcjbKJmomag7B2i3aMfJJ+
+pHHA15VwqYSTZWGFw4uPjpGRkQjeb8c9iy4I+4P3ZBWGgX6Hg4R5e4SNgXyCfGx1i4CLgJt+k42S
+jqCLl4eXhuOHb0GCc2SPgGSKhYVyi4MIin+VXH+Lf4tqtYuSi5ODpouii6Fki4upi6egmIeYhphm
+jHuNptDLv9eWCGb8KxWYkoyUlouYjJaPmo+YjaKZoIycja2IlXtpdWR+YIt0i3WPdpEIDvgU3RX7
+4YuL93rOiwWLi5yisagI+yeLBXyLgH+LfQiL+64Fi32WgJqLCPgUiwWZi5aWi5kIi+tYYYtvBWH3
+RhWLMPc+9xn7PvcUizsF+2KLi/tgi4vF66+d9wSLCA73lPhHFUSLUlKLRIv7DvcU+zOLi4uL9xT3
+M4v3DovSUsREiwiL+1oVZYtsqYuyi7GqqrGLsYuqbItli2RsbWWLCA73lPgKFfs8izP7EIt3i3jj
++xD3PIv3PIvj9xCLnoufM/cQ+zyLCIv7khVMi1i8i8iLyL69yovKi75Zi06LTlhaTIsIi/cCFYGX
+prd6i2yLcXKLbIttpXKqi6qLpaSLqYuZW3SClAgO95T3rhVhi2hoi2GLYK5ptYu1i66ti7aLtWiu
+YYsI92HXFU2LBYOLgpKIkwh7uwWJk4GRg4sI+0KLBYOLgYWJgwh7WwWIg4KEg4sITYsFb4t0dItv
+CIv7egWLb6J0p4sI+C6LBaeLoqKLpwiL93oFi6d0om+LCPth+60VRItSxIvSi9HExdKL0ovEUYtF
+i0RSUkSLCPdP91YVgYuDk4uVi5WTk5WLlYuTg4uBi4GDg4GLCA73HPgRFSlTkS6OafcT9yr3UYOL
+i4uL+6AvPPtMhX2ueJOco76tsYuLvXngdci23MSC9xL3CMimmfuRx/sZPggO+Cn3rhVci4uuBYvW
+abZHi0eLaWCLQAiLaFeLBX2LgHqLfQiL+1wFi32WfJiHCKqBBZiGooiZiwj3KIsFmYuijpiQCKqV
+BZiPlpqLmQiL91wFi5l7nH2LCPtcuRWLsJ+eqouqi594i2YIi10li4u5BQ74KPeuFV2Li8gFi9Vp
+t0eLR4tpX4tBCIuBvouLnwWLsJ+fqouqi593i2YIi0T7YYsFfYuAeot9CIv7XAWLfZZ8mIcIqoEF
+mIeih5mLCPcoiwWZi6KPmI8IqpUFmI+WmouZCIv3XAWLmXucfIsIDvgZ97cVhIuEioWKesJXs02L
+QItOT4tCi4SMhYyFh4uHi4iLV4tiY4tZi1m0Yr+LCPe8iwXPi8LBi82LzVTBR4sIDvgR93kVhI2G
+jI+Vk5+MnYKXe6Neill1i4t7hI+Yk6SJoX+XcKdBbk1LW1twWItfizf1U/KLCPcci+Xhi8qLsmyh
+bpQI+zn7SRU4g0SwhcKGwcq+3ZPelNJlkVSQVUxYOYMI98D3jRWL4EbQNouBi4ODi4GLgZODlYvM
+i8BWi0qLgZODlYuVi5OTi5WLi4uLi4sIQ44Vg7NsqmOTgY2ChYmBiYKRgZWJpYafdpBxjYKVhZSN
+lYyRlYmVCPuj+wAVaoR1b5BwkW+qeq2SrJGhp4anhadsnGmECA74VeUVKuwFmqOTp4upi+NA1zOL
+NItERIszizTXP+KLqIumk6OZCOwpBZWCmouUlAikowWUlYiXgZQI++73TBWLyLy8x4vIi8FVi06L
+T1paTotOi1bBi8cIDvf69/UV+5SLi74lNPE6i7n3lIuL0gX3LvtrFSXii1j7lIuLQ/eUi4td8d0F
+Dvgu95QV+8iLBX2LgICLfIt9loCZiwj3yIsFmYuWlouZi5qAln2LCPvIvhX3yIsFmYuWl4uZi5mA
+ln2LCPvIiwV9i4CAi32LfZZ/mYsI98j7LRX7yIsFfYuAf4t9i32Wf5mLCPfIiwWZi5aXi5mLmYCX
+fYsIDvdU908Vi4vxyMRzl52XnpafU5lBf4uLi4vqxMV5l6CWoJaeXY5ehIuLi4vHrsCRnKeboJmW
+CPusi/s8+9RL+1QIq4vr9zQFi4ura+uropOhoKKnUplAf4uLCA74lBT4lBWLDAoAAAADAgABkAAF
+AAABTAFmAAAARwFMAWYAAAD1ABkAhAAAAAAAAAAAAAAAAAAAAAEQAAAAAAAAAAAAAAAAAAAAAEAA
+AOYpAeD/4P/gAeAAIAAAAAEAAAAAAAAAAAAAACAAAAAAAAIAAAADAAAAFAADAAEAAAAUAAQAOAAA
+AAoACAACAAIAAQAg5in//f//AAAAAAAg5gD//f//AAH/4xoEAAMAAQAAAAAAAAAAAAAAAQAB//8A
+DwABAAAAAAAAU8SYQF8PPPUACwIAAAAAAM/jGLYAAAAAz+MYtgAA/+ACBAHmAAAACAACAAAAAAAA
+AAEAAAHg/+AAAAIAAAD//AIEAAEAAAAAAAAAAAAAAAAAAAAuAAAAAAAAAAAAAAAAAQAAAAIAABoC
+AAAzAgAAMwIAADMCAAAzAgAAMwIAABUCAACAAgAAGwIAABQCAACpAgAAdAIAAHQCAACyAgAAjwIA
+ACkCAAApAgAAjwIAAJECAAAPAgAAAAIAAEgCAAAfAgAAAAIAACkCAAAAAgAAAAIAAAACAAAKAgAA
+AAIAAIACAAAAAgAAAAIAABACAABNAgAATQIAAAACAAAGAgAANgIAAAACAABNAgAAAAAAUAAALgAA
+AAAADgCuAAEAAAAAAAEAEgAAAAEAAAAAAAIADgBVAAEAAAAAAAMAEgAoAAEAAAAAAAQAEgBjAAEA
+AAAAAAUAFgASAAEAAAAAAAYACQA6AAEAAAAAAAoAKAB1AAMAAQQJAAEAEgAAAAMAAQQJAAIADgBV
+AAMAAQQJAAMAEgAoAAMAAQQJAAQAEgBjAAMAAQQJAAUAFgASAAMAAQQJAAYAEgBDAAMAAQQJAAoA
+KAB1AGMAbwBsAGwAYQBtAGEAcgBrAFYAZQByAHMAaQBvAG4AIAAxAC4AMABjAG8AbABsAGEAbQBh
+AHIAa2NvbGxhbWFyawBjAG8AbABsAGEAbQBhAHIAawBSAGUAZwB1AGwAYQByAGMAbwBsAGwAYQBt
+AGEAcgBrAEcAZQBuAGUAcgBhAHQAZQBkACAAYgB5ACAASQBjAG8ATQBvAG8AbgAAAwAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+
+------MultipartBoundary--dlWkMC5quHyo1C7gtcGv8pXKEafxQUdcm7IuKL6zdH------

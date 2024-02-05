@@ -1,0 +1,3509 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/
+Subject: RISC-V SBI and the full boot process
+Date: Fri, 26 Jan 2024 01:25:53 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----"
+
+
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/html
+Content-ID: <frame-93542E305E403DE1728FE647AFE9738F@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/
+
+<!DOCTYPE html><html lang=3D"en" data-theme=3D"light" class=3D"cm-retina" c=
+ollamark=3D"crx"><head><meta http-equiv=3D"Content-Type" content=3D"text/ht=
+ml; charset=3DUTF-8"><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid=
+:css-26e529ca-e2db-4e45-b3d7-17742b7e9580@mhtml.blink" /><link rel=3D"style=
+sheet" type=3D"text/css" href=3D"cid:css-7c6482f6-678d-4256-b535-285a15fa3a=
+59@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:cs=
+s-57e9c078-5869-4565-b9c4-e6bcba024fda@mhtml.blink" /><link rel=3D"styleshe=
+et" type=3D"text/css" href=3D"cid:css-c35287e7-5fed-4770-9ee2-119e15180448@=
+mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-8=
+214cf41-2feb-452a-b3e5-016ae061cc16@mhtml.blink" />
+   =20
+    <meta content=3D"width=3Ddevice-width" name=3D"viewport">
+    <link href=3D"https://popovicu.com/favicon.png" rel=3D"icon" type=3D"im=
+age/png">
+    <link href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-proce=
+ss/" rel=3D"canonical">
+    <meta content=3D"Astro v2.6.6" name=3D"generator">
+
+    <!-- General Meta Tags -->
+    <title>RISC-V SBI and the full boot process</title>
+    <meta content=3D"RISC-V SBI and the full boot process" name=3D"title">
+    <meta content=3D"Detailed explanation on how RISC-V boot process works =
+and what role SBI has in the RISC-V software stack. Concrete example with O=
+penSBI." name=3D"description">
+    <meta content=3D"Uros Popovic" name=3D"author">
+    <link href=3D"https://popovicu.com/sitemap-index.xml" rel=3D"sitemap">
+
+    <!-- Open Graph / Facebook -->
+    <meta content=3D"RISC-V SBI and the full boot process" property=3D"og:t=
+itle">
+    <meta content=3D"Detailed explanation on how RISC-V boot process works =
+and what role SBI has in the RISC-V software stack. Concrete example with O=
+penSBI." property=3D"og:description">
+    <meta content=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-pr=
+ocess/" property=3D"og:url">
+    <meta content=3D"https://popovicu.com/RISC-V%20SBI%20and%20the%20full%2=
+0boot%20process.png" property=3D"og:image">
+
+    <!-- Twitter -->
+    <meta content=3D"summary_large_image" property=3D"twitter:card">
+    <meta content=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-pr=
+ocess/" property=3D"twitter:url">
+    <meta content=3D"RISC-V SBI and the full boot process" property=3D"twit=
+ter:title">
+    <meta content=3D"Detailed explanation on how RISC-V boot process works =
+and what role SBI has in the RISC-V software stack. Concrete example with O=
+penSBI." property=3D"twitter:description">
+    <meta content=3D"https://popovicu.com/RISC-V%20SBI%20and%20the%20full%2=
+0boot%20process.png" property=3D"twitter:image">
+
+    <!-- Google Font -->
+    <link href=3D"https://fonts.googleapis.com/" rel=3D"preconnect">
+    <link href=3D"https://fonts.gstatic.com/" rel=3D"preconnect" crossorigi=
+n=3D"">
+    <link href=3D"https://fonts.googleapis.com/css2?family=3DIBM+Plex+Mono:=
+ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&amp;display=3Dswap" rel=3D"st=
+ylesheet">
+
+   =20
+
+   =20
+  <link href=3D"https://popovicu.com/_astro/about.5b2af2d6.css" rel=3D"styl=
+esheet">
+<link href=3D"https://popovicu.com/_astro/about.6e6daff0.css" rel=3D"styles=
+heet">
+<link href=3D"https://popovicu.com/_astro/_slug_.40cf44c5.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.41a32359.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.3b14054e.css" rel=3D"style=
+sheet">
+<link href=3D"https://popovicu.com/_astro/_slug_.906d67ca.css" rel=3D"style=
+sheet"></head>
+  <body>
+   =20
+  <header class=3D"astro-3EF6KSR2">
+  <a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#m=
+ain-content" class=3D"astro-3EF6KSR2" id=3D"skip-to-content">Skip to conten=
+t</a>
+  <div class=3D"astro-3EF6KSR2 nav-container">
+    <div class=3D"astro-3EF6KSR2 top-nav-wrap">
+      <a href=3D"https://popovicu.com/" class=3D"astro-3EF6KSR2 logo">
+        Uros Popovic
+      </a>
+      <nav class=3D"astro-3EF6KSR2" id=3D"nav-menu">
+        <button class=3D"astro-3EF6KSR2 focus-outline hamburger-menu" aria-=
+label=3D"Open Menu" aria-controls=3D"menu-items" aria-expanded=3D"false">
+          <svg class=3D"astro-3EF6KSR2 menu-icon" xmlns=3D"http://www.w3.or=
+g/2000/svg" stroke-linecap=3D"round" stroke-linejoin=3D"round" fill=3D"none=
+" height=3D"24" stroke=3D"currentColor" stroke-width=3D"1.5" viewBox=3D"0 0=
+ 24 24" width=3D"24">
+            <line x1=3D"7" x2=3D"21" y1=3D"12" y2=3D"12" class=3D"line astr=
+o-3EF6KSR2"></line>
+            <line x1=3D"3" x2=3D"21" y1=3D"6" y2=3D"6" class=3D"line astro-=
+3EF6KSR2"></line>
+            <line x1=3D"12" x2=3D"21" y1=3D"18" y2=3D"18" class=3D"line ast=
+ro-3EF6KSR2"></line>
+            <line x1=3D"18" x2=3D"6" y1=3D"6" y2=3D"18" class=3D"astro-3EF6=
+KSR2 close"></line>
+            <line x1=3D"6" x2=3D"18" y1=3D"6" y2=3D"18" class=3D"astro-3EF6=
+KSR2 close"></line>
+          </svg>
+        </button>
+        <ul class=3D"astro-3EF6KSR2 display-none sm:flex" id=3D"menu-items"=
+>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/posts" class=3D"astro-3EF6KSR2"=
+>
+              Posts
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/tags" class=3D"astro-3EF6KSR2">
+              Tags
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/about" class=3D"astro-3EF6KSR2"=
+>
+              About
+            </a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <a href=3D"https://popovicu.com/search" class=3D"astro-3EF6KSR2=
+ focus-outline astro-5EUNQZKT group inline-block p-3 sm:p-1" tabindex=3D"0"=
+ title=3D"Search" aria-label=3D"search">
+ =20
+              <svg class=3D"astro-3EF6KSR2 scale-125 sm:scale-100" xmlns=3D=
+"http://www.w3.org/2000/svg"><path d=3D"M19.023 16.977a35.13 35.13 0 0 1-1.=
+367-1.384c-.372-.378-.596-.653-.596-.653l-2.8-1.337A6.962 6.962 0 0 0 16 9c=
+0-3.859-3.14-7-7-7S2 5.141 2 9s3.14 7 7 7c1.763 0 3.37-.66 4.603-1.739l1.33=
+7 2.8s.275.224.653.596c.387.363.896.854 1.384 1.367l1.358 1.392.604.646 2.1=
+21-2.121-.646-.604c-.379-.372-.885-.866-1.391-1.36zM9 14c-2.757 0-5-2.243-5=
+-5s2.243-5 5-5 5 2.243 5 5-2.243 5-5 5z" class=3D"astro-3EF6KSR2"></path>
+              </svg>
+           =20
+</a>
+          </li>
+          <li class=3D"astro-3EF6KSR2">
+            <button class=3D"astro-3EF6KSR2 focus-outline" aria-label=3D"li=
+ght" aria-live=3D"polite" id=3D"theme-btn" title=3D"Toggles light &amp; dar=
+k">
+                  <svg class=3D"astro-3EF6KSR2" xmlns=3D"http://www.w3.org/=
+2000/svg" id=3D"moon-svg">
+                    <path d=3D"M20.742 13.045a8.088 8.088 0 0 1-2.077.271c-=
+2.135 0-4.14-.83-5.646-2.336a8.025 8.025 0 0 1-2.064-7.723A1 1 0 0 0 9.73 2=
+.034a10.014 10.014 0 0 0-4.489 2.582c-3.898 3.898-3.898 10.243 0 14.143a9.9=
+37 9.937 0 0 0 7.072 2.93 9.93 9.93 0 0 0 7.07-2.929 10.007 10.007 0 0 0 2.=
+583-4.491 1.001 1.001 0 0 0-1.224-1.224zm-2.772 4.301a7.947 7.947 0 0 1-5.6=
+56 2.343 7.953 7.953 0 0 1-5.658-2.344c-3.118-3.119-3.118-8.195 0-11.314a7.=
+923 7.923 0 0 1 2.06-1.483 10.027 10.027 0 0 0 2.89 7.848 9.972 9.972 0 0 0=
+ 7.848 2.891 8.036 8.036 0 0 1-1.484 2.059z" class=3D"astro-3EF6KSR2"></pat=
+h>
+                  </svg>
+                  <svg class=3D"astro-3EF6KSR2" xmlns=3D"http://www.w3.org/=
+2000/svg" id=3D"sun-svg">
+                    <path d=3D"M6.993 12c0 2.761 2.246 5.007 5.007 5.007s5.=
+007-2.246 5.007-5.007S14.761 6.993 12 6.993 6.993 9.239 6.993 12zM12 8.993c=
+1.658 0 3.007 1.349 3.007 3.007S13.658 15.007 12 15.007 8.993 13.658 8.993 =
+12 10.342 8.993 12 8.993zM10.998 19h2v3h-2zm0-17h2v3h-2zm-9 9h3v2h-3zm17 0h=
+3v2h-3zM4.219 18.363l2.12-2.122 1.415 1.414-2.12 2.122zM16.24 6.344l2.122-2=
+.122 1.414 1.414-2.122 2.122zM6.342 7.759 4.22 5.637l1.415-1.414 2.12 2.122=
+zm13.434 10.605-1.414 1.414-2.122-2.122 1.414-1.414z" class=3D"astro-3EF6KS=
+R2"></path>
+                  </svg>
+                </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </div>
+  <div class=3D"max-w-3xl mx-auto px-4">
+  <hr aria-hidden=3D"true" class=3D"border-skin-line">
+</div>
+</header>
+  <div class=3D"astro-VJ4TPSPI flex justify-start max-w-3xl mx-auto px-2 w-=
+full">
+    <button class=3D"astro-VJ4TPSPI flex focus-outline hover:opacity-75 mb-=
+2 mt-8">
+      <svg class=3D"astro-VJ4TPSPI" xmlns=3D"http://www.w3.org/2000/svg"><p=
+ath d=3D"M13.293 6.293 7.586 12l5.707 5.707 1.414-1.414L10.414 12l4.293-4.2=
+93z" class=3D"astro-VJ4TPSPI"></path>
+      </svg><span class=3D"astro-VJ4TPSPI">Go back</span>
+    </button>
+  </div>
+  <main class=3D"astro-VJ4TPSPI" id=3D"main-content">
+    <h1 class=3D"astro-VJ4TPSPI post-title">RISC-V SBI and the full boot pr=
+ocess</h1>
+    <div class=3D"astro-VJ4TPSPI flex items-center my-2 opacity-80 space-x-=
+2"><svg class=3D"inline-block fill-skin-base h-6 scale-100 w-6" xmlns=3D"ht=
+tp://www.w3.org/2000/svg" aria-hidden=3D"true"><path d=3D"M7 11h2v2H7zm0 4h=
+2v2H7zm4-4h2v2h-2zm0 4h2v2h-2zm4-4h2v2h-2zm0 4h2v2h-2z"></path><path d=3D"M=
+5 22h14c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2h-2V2h-2v2H9V2H7v2H5c-1.103 =
+0-2 .897-2 2v14c0 1.103.897 2 2 2zM19 8l.001 12H5V8h14z"></path></svg><span=
+ class=3D"sr-only">Posted on:</span><span class=3D"italic text-base">Septem=
+ber 9, 2023<span aria-hidden=3D"true"> | </span><span class=3D"sr-only">&nb=
+sp;at&nbsp;</span>09:00 PM</span></div>
+    <article class=3D"astro-VJ4TPSPI max-w-3xl mx-auto mt-8 prose" id=3D"ar=
+ticle" role=3D"article">
+      <p><iframe id=3D"twitter-widget-0" scrolling=3D"no" frameborder=3D"0"=
+ allowtransparency=3D"true" allowfullscreen=3D"true" class=3D"twitter-follo=
+w-button twitter-follow-button-rendered" style=3D"position: static; visibil=
+ity: visible; width: 153px; height: 20px;" title=3D"Twitter Follow Button" =
+src=3D"cid:frame-4B7706989EDDC5C5A2E54B1AFA157DDB@mhtml.blink" data-screen-=
+name=3D"popovicu94"></iframe></p>
+<p>In the last article, we covered <a href=3D"https://popovicu.com/posts/ba=
+re-metal-programming-risc-v">bare metal programming on RISC-V</a>. Please f=
+amiliarize yourself with that material before proceeding with the rest of t=
+his article, as this article is a direct continuation of the aforementioned=
+ one.</p>
+<p>This time we are talking about RISC-V <strong>SBI (Supervisor Binary Int=
+erface)</strong>, with <strong>OpenSBI</strong> as the example. We=E2=80=99=
+ll look at how SBI can assist us with implementing operating system kernel =
+primitives and we=E2=80=99ll end the article with a practical example using=
+ <code>riscv64 virt</code> machine.</p>
+<h2 id=3D"table-of-contents">Table of contents</h2>
+<p></p><details><summary>Open Table of contents</summary><p></p>
+<ul>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+risc-v-and-bios">RISC-V and =E2=80=9CBIOS=E2=80=9D</a></p>
+<ul>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#machine-modes">Machine modes</a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#sbi">SBI</a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#fancy-abstractions">Fancy abstractions</a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#binary-interface">Binary interface</a></li>
+</ul>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+practical-example-with-opensbi">Practical example with OpenSBI</a></p>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+booting-the-os-kernel-after-sbi-and-calling-into-opensbi">Booting the OS ke=
+rnel after SBI and calling into OpenSBI</a></p>
+<ul>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+what-really-happens-in-the-zsbl">What really happens in the ZSBL?</a></p>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+3-flavors-of-opensbi">3 flavors of OpenSBI</a></p>
+<ul>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#fw_payload"><code>FW_PAYLOAD</code></a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#fw_jump"><code>FW_JUMP</code></a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#fw_dynamic"><code>FW_DYNAMIC</code></a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#exploring-the-fw_dynamic_info-struct">Exploring the <code>fw_dynamic_info<=
+/code> struct</a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#building-an-infinite-loop-fake-kernel">Building an =E2=80=9Cinfinite-loop =
+fake kernel=E2=80=9D</a></li>
+<li><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/=
+#intentionally-skipped-details">Intentionally skipped details</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+hello-world-fake-kernel">Hello world fake kernel</a></p>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+conclusion">Conclusion</a></p>
+</li>
+<li>
+<p><a href=3D"https://popovicu.com/posts/risc-v-sbi-and-full-boot-process/#=
+code-pointers">Code pointers</a></p>
+</li>
+</ul>
+<p></p></details><p></p>
+<h2 id=3D"risc-v-and-bios">RISC-V and =E2=80=9CBIOS=E2=80=9D</h2>
+<p>In the article mentioned above, we talked extensively about the very fir=
+st stages of the RISC-V bootup process. We mentioned that first the ZSBL (Z=
+ero Stage Bootloader) runs, initializes a few registers and jumps directly =
+to some address hardcoded by ZSBL. In the case of QEMU=E2=80=99s <code>risc=
+v64 virt</code>, the hardcoded address is <code>0x80000000</code>. This is =
+where the first user-provided code runs, and if left to default, QEMU will =
+load <code>OpenSBI</code> there.</p>
+<h3 id=3D"machine-modes">Machine modes</h3>
+<p>So far we have avoided talking about different machine modes, and now is=
+ the perfect time to introduce them. The concept with machines modes is tha=
+t not every piece of software should be able to access just about any memor=
+y address on the machine, or even execute just about any instructions avail=
+able with the CPU. Traditionally, in a textbook example, the two main divis=
+ions are made here:</p>
+<ol>
+<li>Privileged mode</li>
+<li>Unprivileged mode</li>
+</ol>
+<p>The <em>privileged mode</em> is where the machine starts at the boot tim=
+e. Any instruction is permitted and no address access is considered an acce=
+ss violation. Once the operating system takes over the control of the syste=
+m and starts launching the user code (aka userspace code), the modes start =
+switching. When the user code is running on the CPU core, it is running wit=
+hin the <em>unprivileged mode</em> where not everything is accessible. Goin=
+g back to the kernel mode means switching back to the privilged mode.</p>
+<p>This is a very textbook and simplistic view at the permissions of operat=
+ions and the question arises: why only 2 modes?</p>
+<p>In systems, more than 2 modes typically exist, forming a <a href=3D"http=
+s://en.wikipedia.org/wiki/Protection_ring">protection ring</a> with multipl=
+e access modes. RISC-V specification does not necessarily prescribe exactly=
+ which modes must be implemented for a core, except the <strong>M (Machine)=
+</strong> mode. This is the most privileged mode.</p>
+<p>Typically, the processors with M mode only are simple embedded systems, =
+moving over more secure systems (M and S modes), all the way to full system=
+s that can run Unix-like operating systems (M, S and U modes).</p>
+<h3 id=3D"sbi">SBI</h3>
+<p>The <a href=3D"https://github.com/riscv-non-isa/riscv-sbi-doc">official =
+docs</a> provide a formal definition, and I will try to water it down here =
+with the goals of making it more intuitive.</p>
+<p>RISC-V=E2=80=99s SBI spec defines the layer of software that sits at the=
+ bottom of the RISC-V software stack. This is very similar to BIOS, which i=
+s traditionally the first bit of software that runs on a machine. You might=
+ have seen some of the guides for developing a simple kernel from scratch, =
+and they typically involve something similar to what we did in the <a href=
+=3D"https://popovicu.com/posts/bare-metal-programming-risc-v">initial guide=
+</a> for bare metal programming on RISC-V, with a small twist =E2=80=94 the=
+y are very often actually depending on the pre-existing software to do some=
+ I/O. The similarity to our previous guide is that they also carefully alig=
+n the first instructions to the correct address to ensure that the processo=
+r=E2=80=99s execution flow goes as intended and the simple kernel takes ove=
+r at the right time, however, what I have typically observed in those short=
+ guides is that the goal is typically to print something like =E2=80=98Hell=
+o world=E2=80=99 to <strong>the VGA screen</strong>. This last bit sounds l=
+ike a fairly complex operation, and it really is.</p>
+<p>How is printing to the VGA then done easily then? The answer is that BIO=
+S is here to assist with the most basic I/O operations such as printing som=
+e characters to the screen, hence its name =E2=80=94 <strong>B</strong>asic=
+ <strong>I</strong>nput <strong>O</strong>utput <strong>S</strong>ystem! Pl=
+ease pay attention to the opening section of the bare metal programming gui=
+de: we were achieving interaction with the user <em>without</em> depending =
+on <em>any</em> existing software on the machine (well, almost true, we sti=
+ll went through the Zero Stage Bootloader, but we didn=E2=80=99t depend on =
+any outcome from it, nor we really had any control over it; it=E2=80=99s si=
+mply hardcoded into the system). If we were to print something on the VGA s=
+creen, instead of sending characters out through UART, we would have to do =
+a lot more than send an ASCII code to a single address. VGA involves settin=
+g up the display device into the right mode, by sending multiple values ove=
+r, setting up different parameters, etc. It=E2=80=99s a fairly ellaborate o=
+peration.</p>
+<p>So how does BIOS traditionally help with tasks like these? The main conc=
+ept is that whatever operating system ends up installed on the machine, it =
+would anyway need some basic functionality, such as printing some informati=
+on to the VGA screen. Thus, the machine can have these standard operations =
+simply baked into it and ready to consume by whatever operating system ends=
+ up on the machine. Conceptually, we can think of these procedures as an ev=
+eryday library we write our applications against.</p>
+<p>Additionally, if an operating system is written against such a =E2=80=9C=
+library=E2=80=9D, it automatically becomes more portable. The =E2=80=9Clibr=
+ary=E2=80=9D should have all the low level details, such as =E2=80=9Coutput=
+ting to UART means writing to <code>0x10000000</code>=E2=80=9D (as is the c=
+ase with QEMU=E2=80=99s <code>riscv64 virt</code> VM), vs. =E2=80=9Coutputt=
+ing to UART means writing to <code>0x12345678</code>=E2=80=9D, and the oper=
+ating system simply needs to invoke =E2=80=9Coutputting to UART=E2=80=9D pr=
+ocedure, while this =E2=80=9Clibrary=E2=80=9D will know exactly how to inte=
+ract with the hardware.</p>
+<h3 id=3D"fancy-abstractions">Fancy abstractions</h3>
+<p>This is all just a lot of talk for a very simple concept we have been us=
+ing in programming since day 1: we apply <strong>layers of abstractions</st=
+rong> in our coding. Think of something like a Python function that does so=
+mething like =E2=80=9Csending a local file to an email address=E2=80=9D. Fr=
+om a high level perspective, we simply call a function <code>send_file_to_e=
+mail(file, email)</code> and the underlying library opens up the network co=
+nnection and starts pumping the bytes. This could be just another Python li=
+brary. At some point, that will likely move down the software stack, and th=
+e Python library will depend on the Python runtime written in something lik=
+e C to make a system call to the operating system (for example, to perform =
+a core operation such as opening a network socket). The operating system ha=
+s a network driver somewhere deep down, which knows to which address in the=
+ address space does it need to send the individual bytes in order to send t=
+he bytes over the wire to the network and so on. The main concept here is t=
+hat we have an established way of hiding the complexity of operations by de=
+legating them to the lower layers of the software stack. We built the large=
+r system not from the atomic parts, but out of =E2=80=9Cmolecules=E2=80=9D.=
+</p>
+<p>If we=E2=80=99re delegating the complexity to the underlying library, it=
+ probably just means a function call. However, once it=E2=80=99s time to de=
+legate the complexity to the operating system and lower, this happens throu=
+gh a <strong>binary interface</strong>.</p>
+<h3 id=3D"binary-interface">Binary interface</h3>
+<p>Since basically forever, the <code>x86</code> has been the dominant arch=
+itecture for the computers we use, be it desktops or laptops. Things have b=
+een changing a lot lately, and other architectures are entering the picture=
+, but let=E2=80=99s focus on just <code>x86</code>. What then, makes an app=
+lication built for Linux incompatible with the application for Windows? If =
+it=E2=80=99s written for <code>x86</code>, and both Linux and Windows run o=
+n <code>x86</code>, what could possibly be the differentiator here? The CPU=
+ instructions are not different from one platform and the other, so what co=
+uld it be? The answer is the <strong>interface between the application and =
+the operating system</strong>. This particular link between the user softwa=
+re and the operating system is called the <strong>application binary interf=
+ace (ABI)</strong>. ABI is just a definition that says how the services fro=
+m the operating system are invoked from the user application.</p>
+<p>Therefore, when we say something like =E2=80=9Cthis software is written =
+for platform X=E2=80=9D, it=E2=80=99s not enough to just say that X is <cod=
+e>x86</code> or <code>RISC-V</code>, we must say <code>x86/Linux</code> or =
+<code>x86/Windows</code> or <code>RISC-V Linux</code> etc. The platform def=
+inition may be even more complex than that if things like dynamic linking a=
+re involved, but let us not go there for now.</p>
+<p>Let=E2=80=99s take a quick example at a program written in assembly for =
+<code>x86/Linux</code> that just prints a =E2=80=98Hello=E2=80=99 string to=
+ the standard output.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">.global _=
+start</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">.</span><span style=3D"c=
+olor:#61afef">section .text</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#61afef">_start:</span><span styl=
+e=3D"color:#abb2bf"> </span><span style=3D"color:#c678dd">mov</span><span s=
+tyle=3D"color:#abb2bf"> </span><span style=3D"color:#d19a66">$4</span><span=
+ style=3D"color:#abb2bf">, %</span><span style=3D"color:#d19a66">eax</span>=
+<span style=3D"color:#abb2bf"> </span><span style=3D"color:#7f848e;font-sty=
+le:italic">; 4 is the code for the 'write' system call</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">mov</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#d19a66">$1</span><span style=3D"color:#abb2bf">, %</span><s=
+pan style=3D"color:#d19a66">ebx</span><span style=3D"color:#abb2bf"> </span=
+><span style=3D"color:#7f848e;font-style:italic">; We are writing to file 1=
+, i.e. the 'standard output'</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">mov</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#e06c75">$message</span><span style=3D"color:#abb2bf">, %</s=
+pan><span style=3D"color:#d19a66">ecx</span><span style=3D"color:#abb2bf"> =
+</span><span style=3D"color:#7f848e;font-style:italic">; The data we want t=
+o print is at the address defined by the symbol message</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">mov</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#d19a66">$5</span><span style=3D"color:#abb2bf">, %</span><s=
+pan style=3D"color:#d19a66">edx</span><span style=3D"color:#abb2bf"> </span=
+><span style=3D"color:#7f848e;font-style:italic">; The length of the data w=
+e want to print is 5</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">int</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#e06c75">$0x80</span><span style=3D"color:#abb2bf"> </span><=
+span style=3D"color:#7f848e;font-style:italic">; Invoke the system call, i.=
+e. ask kernel to print the data to the standard output</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">mov</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#d19a66">$1</span><span style=3D"color:#abb2bf">, %</span><s=
+pan style=3D"color:#d19a66">eax</span><span style=3D"color:#abb2bf"> </span=
+><span style=3D"color:#7f848e;font-style:italic">; 1 is the code for the 'e=
+xit' system call</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">mov</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#d19a66">$0</span><span style=3D"color:#abb2bf">, %</span><s=
+pan style=3D"color:#d19a66">ebx</span><span style=3D"color:#abb2bf"> </span=
+><span style=3D"color:#7f848e;font-style:italic">; 0 is the process return =
+code</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        </span><span sty=
+le=3D"color:#c678dd">int</span><span style=3D"color:#abb2bf"> </span><span =
+style=3D"color:#e06c75">$0x80</span><span style=3D"color:#abb2bf">  </span>=
+<span style=3D"color:#7f848e;font-style:italic">; Invoke the system call, i=
+.e. ask the the kernel to close this process</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">.</span><span style=3D"c=
+olor:#61afef">section .data</span></span>
+<span class=3D"line"><span style=3D"color:#61afef">message:</span><span sty=
+le=3D"color:#abb2bf"> .ascii "Hello"</span></span></code></pre>
+<p>Assemble this program with:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">as -o sys=
+call.o syscall.s</span></span></code></pre>
+<p>Link it with:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">ld -o sys=
+call syscall.o</span></span></code></pre>
+<p>Run with:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">./syscall=
+</span></span></code></pre>
+<p>You should see the output =E2=80=9CHello=E2=80=9D. If you=E2=80=99re on =
+Bash and you also want to double check the process return code, simply run:=
+</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">echo $?</=
+span></span></code></pre>
+<p>And you should see <code>0</code>.</p>
+<p><em>Tip: If you want to try out this example from above, but you do not =
+have access to an x86/Linux machine, you can do this through a JavaScript V=
+M that emulates an x86 system in-browser <a href=3D"https://bellard.org/jsl=
+inux/">here</a>; that=E2=80=99s a really cool website!</em></p>
+<p>And there we have it: a program which prints a message to the standard o=
+utput when run on an <code>x86</code> machine with a Linux kernel. C standa=
+rd library <strong>was not used</strong>. The final <code>ELF</code> binary=
+ should run on Linux with no dependencies other than it is run on the corre=
+ct platform.</p>
+<p>Now back to the question, what makes this binary incompatible with Windo=
+ws (potentially)? <strong>Another operating system encodes the system calls=
+ differently (e.g. writing isn=E2=80=99t code 4, but code 123, or the param=
+eters are passed through different CPU registers).</strong> And now you hav=
+e a good idea of how to directly interface with the kernel, without the ass=
+istance of the standard library (although you probably almost never want to=
+ do it). This means you have uncovered the layer at which software does thi=
+ngs like opening files, allocates memory, sends signals, etc. The C standar=
+d library can be thought of as a wrapper which hides this complexity of inv=
+oking software interrupts through the <code>int</code> instruction to commu=
+nicate with the kernel, and instead makes it look like a normal call to a C=
+ function, and then under the hood, this is what it is. To be fair, the lib=
+rary does a lot more than that, but for the purposes of this article, it ca=
+n be thought of simply as a wrapper.</p>
+<p>And now in the RISC-V world, we have the same thing: the user applicatio=
+n interfaces with the kernel through software interrupt CPU instructions, a=
+nd passing the parameters through the CPU registers. And the kernel basical=
+ly does <strong>the same thing</strong> with the SBI in order to invoke its=
+ services! It=E2=80=99s just that this final layer of logic invocation is c=
+alled the <strong>SBI</strong>, not the <strong>ABI</strong>. A way to thin=
+k about it is that it is not the <strong>application</strong> that works in=
+ the lower layer, but rather the <strong>supervisor</strong> of the applica=
+tions. The difference, however, is in the name only, and the concept remain=
+s absolutely the same.</p>
+<h2 id=3D"practical-example-with-opensbi">Practical example with OpenSBI</h=
+2>
+<p>At this point we have established that SBI, much like ABI, is just a way=
+ of invoking a functionality in the lower layers of the software stack. Fur=
+thermore, we also established the SBI sits at the bottom of the software st=
+ack on a RISC-V machine, and runs in the most privileged M mode. Let=E2=80=
+=99s add some more details to this picture.</p>
+<p>It should also make sense at this point why the QEMU developers chose th=
+e <code>-bios</code> flag in order to accept the SBI software image (becaus=
+e the functionality is basically the same as BIOS). As a reminder, the <cod=
+e>-bios</code> flag should point to an <code>ELF</code> file that will lay =
+out the SBI software out in memory starting from address <code>0x80000000</=
+code>.</p>
+<p>Let=E2=80=99s start the QEMU=E2=80=99s VM with just OpenSBI loaded, and =
+see what happens. We shouldn=E2=80=99t really have to pass anything to QEMU=
+ since it defaults to loading OpenSBI at <code>0x80000000</code>.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt</span></span></code></pre>
+<p>This is the output (on the serial port, not VGA):</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">OpenSBI v=
+0.8</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">   ____                 =
+   _____ ____ _____</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  / __ \                =
+  / ____|  _ \_   _|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | |_ __   ___ _ __=
+ | (___ | |_) || |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | | '_ \ / _ \ '_ =
+\ \___ \|  _ &lt; | |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |__| | |_) |  __/ | |=
+ |____) | |_) || |_</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  \____/| .__/ \___|_| |=
+_|_____/|____/_____|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        | |</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf">        |_|</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Name       : ri=
+scv-virtio,qemu</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Features   : ti=
+mer,mfdeleg</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform HART Count : 1<=
+/span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ID        : 0<=
+/span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ISA       : rv=
+64imafdcsu</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">BOOT HART Features  : pm=
+p,scounteren,mcounteren,time</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">BOOT HART PMP Count : 16=
+</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Base       : 0x=
+80000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Size       : 96=
+ KB</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Runtime SBI Version : 0.=
+2</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">MIDELEG : 0x000000000000=
+0222</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">MEDELEG : 0x000000000000=
+b109</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">PMP0    : 0x000000008000=
+0000-0x000000008001ffff (A)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">PMP1    : 0x000000000000=
+0000-0xffffffffffffffff (A,R,W,X)</span></span></code></pre>
+<p>The machine keeps spinning in place, presumably because it is set up to =
+do so by default since there is no other piece of software passed to QEMU t=
+o take over the control after OpenSBI. At this point, things look good, it =
+seems like OpenSBI has been set up properly (and its output confirms that i=
+t sits right at <code>0x80000000</code>).</p>
+<p>How do we keep going up the software stack, how do we add a new layer? T=
+he new layer could be something like an operating system kernel, so similar=
+ly to how we have previously built an <code>ELF</code> file containing inst=
+ructions to be placed at <code>0x80000000</code>, we will build another <co=
+de>ELF</code> file for QEMU to load into its memory, but this time the inst=
+ructions will come to another address, since the portion starting at <code>=
+0x80000000</code> has already been taken over by OpenSBI.</p>
+<p>Which address should we load our fake =E2=80=9Ckernel=E2=80=9D at, then?=
+</p>
+<h2 id=3D"booting-the-os-kernel-after-sbi-and-calling-into-opensbi">Booting=
+ the OS kernel after SBI and calling into OpenSBI</h2>
+<p>When we loaded the BIOS/SBI/whatever you want to call it, the address wa=
+s basically burnt into the machine=E2=80=99s logic. The first few instructi=
+ons were Zero Stage Bootloader (ZSBL) and the final instruction from there =
+was jumping to the hardcoded address <code>0x80000000</code>. As we previou=
+sly mentioned, this is an immutable fact of the platform we=E2=80=99re work=
+ing with, it=E2=80=99s just simply what it does. However, that=E2=80=99s al=
+l it really hardcodes at this point: it just hardcodes that you will have t=
+o start from <code>0x80000000</code>, and now we have OpenSBI placed there,=
+ so where does OpenSBI take us next?</p>
+<p>Now enters the importance of the <strong>ZSBL</strong> again and now it =
+really matters how it initializes those registers before performing that ha=
+rdcoded jump to <code>0x80000000</code>. What ZSBL really does is two thing=
+s:</p>
+<ol>
+<li>Ensures that the software running <strong>after</strong> OpenSBI=E2=80=
+=99s initialization can run, and this is basically the OS kernel bootloader=
+, or it could be the kernel itself directly (which is what you typically se=
+e in QEMU guides where you launch Linux, bootloader is skipped and the memo=
+ry is immediately loaded with the kernel).</li>
+<li>Jumps to the OpenSBI.</li>
+</ol>
+<p>We have covered the second point in great detail so far, so let=E2=80=99=
+s now dig deeper into how does it accomplish point #1.</p>
+<h3 id=3D"what-really-happens-in-the-zsbl">What really happens in the ZSBL?=
+</h3>
+<p>We have mentioned before that ZSBL execution starts at the address <code=
+>0x1000</code>. Let=E2=80=99s trace the execution through QEMU and see what=
+=E2=80=99s going on. To do that, we=E2=80=99ll add 2 flags to the QEMU CLI =
+command: <code>-s</code> and <code>-S</code>. These flags ensure that QEMU =
+exposes a <code>gdb</code> debug port, and additionally, the VM pauses imme=
+diately upon creation, waiting for us to drive it manually (which we will d=
+o through <code>gdb</code>).</p>
+<p>Let=E2=80=99s begin this reverse engineering process. We=E2=80=99re star=
+ting QEMU as so:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt -s -S</span></span></code></pre>
+<p>In another terminal, we connect to the <code>gdb</code> server nested in=
+ QEMU, so we can drive the VM forward. I am doing this on an <code>x86</cod=
+e> machine, so I will use <code>gdb-multiarch</code> so I can do a cross-pl=
+atform debug for <code>riscv</code>. So in this new terminal, I just run:</=
+p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">gdb-multi=
+arch</span></span></code></pre>
+<p>I want to set up a few things before I connect into the VM to drive it f=
+orward:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">set archi=
+tecture riscv:rv64</span></span></code></pre>
+<p>It should be obvious what the line above does. Next, I want to get the a=
+ctual running instruction printed to my terminal each time I move one instr=
+uction:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">set disas=
+semble-next-line on</span></span></code></pre>
+<p>It=E2=80=99s time to connect to the QEMU <code>gdb</code> server (port <=
+code>1234</code> is I believe hardcoded by QEMU, though it <em>may</em> be =
+configurable by the <code>-s</code> flag somehow; I never tried it and I do=
+n=E2=80=99t think you=E2=80=99ll need to change this behavior)</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">target re=
+mote :1234</span></span></code></pre>
+<p>And right there, <code>gdb</code> is waiting for us at <code>0x1000</cod=
+e>, exactly where the very first instruction after power on happens. We wil=
+l use <code>si</code> a few times to step through instructions one by one, =
+until we get to the jump to SBI at <code>0x80000000</code>.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">(gdb) tar=
+get remote:1234</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Remote debugging using :=
+1234</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">warning: No executable h=
+as been specified and target does not support</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">determining executable a=
+utomatically.  Try using the "file" command.</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000000001000 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+00:	97 02 00 00	auipc	t0,0x0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000000001004 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+04:	13 86 82 02	addi	a2,t0,40</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000000001008 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+08:	73 25 40 f1	csrr	a0,mhartid</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x000000000000100c in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+0c:	83 b5 02 02	ld	a1,32(t0)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000000001010 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+10:	83 b2 82 01	ld	t0,24(t0)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000000001014 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000000010=
+14:	67 80 02 00	jr	t0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) si</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x0000000080000000 in ??=
+ ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000800000=
+00:	33 04 05 00	add	s0,a0,zero</span></span></code></pre>
+<p>There were only 6 instructions in ZSBL before handing the control over t=
+o the OpenSBI, including the jump itself. However, what are these few instr=
+uctions that happened, what is their significance?</p>
+<p>It turns out that all this is part of the SBI specification too, it=E2=
+=80=99s a part of the boot sequence. However, with OpenSBI, there are 3 dif=
+ferent flavors of this dance, and let=E2=80=99s look at those flavors first=
+ before getting into a lot of details on what happens after the ZSBL.</p>
+<h3 id=3D"3-flavors-of-opensbi">3 flavors of OpenSBI</h3>
+<p>You can build OpenSBI in 3 different ways:</p>
+<ol>
+<li><code>FW_PAYLOAD</code> (<a href=3D"https://github.com/riscv-software-s=
+rc/opensbi/blob/master/docs/firmware/fw_payload.md">official docs</a>)</li>
+<li><code>FW_JUMP</code> (<a href=3D"https://github.com/riscv-software-src/=
+opensbi/blob/master/docs/firmware/fw_jump.md">official docs</a>)</li>
+<li><code>FW_DYNAMIC</code> (<a href=3D"https://github.com/riscv-software-s=
+rc/opensbi/blob/master/docs/firmware/fw_dynamic.md">official docs</a>)</li>
+</ol>
+<h4 id=3D"fw_payload"><code>FW_PAYLOAD</code></h4>
+<p>This one is probably the easiest to understand conceptually. When buildi=
+ng this flavor of OpenSBI, you will literally point the <code>make</code> t=
+ool to your kernel/=E2=80=9Cwhatever you want to run after OpenSBI=E2=80=9D=
+ image and you will get a single binary payload that you can directly load =
+wherever you first CPU instructions start from (in QEMU=E2=80=99s VM case, =
+<code>0x80000000</code>). As I understand, it is possible to tweak the exac=
+t location of your software in relation to the OpenSBI blob in the memory, =
+but for simplicity, the mental model we can apply here is that OpenSBI and =
+your software blob are spliced together into a single blob and once the Ope=
+nSBI initialization finishes, the very next instruction is your software (y=
+ou basically slide right into your software after OpenSBI).</p>
+<p>The way to achieve this is:</p>
+<ol>
+<li>Make sure <code>FW_PAYLOAD=3Dy</code> is set in the <code>make</code> p=
+rocess, this will ensure a file called <code>fw_payload</code> is generated=
+.</li>
+<li>Point <code>FW_PAYLOAD_PATH</code> in your <code>make</code> process to=
+ the software you want to run after OpenSBI.</li>
+</ol>
+<p>Per the docs linked aboved, if you skip the second flag, a very simple p=
+iece of software will be spliced with OpenSBI: a blank infinite loop. That =
+explains why when we just launched QEMU with no flags, basically with OpenS=
+BI only, the machine kept spinning in place =E2=80=94 OpenSBI was likely bu=
+ilt this way (since you can=E2=80=99t just keep executing random contents o=
+f the memory) and it was just busy waiting in place.</p>
+<p>The upside of this approach is that now you have a single, spliced, mono=
+lithic software image to load into your machine. You don=E2=80=99t have to =
+deal with multiple floating pieces, just one monolith. If your build proces=
+s for the software is straightforward, you may even end up with a really ea=
+sy way to manage all the software on the target machine, while getting all =
+the upside of having OpenSBI do some work for you.</p>
+<p>The downside is that you are now responsible for building everything tog=
+ether, including OpenSBI. What=E2=80=99s worse, if the machine already had =
+OpenSBI, let=E2=80=99s imagine, burnt into some ROM, it already has OpenSBI=
+ to boot up, having it twice on a machine likely won=E2=80=99t cut it.</p>
+<h4 id=3D"fw_jump"><code>FW_JUMP</code></h4>
+<p>This one is fairly simple too: you basically hardcode the address of you=
+r software that comes after OpenSBI. Similarly to above, 2 steps are needed=
+.</p>
+<ol>
+<li>Make sure <code>FW_JUMP=3Dy</code> is set in the <code>make</code> proc=
+ess, this will ensure a file called <code>fw_jump</code> is generated.</li>
+<li>Set <code>FW_JUMP_ADDR</code> in the <code>make</code> process to the a=
+ddress where OpenSBI should jump once its done.</li>
+</ol>
+<p>This is quite similar to what we had in the previous scenario, only the =
+jump address is hardcoded. It seems like in this case you are still necessa=
+rily responsible for building the OpenSBI image, but it=E2=80=99s easy to r=
+ebuild it and point to different addresses for different machines (let=E2=
+=80=99s say different machines with varying memory layouts).</p>
+<h4 id=3D"fw_dynamic"><code>FW_DYNAMIC</code></h4>
+<p>This one is the most generalized flavor and that=E2=80=99s why we leave =
+it for last. This is where the importance of the register set up in ZSLB sh=
+ines.</p>
+<p>In this flavor, the boot stage that happens before OpenSBI is in charge =
+of passing a few pointers to OpenSBI. In this case, we=E2=80=99re of course=
+ talking about the ZSBL. If we play close attention, we see that it touches=
+ the register <code>a2</code>.</p>
+<p>At this point, I would like to encourage the reader to also read the sec=
+tion on ZSBL from <a href=3D"https://embeddedinn.xyz/articles/tutorial/RISC=
+V-Uncovering-the-Mysteries-of-Linux-Boot-on-RISC-V-QEMU-Machines/#the-zero-=
+stage-bootloader-zsbl">this article</a>. The whole article is great, I just=
+ initially found it a little tough to go through, so consider this article =
+a warmup for understanding that article, it=E2=80=99s really worth going th=
+rough.</p>
+<p>Anyway, keeping this article watered down still =E2=80=94 what is the si=
+gnificance of setting up the register <code>a2</code> in ZSBL? <strong>It p=
+oints to a struct <code>struct fw_dynamic_info</code></strong> which gives =
+the dynamic OpenSBI flavor a way to continue going through the boot process=
+! In fact, one of the piece of data in this struct is the address of the ne=
+xt piece of software running after OpenSBI! A good question to ask is: on a=
+ real machine, who populates this struct? Based on what we=E2=80=99ll see b=
+elow, it=E2=80=99s obvious that QEMU hardcodes this content into the memory=
+, and that logic is not part a of the ZSBL, but I can definitely imagine a =
+device where ZSBL actually populates this struct and passes it on to OpenSB=
+I.</p>
+<p>Slide 17 of <a href=3D"https://riscv.org/wp-content/uploads/2019/06/13.3=
+0-RISCV_OpenSBI_Deep_Dive_v5.pdf">this presentation</a> by an engineer from=
+ Western Digital (presumably a core contributor to OpenSBI) outlines the co=
+ntents of this <code>struct</code>:</p>
+<ol>
+<li>Magic number</li>
+<li>Version</li>
+<li>Next address</li>
+<li>Next mode</li>
+<li>Options</li>
+</ol>
+<p>All of these are unsigned longs (I guess that means 64 bit, 8 bytes?).</=
+p>
+<h4 id=3D"exploring-the-fw_dynamic_info-struct">Exploring the <code>fw_dyna=
+mic_info</code> struct</h4>
+<p>At this point, let=E2=80=99s take a quick detour to make sure we=E2=80=
+=99re on the same page. Let=E2=80=99s quickly make sure we=E2=80=99re all l=
+ooking at the same version of the OpenSBI because different systems have di=
+fferent version of QEMU which may come with a different version of OpenSBI.=
+ Building OpenSBI from source is really straightforward, so let=E2=80=99s q=
+uickly do it. First, we need to clone the Git repo (time of writing of this=
+ article is 10th Sept 2023; if you want to achieve full reproducibility, bu=
+ild at a commit at this date):</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">git clone=
+ https://github.com/riscv-software-src/opensbi.git</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">cd opensbi</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">make ARCH=3Driscv CROSS_=
+COMPILE=3Driscv64-linux-gnu- PLATFORM=3Dgeneric</span></span></code></pre>
+<p>The build should be fairly fast and lightweight. The output file we=E2=
+=80=99re interested in is <code>build/platform/generic/firmware/fw_dynamic.=
+bin</code>. We=E2=80=99ll pass this through the <code>-bios</code> flag to =
+QEMU. Starting QEMU with (from the <code>opensbi</code> folder we just clon=
+ed with Git):</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt -s -S -bios build/platform/generic/firmware/fw_dyn=
+amic.bin</span></span></code></pre>
+<p>After a few <code>si</code>s in <code>gdb</code>, we get back to where w=
+e were before. Let=E2=80=99s poke QEMU=E2=80=99s memory to see what=E2=80=
+=99s going on there at the end of ZSBL. At the last instruction of ZSBL, we=
+ look at the register dump (we use <code>i r</code> for this).</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0=
+x0000000080000000:	33 04 05 00	add	s0,a0,zero</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) i r</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">ra             0x0	0x0</=
+span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">sp             0x0	0x0</=
+span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">gp             0x0	0x0</=
+span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">tp             0x0	0x0</=
+span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t0             0x8000000=
+0	2147483648</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t1             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t2             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">fp             0x0	0x0</=
+span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s1             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a0             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a1             0x87e0000=
+0	2279604224</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a2             0x1028	41=
+36</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a3             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a4             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a5             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a6             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">a7             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s2             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s3             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s4             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s5             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s6             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s7             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s8             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s9             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s10            0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">s11            0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t3             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t4             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t5             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">t6             0x0	0</sp=
+an></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">pc             0x8000000=
+0	0x80000000</span></span></code></pre>
+<p><code>a2</code> is therefore pointing to <code>0x1028</code>. As we said=
+, let=E2=80=99s poke that memory with <code>gdb</code>. We=E2=80=99ll ask i=
+t to read 10 successive 8-byte values starting from <code>0x1028</code>, an=
+d display them in hex format.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">(gdb) x/1=
+0xg 0x1028</span></span></code></pre>
+<p>The <code>g</code> flag prints out the memory contents in 8-byte (giant)=
+ chunks.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">(gdb) x/1=
+0xg 0x1028</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1028:	0x00000000494253=
+4f	0x0000000000000002</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1038:	0x00000000000000=
+00	0x0000000000000001</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1048:	0x00000000000000=
+00	0x0000000000000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1058:	0x00000000000000=
+00	0x0000000000000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1068:	0x00000000000000=
+00	0x0000000000000000</span></span></code></pre>
+<p>This roughly seems to match <a href=3D"https://embeddedinn.xyz/articles/=
+tutorial/RISCV-Uncovering-the-Mysteries-of-Linux-Boot-on-RISC-V-QEMU-Machin=
+es/#the-zero-stage-bootloader-zsbl">Vysakh=E2=80=99s article</a>. We defini=
+tely see the magic described in that article, followed by the <code>0x02</c=
+ode> info version. Next should be the address for the next jump, but there =
+are all zeroes=E2=80=A6 This is strange, but let=E2=80=99s keep looking. Ne=
+xt value is <code>0x01</code> which again, according to the article, should=
+ correspond to the next mode of execution which is <code>S</code>. This is =
+correct, we=E2=80=99re going from <code>M</code> mode running SBI to the <c=
+ode>S</code> mode running the OS kernel bootloader, or the kernel itself, w=
+hatever we want. Why is the address of the next jump all zeroes though? At =
+this point, I=E2=80=99ll just let QEMU run without interference from <code>=
+gdb</code>. I run the following in <code>gdb</code>:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">continue<=
+/span></span></code></pre>
+<p>Everything is sort of hanging, but I got a newer OpenSBI output on UART =
+since I am now running a newer version of OpenSBI:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">OpenSBI v=
+1.3-54-g901d3d7</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">   ____                 =
+   _____ ____ _____</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  / __ \                =
+  / ____|  _ \_   _|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | |_ __   ___ _ __=
+ | (___ | |_) || |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | | '_ \ / _ \ '_ =
+\ \___ \|  _ &lt; | |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |__| | |_) |  __/ | |=
+ |____) | |_) || |_</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  \____/| .__/ \___|_| |=
+_|_____/|____/_____|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        | |</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf">        |_|</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Name           =
+  : riscv-virtio,qemu</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Features       =
+  : medeleg</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform HART Count     =
+  : 1</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform IPI Device     =
+  : aclint-mswi</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Timer Device   =
+  : aclint-mtimer @ 10000000Hz</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Console Device =
+  : uart8250</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform HSM Device     =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform PMU Device     =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Reboot Device  =
+  : syscon-reboot</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Shutdown Device=
+  : syscon-poweroff</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Suspend Device =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform CPPC Device    =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Base           =
+  : 0x80000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Size           =
+  : 322 KB</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware RW Offset      =
+  : 0x40000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware RW Size        =
+  : 66 KB</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Heap Offset    =
+  : 0x48000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Heap Size      =
+  : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Scratch Size   =
+  : 4096 B (total), 768 B (used), 3328 B (free)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Runtime SBI Version     =
+  : 1.0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Name            =
+  : root</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Boot HART       =
+  : 0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 HARTs           =
+  : 0*</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region00        =
+  : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region01        =
+  : 0x0000000080040000-0x000000008005ffff M: (R,W) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region02        =
+  : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region03        =
+  : 0x0000000000000000-0xffffffffffffffff M: () S/U: (R,W,X)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Address    =
+  : 0x0000000000000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Arg1       =
+  : 0x0000000087e00000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Mode       =
+  : S-mode</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 SysReset        =
+  : yes</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 SysSuspend      =
+  : yes</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ID            =
+  : 0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Domain        =
+  : root</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Priv Version  =
+  : v1.10</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Base ISA      =
+  : rv64imafdc</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ISA Extensions=
+  : zicntr</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Count     =
+  : 16</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Granularit=
+y : 4</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Address Bi=
+ts: 54</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MHPM Info     =
+  : 0 (0x00000000)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MIDELEG       =
+  : 0x0000000000000222</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MEDELEG       =
+  : 0x000000000000b109</span></span></code></pre>
+<p>This matches what we saw above, the next address is all zeroes=E2=80=A6 =
+This is strange, there=E2=80=99s no way that could be true. I now ran QEMU =
+without the initial pause, just letting it run and connecting with <code>gd=
+b</code> asynchronously. I=E2=80=99ll spare you the details, but inspecting=
+ the registers on that =E2=80=9Clive run=E2=80=9D definitely showed to me t=
+hat nothing is executing in the <code>0x0000000000000000</code> area. The C=
+PU seems to be spinning around some other address.</p>
+<p>This likely has something to do with the fact that I actually didn=E2=80=
+=99t pass any software to QEMU to load other than OpenSBI, so that=E2=80=99=
+s probably what=E2=80=99s throwing it off. QEMU likely populated the struct=
+ in memory with all zeroes, and OpenSBI identifies it as an illegal edge ca=
+se, so it just keeps spinning in OpenSBI forever =E2=80=94 this is my educa=
+ted guess.</p>
+<p>How do we pass some software to run other than OpenSBI? <strong>The same=
+ way we passed OpenSBI, just a diferent flag name!</strong> This time, we=
+=E2=80=99re using the <code>-kernel</code> QEMU flag. And how are we going =
+to build this software? The same way we built the =E2=80=9Cfake BIOS=E2=80=
+=9D in our previous article, we=E2=80=99ll just map it to a different memor=
+y location. Let=E2=80=99s give it a shot at <code>0x80200000</code>.</p>
+<h4 id=3D"building-an-infinite-loop-fake-kernel">Building an =E2=80=9Cinfin=
+ite-loop fake kernel=E2=80=9D</h4>
+<p>Our OS kernel will just spin in place. It will be a single jump instruct=
+ion at <code>0x80200000</code> that just stays there infinitely. Here=E2=80=
+=99s the assembly source code:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">	.global =
+_start</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">	.</span><span style=3D"=
+color:#61afef">section .text</span><span style=3D"color:#abb2bf">.kernel</s=
+pan></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#61afef">_start:</span><span styl=
+e=3D"color:#abb2bf">	j _start</span></span></code></pre>
+<p>The linker script is the following:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">MEMORY {<=
+/span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  kernel_space (rwx) : O=
+RIGIN =3D 0x80200000, LENGTH =3D 128</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">}</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">SECTIONS {</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  .text : {</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf">    infinite_loop.o(.tex=
+t.kernel)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  } &gt; kernel_space</s=
+pan></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">}</span></span></code></=
+pre>
+<p><em>For details on how to use these files to build an <code>ELF</code> i=
+mage that can be loaded into QEMU, please see the original bare metal progr=
+amming article.</em></p>
+<p>Once we build it, we end up with the <code>infinte_loop</code> <code>ELF=
+</code> file that can serve as our fake kernel. We now run QEMU</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt -s -S -bios build/platform/generic/firmware/fw_dyn=
+amic.bin -kernel ~/work/github_demo/risc-v-bare-metal-fake-kernel/infinite_=
+loop</span></span></code></pre>
+<p>Again, I connect <code>gdb</code> and <code>si</code> my way to the end =
+of ZSBL. Now when I read the infamous struct at <code>0x1028</code>, things=
+ look a lot better, which confirms the theory that QEMU was populating that=
+ struct weirdly.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0=
+x0000000080000000:	33 04 05 00	add	s0,a0,zero</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) x/10xg 0x1028</spa=
+n></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1028:	0x00000000494253=
+4f	0x0000000000000002</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1038:	0x00000000802000=
+00	0x0000000000000001</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1048:	0x00000000000000=
+00	0x0000000000000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1058:	0x00000000000000=
+00	0x0000000000000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">0x1068:	0x00000000000000=
+00	0x0000000000000000</span></span></code></pre>
+<p>We now see that the new address is populated in this struct, as is expec=
+ted. This is also reflected in the OpenSBI output on UART. Let=E2=80=99s co=
+ntinue to our fake kernel with <code>gdb</code> and see if everything is OK=
+ there.</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">(gdb) bre=
+ak *0x080200000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Breakpoint 1 at 0x802000=
+00</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">(gdb) continue</span></s=
+pan>
+<span class=3D"line"><span style=3D"color:#abb2bf">Continuing.</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Breakpoint 1, 0x00000000=
+80200000 in ?? ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">=3D&gt; 0x00000000802000=
+00:	6f 00 00 00	j	0x80200000</span></span></code></pre>
+<p>Everything looks good here. Let=E2=80=99s recap:</p>
+<ol>
+<li>ZSBL is the first thing that runs after the power-on. It initializes a =
+few registers. The key register is <code>a2</code>, which points to a <code=
+>fw_dynamic_info</code> struct containing the crucial info for the <code>FW=
+_DYNAMIC</code> flavor of OpenSBI to operate. In QEMU case, this struct is =
+somehow populated during the power-on, magically by the virutalization engi=
+ne, but in reality, this is <strong>likely</strong> the job of the ZSBL. Ei=
+ther way, OpenSBI now knows what to do after it=E2=80=99s done.</li>
+<li>OpenSBI provides an interrupt-based interface for the software up on th=
+e stack (presumably OS kernel bootloader and kernel itself) to invoke it. T=
+his interface is called SBI and it=E2=80=99s conceptually the same as ABI f=
+or the application software on top of an operating system.</li>
+<li>We pass the kernel image to QEMU as yet another ELF which just populate=
+d another section of the memory. QEMU populates the struct in such way that=
+ OpenSBI can pass the control to there, and before it switches there, it en=
+ters the <code>S</code> mode of execution.</li>
+</ol>
+<h4 id=3D"intentionally-skipped-details">Intentionally skipped details</h4>
+<p>ZSBL also touched the <code>a0</code> and <code>a1</code> registers.</p>
+<p><code>a0</code> has something to do with RISC-V <code>hart</code>s, but =
+let=E2=80=99s not get into those details, they are not relevant for the res=
+t of this article. Besides, this particular step in the boot process doesn=
+=E2=80=99t seem to be particularly relevant, per <a href=3D"https://github.=
+com/riscv-software-src/opensbi/issues/170#issuecomment-642679348">comments =
+from Github</a>.</p>
+<p><code>a1</code> is an interesting pointer because it points to the <stro=
+ng>device tree</strong> data structure in memory. For the rest of this arti=
+cle, this data structure is not relevant, so we can disregard this piece of=
+ information. However, the device tree is really useful for real kernels li=
+ke Linux. Linux is able to scan the device tree from memory and understand =
+the structure of the machine it=E2=80=99s running on, rather than having to=
+ run a lot of <code>if/else</code> branches in its programming for every ha=
+rdware combination. <a href=3D"https://en.wikipedia.org/wiki/Devicetree#Lin=
+ux">The Wikipedia article</a> should give a decent idea of how this is used=
+ in Linux. As mentioned, however, we won=E2=80=99t be concerned with the de=
+tails of device tree in the rest of this article.</p>
+<h2 id=3D"hello-world-fake-kernel">Hello world fake kernel</h2>
+<p>Now we have all the knowledge we need to code a fake OS kernel that just=
+ prints =E2=80=9CHello world=E2=80=9D to the UART device. The functionality=
+ is not at all different from the bare metal program we looked at in the pr=
+evious guide, but the way we=E2=80=99ll get there is significantly differen=
+t. We=E2=80=99ll be using an SBI call to print to UART, instead of directly=
+ interacting with the UART device (we=E2=80=99re using a more privileged lo=
+wer layer of software to do this work for us). This could have serious cons=
+equences, even on a trivial example such as a =E2=80=9Chello world=E2=80=9D=
+ one: <strong>we delegate the responsibility of interacting with the UART h=
+ardware to the SBI layer, thus achieving portability across different machi=
+nes that conform to this SBI interface</strong>.</p>
+<p>How do we call into RISC-V SBI layer? Conceptually, it=E2=80=99s exactly=
+ the same as invoking a print to standard output in x86 Linux =E2=80=94 we=
+=E2=80=99ll populate some registers and invoke a software interrupt/trap to=
+ pass the control down the software stack to OpenSBI. OpenSBI offers a lot =
+of services in the SBI layer, and many of them can be extremely useful for =
+developing a portable operating system kernel, such as interaction with the=
+ timers (relevant for time slicing and enabling multiple threads to share t=
+he same CPU core). For the full list of functionality exposed through the S=
+BI layer, please take a look <a href=3D"https://github.com/riscv-non-isa/ri=
+scv-sbi-doc/blob/master/riscv-sbi.adoc">here</a>.</p>
+<p>In this guide, we=E2=80=99ll be focusing on the <a href=3D"https://githu=
+b.com/riscv-non-isa/riscv-sbi-doc/blob/master/src/ext-debug-console.adoc">d=
+ebug console</a> functionality, i.e. we=E2=80=99ll be writing out to UART t=
+hrough SBI. Let=E2=80=99s code!</p>
+<p>First, we need to know how do we encode the functionality we want OpenSB=
+I to execute through registers. This is well documented <a href=3D"https://=
+github.com/riscv-non-isa/riscv-sbi-doc/blob/master/src/binary-encoding.adoc=
+">here</a>. tl;dr is that SBI functionality is grouped into =E2=80=9Cextens=
+ions=E2=80=9D. Register <code>a7</code> contains the extension ID (EID), wh=
+ile <code>a6</code> encodes the individual function ID (FID) within that ex=
+tension. The parameters are then passed through <code>a0</code>, <code>a1</=
+code>, <code>a2</code>, =E2=80=A6</p>
+<p>For printing to the console, the EID we are looking for is <code>0x44424=
+34E</code> (a rather interesting value) and the FID is simply <code>0x00</c=
+ode>.</p>
+<p>This time, instead of printing one by one character as we did in the ini=
+tial bare metal programming guide, we=E2=80=99ll invoke the printing as a s=
+ingle operation. After all, we should be benefiting from the high level fun=
+ctionality that the SBI layer offers. Therefore, our binary should store th=
+e output string somewhere in the memory, and ideally we want to do somethin=
+g like invoking the SBI to print from that address. We=E2=80=99ll do just t=
+hat:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">        .=
+global _start</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        .</span><span st=
+yle=3D"color:#61afef">section .text</span><span style=3D"color:#abb2bf">.ke=
+rnel</span></span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#61afef">_start:</span><span styl=
+e=3D"color:#abb2bf"> li a7, </span><span style=3D"color:#d19a66">0x4442434E=
+</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        li a6, </span><s=
+pan style=3D"color:#d19a66">0x00</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        li a0, </span><s=
+pan style=3D"color:#c678dd">12</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        lla a1, debug_st=
+ring</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        li a2, </span><s=
+pan style=3D"color:#c678dd">0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        ecall</span></sp=
+an>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#c678dd">loop</span><span style=
+=3D"color:#abb2bf">:   j </span><span style=3D"color:#c678dd">loop</span></=
+span>
+<span class=3D"line"></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        .</span><span st=
+yle=3D"color:#61afef">section .rodata</span></span>
+<span class=3D"line"><span style=3D"color:#61afef">debug_string:</span></sp=
+an>
+<span class=3D"line"><span style=3D"color:#abb2bf">        .string "Hello w=
+orld\n"</span></span></code></pre>
+<p>A couple of things to note here:</p>
+<ol>
+<li>We use PC-relative addressing here for the output string. As a reminder=
+, the kernel is stored at an address represented by a very large unsigned i=
+nteger. This value is too high to be encoded within any RISC-V 32-bit instr=
+uction word. That=E2=80=99s not a problem, we simply use a short sequence o=
+f <code>AUIPC</code> and <code>ADDI</code> instructions to get there (check=
+ out <a href=3D"https://michaeljclark.github.io/asm.html">this article</a> =
+for more information on this). If you do not understand what this point is =
+all about, please make sure to revise different memory addressing modes and=
+ the differences between them: this is crucial for any sort of bare metal p=
+rogramming. And instead of using <code>AUIPC</code> and <code>ADDI</code> i=
+n sequence, since this is a common pattern, the RISC-V assembler has a <str=
+ong>pseudoinstruction</strong> <code>LLA</code>, which we are using here.</=
+li>
+<li>SBI for some reason asks for the pointer to the string to be printed to=
+ be broken down into two pieces. One piece, as you can see is just 0. I am =
+not entirely sure why this is needed, but that=E2=80=99s the API.</li>
+</ol>
+<p>So our SBI call is defined by several registers:</p>
+<ol>
+<li><code>a7</code> identifies the SBI extension</li>
+<li><code>a6</code> identifies the function within the extension (in this c=
+ase, debug console extension)</li>
+<li><code>a0</code> contains the length of the string that needs to go to t=
+he debug console output</li>
+<li><code>a1</code> and <code>a2</code>, when joined together, contain the =
+64-bit pointer to the address of the string that needs to be printed</li>
+</ol>
+<p>The SBI call is now invoked through an <code>ecall</code> instruction, w=
+hich activates a CPU trap. At this point, OpenSBI takes over and writes to =
+UART, in exactly the same way as we did in the initial bare metal programmi=
+ng guide. If you are wondering how a simple <code>ecall</code> invocation t=
+akes us to OpenSBI, that is because OpenSBI set up the trap handling mechan=
+ism in such way that when our kernel gets into a trap, the program counter =
+will jump into the OpenSBI software section. The details of this are way ou=
+tside the scope of this article, but we may cover this in some other articl=
+e.</p>
+<p>For now, just check out the QEMU serial port and confirm that =E2=80=9CH=
+ello world=E2=80=9D is printed properly:</p>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">qemu-syst=
+em-riscv64 -machine virt -s -S -bios build/platform/generic/firmware/fw_dyn=
+amic.bin -kernel ~/work/github_demo/risc-v-bare-metal-fake-kernel/hello_wor=
+ld_kernel</span></span></code></pre>
+<pre class=3D"astro-code one-dark-pro" is:raw=3D"" style=3D"white-space:pre=
+-wrap;word-wrap:break-word;background-color:#282c34;overflow-x:auto" tabind=
+ex=3D"0"><code><span class=3D"line"><span style=3D"color:#abb2bf">OpenSBI v=
+1.3-54-g901d3d7</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">   ____                 =
+   _____ ____ _____</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  / __ \                =
+  / ____|  _ \_   _|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | |_ __   ___ _ __=
+ | (___ | |_) || |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |  | | '_ \ / _ \ '_ =
+\ \___ \|  _ &lt; | |</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"> | |__| | |_) |  __/ | |=
+ |____) | |_) || |_</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">  \____/| .__/ \___|_| |=
+_|_____/|____/_____|</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">        | |</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf">        |_|</span></span=
+>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Name           =
+  : riscv-virtio,qemu</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Features       =
+  : medeleg</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform HART Count     =
+  : 1</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform IPI Device     =
+  : aclint-mswi</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Timer Device   =
+  : aclint-mtimer @ 10000000Hz</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Console Device =
+  : uart8250</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform HSM Device     =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform PMU Device     =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Reboot Device  =
+  : syscon-reboot</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Shutdown Device=
+  : syscon-poweroff</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform Suspend Device =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Platform CPPC Device    =
+  : ---</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Base           =
+  : 0x80000000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Size           =
+  : 322 KB</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware RW Offset      =
+  : 0x40000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware RW Size        =
+  : 66 KB</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Heap Offset    =
+  : 0x48000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Heap Size      =
+  : 34 KB (total), 2 KB (reserved), 9 KB (used), 22 KB (free)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Firmware Scratch Size   =
+  : 4096 B (total), 768 B (used), 3328 B (free)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Runtime SBI Version     =
+  : 1.0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Name            =
+  : root</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Boot HART       =
+  : 0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 HARTs           =
+  : 0*</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region00        =
+  : 0x0000000002000000-0x000000000200ffff M: (I,R,W) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region01        =
+  : 0x0000000080040000-0x000000008005ffff M: (R,W) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region02        =
+  : 0x0000000080000000-0x000000008003ffff M: (R,X) S/U: ()</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Region03        =
+  : 0x0000000000000000-0xffffffffffffffff M: () S/U: (R,W,X)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Address    =
+  : 0x0000000080200000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Arg1       =
+  : 0x0000000087e00000</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 Next Mode       =
+  : S-mode</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 SysReset        =
+  : yes</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Domain0 SysSuspend      =
+  : yes</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf"></span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ID            =
+  : 0</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Domain        =
+  : root</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Priv Version  =
+  : v1.10</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART Base ISA      =
+  : rv64imafdc</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART ISA Extensions=
+  : zicntr</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Count     =
+  : 16</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Granularit=
+y : 4</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART PMP Address Bi=
+ts: 54</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MHPM Info     =
+  : 0 (0x00000000)</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MIDELEG       =
+  : 0x0000000000000222</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Boot HART MEDELEG       =
+  : 0x000000000000b109</span></span>
+<span class=3D"line"><span style=3D"color:#abb2bf">Hello world</span></span=
+></code></pre>
+<p>As an exercise, I suggest probing the <a href=3D"https://github.com/risc=
+v-non-isa/riscv-sbi-doc/blob/master/src/ext-base.adoc">base extension (<cod=
+e>0x10</code>)</a> with <code>gdb</code> to investigate what the QEMU machi=
+ne + OpenSBI you build are capable of offering.</p>
+<h2 id=3D"conclusion">Conclusion</h2>
+<p>We ended up with an entirely portable fake kernel that prints =E2=80=9CH=
+ello world=E2=80=9D to UART! This may seem like nothing special, but the co=
+ncept here is very powerful. Without rebuilding, you can drop the same kern=
+el image on a different RISC-V 64-bit machine with OpenSBI that supports th=
+e debug console extension.</p>
+<p>In fact, I played a little trick here. :) One of the main reasons I sugg=
+ested building OpenSBI from source is that some QEMU versions provided by t=
+he Linux distro package managers do not support the debug console extension=
+ (they=E2=80=99re simply old). This was the case with my default OpenSBI wh=
+ich came with Debian=E2=80=99s version of QEMU.</p>
+<p>Finally, I would like to remind the reader that we have extensively focu=
+sed on the QEMU <code>virt</code> machine with a RISC-V core and all the fi=
+ne details of this article are related to it. That said, my hope is that th=
+e reader has learned enough about the boot sequence concepts and bare metal=
+ programming that adapting this knowledge to a particular real-world scenar=
+io becomes easy.</p>
+<p>In the next posts, we=E2=80=99ll talk about taking this further and boot=
+ing up a full blown Linux kernel. We=E2=80=99ll expand that step by step un=
+til we reach a Linux deployment that can handle I/O with keyboard, mouse, s=
+creen and Ethernet network.</p>
+<p>I hope you enjoyed this lengthy writeup!</p>
+<h2 id=3D"code-pointers">Code pointers</h2>
+<p>If you prefer not to copy/paste, the code is available on <a href=3D"htt=
+ps://github.com/popovicu/risc-v-bare-metal-fake-kernel">this GitHub repo</a=
+>.</p>
+    </article>
+
+    <ul class=3D"astro-VJ4TPSPI tags-container">
+      <li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/risc-v" class=3D"astro-BLWJYJPT grou=
+p pr-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">risc-v</span>
+  </a>
+</li><li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/sbi" class=3D"astro-BLWJYJPT group p=
+r-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">sbi</span>
+  </a>
+</li><li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/opensbi" class=3D"astro-BLWJYJPT gro=
+up pr-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">opensbi</span>
+  </a>
+</li><li class=3D"astro-BLWJYJPT inline-block my-1 underline-offset-4">
+  <a href=3D"https://popovicu.com/tags/bare-metal" class=3D"astro-BLWJYJPT =
+group pr-2 text-sm">
+    <svg class=3D"astro-BLWJYJPT scale-75" xmlns=3D"http://www.w3.org/2000/=
+svg"><path d=3D"M16.018 3.815 15.232 8h-4.966l.716-3.815-1.964-.37L8.232 8H=
+4v2h3.857l-.751 4H3v2h3.731l-.714 3.805 1.965.369L8.766 16h4.966l-.714 3.80=
+5 1.965.369.783-4.174H20v-2h-3.859l.751-4H21V8h-3.733l.716-3.815-1.965-.37z=
+M14.106 14H9.141l.751-4h4.966l-.752 4z" class=3D"astro-BLWJYJPT"></path>
+    </svg>
+    &nbsp;<span class=3D"astro-BLWJYJPT">bare-metal</span>
+  </a>
+</li>
+    </ul>
+  </main>
+  <footer class=3D"astro-SZ7XMLTE mt-auto">
+  <div class=3D"max-w-3xl mx-auto px-0">
+  <hr aria-hidden=3D"true" class=3D"border-skin-line">
+</div>
+  <div class=3D"astro-SZ7XMLTE footer-wrapper">
+    <div class=3D"astro-UPU6FZXR flex social-icons">
+  <a href=3D"https://github.com/popovicu" class=3D"inline-block astro-5EUNQ=
+ZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D" Uros Popovic=
+ on Github">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+    <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+    <path d=3D"M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2=
+c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.=
+1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2=
+ 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.=
+5 2v3.5"></path>
+  </svg>
+     =20
+</a><a href=3D"https://linkedin.com/in/upopovic" class=3D"inline-block astr=
+o-5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros P=
+opovic on LinkedIn">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+    <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+    <rect height=3D"16" rx=3D"2" width=3D"16" x=3D"4" y=3D"4"></rect>
+    <line x1=3D"8" x2=3D"8" y1=3D"11" y2=3D"16"></line>
+    <line x1=3D"8" x2=3D"8" y1=3D"8" y2=3D"8.01"></line>
+    <line x1=3D"12" x2=3D"12" y1=3D"16" y2=3D"11"></line>
+    <path d=3D"M16 16v-3a2 2 0 0 0 -4 0"></path>
+  </svg>
+     =20
+</a><a href=3D"https://twitter.com/popovicu94" class=3D"inline-block astro-=
+5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros Pop=
+ovic on Twitter">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+      <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+      <path d=3D"M22 4.01c-1 .49 -1.98 .689 -3 .99c-1.121 -1.265 -2.783 -1.=
+335 -4.38 -.737s-2.643 2.06 -2.62 3.737v1c-3.245 .083 -6.135 -1.395 -8 -4c0=
+ 0 -4.182 7.433 4 11c-1.872 1.247 -3.739 2.088 -6 2c3.308 1.803 6.913 2.423=
+ 10.034 1.517c3.58 -1.04 6.522 -3.723 7.651 -7.742a13.84 13.84 0 0 0 .497 -=
+3.753c-.002 -.249 1.51 -2.772 1.818 -4.013z"></path>
+    </svg>
+     =20
+</a><a href=3D"https://www.reddit.com/user/urosp" class=3D"inline-block ast=
+ro-5EUNQZKT group astro-UPU6FZXR link-button" tabindex=3D"0" title=3D"Uros =
+Popovic on Reddit">
+ =20
+        <svg class=3D"icon-tabler" xmlns=3D"http://www.w3.org/2000/svg" str=
+oke-linecap=3D"round" stroke-linejoin=3D"round">
+      <path d=3D"M0 0h24v24H0z" fill=3D"none" stroke=3D"none"></path>
+      <path d=3D"M12 8c2.648 0 5.028 .826 6.675 2.14a2.5 2.5 0 0 1 2.326 4.=
+36c0 3.59 -4.03 6.5 -9 6.5c-4.875 0 -8.845 -2.8 -9 -6.294l-1 -.206a2.5 2.5 =
+0 0 1 2.326 -4.36c1.646 -1.313 4.026 -2.14 6.674 -2.14z"></path>
+      <path d=3D"M12 8l1 -5l6 1"></path>
+      <circle cx=3D"19" cy=3D"4" r=3D"1"></circle>
+      <circle cx=3D"9" cy=3D"13" r=3D".5" fill=3D"currentColor"></circle>
+      <circle cx=3D"15" cy=3D"13" r=3D".5" fill=3D"currentColor"></circle>
+      <path d=3D"M10 17c.667 .333 1.333 .5 2 .5s1.333 -.167 2 -.5"></path>
+    </svg>
+     =20
+</a>
+</div>
+    <div class=3D"astro-SZ7XMLTE copyright-wrapper">
+      <span class=3D"astro-SZ7XMLTE">Copyright =C2=A9 2023</span>
+      <span class=3D"astro-SZ7XMLTE separator">&nbsp;|&nbsp;</span>
+      <span class=3D"astro-SZ7XMLTE">All rights reserved.</span>
+    </div>
+  </div>
+</footer>
+
+  <!-- Cloudflare Pages Analytics --><!-- Cloudflare Pages Analytics --><if=
+rame scrolling=3D"no" frameborder=3D"0" allowtransparency=3D"true" src=3D"c=
+id:frame-7A3D5BF47157C334F72D1546835831DC@mhtml.blink" title=3D"Twitter set=
+tings iframe" style=3D"display: none;"></iframe><div class=3D"cm-popover" i=
+d=3D"cm-popover">                <div class=3D"cm-popover__arrow">         =
+           <span class=3D"cm-popover__arrow-bg"></span>                </di=
+v>                <div class=3D"cm-popover__raw-open">null</div>           =
+ </div><div id=3D"webhighlights-notifications"></div><webhighlights-extensi=
+on></webhighlights-extension><webhighlights-sidebar><template shadowmode=3D=
+"open"><!---->
+      <!--?lit$845574146$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$845574146$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$845574146$--><!--?-->
+      <!--?lit$845574146$-->
+    </template></main-component>
+         =20
+      <!--?lit$845574146$--><!--?-->
+      <!--?lit$845574146$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$845574146$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$845574146$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$845574146$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$845574146$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker><iframe id=3D"rufous-sandbox" scrolli=
+ng=3D"no" frameborder=3D"0" allowtransparency=3D"true" allowfullscreen=3D"t=
+rue" style=3D"position: absolute; visibility: hidden; display: none; width:=
+ 0px; height: 0px; padding: 0px; border: none;" title=3D"Twitter analytics =
+iframe"></iframe></body></html>
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-26e529ca-e2db-4e45-b3d7-17742b7e9580@mhtml.blink
+
+@charset "utf-8";
+
+:where(img) { height: auto; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-7c6482f6-678d-4256-b535-285a15fa3a59@mhtml.blink
+
+@charset "utf-8";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-57e9c078-5869-4565-b9c4-e6bcba024fda@mhtml.blink
+
+@charset "utf-8";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00b0783b; --wh-primary-light: #53e3a6; --wh-primary-dark=
+: #007f4b; --wh-primary-dark-hover: #017444; --wh-primary-shadow: #00b07841=
+; --wh-primary-shadow-2: #00b07870; --wh-primary-border-color: #c8c8c870; -=
+-secondary-color: #3d4455; --secondary-color-hover: #3a4052; --secondary-co=
+lor-transparent: #3d44556b; --secondary-light: #4c556d; --secondary-dark: #=
+252934; --secondary-dark-hover: #191b22; --secondary-dark-transparent: #2e2=
+d2d46; --highlight-color: #92ffaa; --error-color: #d62d4c; --warning-color:=
+ #ffcc00; --error-info: #14854e; --success-color: #4BB543; --font-color: #2=
+f3237; --font-color-light: #626364; --font-color-dark: #252525; --wh-font-f=
+amily: 'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--red-600); --wh-danger-color-hover: var(--red=
+-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-bg-base=
+: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500); --w=
+h-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(--wh-se=
+condary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-border=
+-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong: var(=
+--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-back-st=
+rong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-secondar=
+y-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hover-str=
+ong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-100); --=
+wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--wh-seco=
+ndary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-front-st=
+rong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-secondar=
+y-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-border-fr=
+ont: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%); --wh=
+-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0, 0%, 1=
+00%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(255, 2=
+55, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-light: rg=
+ba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63); --wh=
+-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, 0%, 10=
+0%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-note-edi=
+tor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: hsl(22=
+1, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hover: va=
+r(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05); --w=
+h-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(220, 2=
+2%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --wh-bg-=
+notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gray: rg=
+b(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 100%, 0=
+.1),
+      /* 2. shadow ring =F0=9F=91=87 */ 0 0 0 1px hsla(230, 13%, 9%, 0.075)=
+,
+      /* 3. multiple soft shadows =F0=9F=91=87 */ 0 0.3px 0.4px hsla(230, 1=
+3%, 9%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-c35287e7-5fed-4770-9ee2-119e15180448@mhtml.blink
+
+@charset "utf-8";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-8214cf41-2feb-452a-b3e5-016ae061cc16@mhtml.blink
+
+@charset "utf-8";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&display=swap
+
+@charset "utf-8";
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa2Hdgv-s.woff2") format("woff2"); unicode-r=
+ange: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F=
+; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa0Xdgv-s.woff2") format("woff2"); unicode-r=
+ange: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa2ndgv-s.woff2") format("woff2"); unicode-r=
+ange: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+3=
+00-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa23dgv-s.woff2") format("woff2"); unicode-r=
+ange: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+2=
+0A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6pfjptAgt5VM-kVkqdyU8n1ioa1Xdg.woff2") format("woff2"); unicode-rang=
+e: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, =
+U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,=
+ U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1jcoQLNg.woff2") format("woff2"); unico=
+de-range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-=
+FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1hMoQLNg.woff2") format("woff2"); unico=
+de-range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1j8oQLNg.woff2") format("woff2"); unico=
+de-range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0,=
+ U+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1jsoQLNg.woff2") format("woff2"); unico=
+de-range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020,=
+ U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: italic; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6sfjptAgt5VM-kVkqdyU8n1ioSClN1gMoQ.woff2") format("woff2"); unicode-=
+range: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+3=
+08, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2=
+215, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iIq129k.woff2") format("woff2"); unicode-rang=
+e: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1isq129k.woff2") format("woff2"); unicode-rang=
+e: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iAq129k.woff2") format("woff2"); unicode-rang=
+e: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+300-=
+301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1iEq129k.woff2") format("woff2"); unicode-rang=
+e: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0=
+-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 400; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F63fjptAgt5VM-kVkqdyU8n1i8q1w.woff2") format("woff2"); unicode-range:=
+ U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308, U+=
+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U=
++FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 500; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3twJwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 600; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3vAOwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl1FgtIU.woff2") format("woff2"); unicode-=
+range: U+460-52F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2=
+F; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwlRFgtIU.woff2") format("woff2"); unicode-=
+range: U+301, U+400-45F, U+490-491, U+4B0-4B1, U+2116; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl9FgtIU.woff2") format("woff2"); unicode-=
+range: U+102-103, U+110-111, U+128-129, U+168-169, U+1A0-1A1, U+1AF-1B0, U+=
+300-301, U+303-304, U+308-309, U+323, U+329, U+1EA0-1EF9, U+20AB; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwl5FgtIU.woff2") format("woff2"); unicode-=
+range: U+100-2AF, U+304, U+308, U+329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+=
+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+@font-face { font-family: "IBM Plex Mono"; font-style: normal; font-weight:=
+ 700; font-display: swap; src: url("https://fonts.gstatic.com/s/ibmplexmono=
+/v19/-F6qfjptAgt5VM-kVkqdyU8n3pQPwlBFgg.woff2") format("woff2"); unicode-ra=
+nge: U+0-FF, U+131, U+152-153, U+2BB-2BC, U+2C6, U+2DA, U+2DC, U+304, U+308=
+, U+329, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+221=
+5, U+FEFF, U+FFFD; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/about.5b2af2d6.css
+
+@charset "utf-8";
+
+*, ::before, ::after { box-sizing: border-box; border-width: 0px; border-st=
+yle: solid; border-color: currentcolor; }
+
+::before, ::after { --tw-content: ""; }
+
+html { line-height: 1.5; text-size-adjust: 100%; tab-size: 4; font-family: =
+ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Ro=
+boto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji"=
+, "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"; font-feature-set=
+tings: normal; font-variation-settings: normal; }
+
+body { margin: 0px; line-height: inherit; }
+
+hr { height: 0px; color: inherit; border-top-width: 1px; }
+
+abbr:where([title]) { text-decoration: underline dotted; }
+
+h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
+
+a { color: inherit; text-decoration: inherit; }
+
+b, strong { font-weight: bolder; }
+
+code, kbd, samp, pre { font-family: "IBM Plex Mono", monospace; font-size: =
+1em; }
+
+small { font-size: 80%; }
+
+sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-ali=
+gn: baseline; }
+
+sub { bottom: -0.25em; }
+
+sup { top: -0.5em; }
+
+table { text-indent: 0px; border-color: inherit; border-collapse: collapse;=
+ }
+
+button, input, optgroup, select, textarea { font-family: inherit; font-size=
+: 100%; font-weight: inherit; line-height: inherit; color: inherit; margin:=
+ 0px; padding: 0px; }
+
+button, select { text-transform: none; }
+
+button, [type=3D"button"], [type=3D"reset"], [type=3D"submit"] { appearance=
+: button; background-color: transparent; background-image: none; }
+
+progress { vertical-align: baseline; }
+
+::-webkit-inner-spin-button, ::-webkit-outer-spin-button { height: auto; }
+
+[type=3D"search"] { appearance: textfield; outline-offset: -2px; }
+
+::-webkit-search-decoration { appearance: none; }
+
+::-webkit-file-upload-button { appearance: button; font: inherit; }
+
+summary { display: list-item; }
+
+blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre { margin: 0p=
+x; }
+
+fieldset { margin: 0px; padding: 0px; }
+
+legend { padding: 0px; }
+
+ol, ul, menu { list-style: none; margin: 0px; padding: 0px; }
+
+textarea { resize: vertical; }
+
+input::placeholder, textarea::placeholder { opacity: 1; color: rgb(156, 163=
+, 175); }
+
+button, [role=3D"button"] { cursor: pointer; }
+
+:disabled { cursor: default; }
+
+img, svg, video, canvas, audio, iframe, embed, object { display: block; ver=
+tical-align: middle; }
+
+img, video { max-width: 100%; height: auto; }
+
+[hidden] { display: none; }
+
+:root, html[data-theme=3D"light"] { --color-fill: 251, 254, 251; --color-te=
+xt-base: 40, 39, 40; --color-accent: 0, 108, 172; --color-card: 230, 230, 2=
+30; --color-card-muted: 205, 205, 205; --color-border: 236, 233, 233; }
+
+html[data-theme=3D"dark"] { --color-fill: 33, 39, 55; --color-text-base: 23=
+4, 237, 243; --color-accent: 255, 107, 1; --color-card: 52, 63, 96; --color=
+-card-muted: 138, 51, 2; --color-border: 171, 75, 8; }
+
+#sun-svg, html[data-theme=3D"dark"] #moon-svg { display: none; }
+
+#moon-svg, html[data-theme=3D"dark"] #sun-svg { display: block; }
+
+body { display: flex; min-height: 100vh; flex-direction: column; --tw-bg-op=
+acity: 1; background-color: rgba(var(--color-fill),var(--tw-bg-opacity)); f=
+ont-family: "IBM Plex Mono", monospace; --tw-text-opacity: 1; color: rgba(v=
+ar(--color-text-base),var(--tw-text-opacity)); }
+
+body ::selection { background-color: rgba(var(--color-accent),var(--tw-bg-o=
+pacity)); --tw-bg-opacity: .7; --tw-text-opacity: 1; color: rgba(var(--colo=
+r-fill),var(--tw-text-opacity)); }
+
+body::selection { background-color: rgba(var(--color-accent),var(--tw-bg-op=
+acity)); --tw-bg-opacity: .7; --tw-text-opacity: 1; color: rgba(var(--color=
+-fill),var(--tw-text-opacity)); }
+
+section, footer { margin-left: auto; margin-right: auto; max-width: 48rem; =
+padding-left: 1rem; padding-right: 1rem; }
+
+a { outline-width: 2px; outline-offset: 1px; outline-color: rgb(var(--color=
+-accent)); }
+
+a:focus-visible { text-decoration-line: none; outline-style: dashed; }
+
+svg { display: inline-block; height: 1.5rem; width: 1.5rem; fill: rgb(var(-=
+-color-text-base)); }
+
+.group:hover svg { fill: rgb(var(--color-accent)); }
+
+svg.icon-tabler { display: inline-block; height: 1.5rem; width: 1.5rem; --t=
+w-scale-x: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translat=
+e-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x))=
+ skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)=
+); fill: transparent; stroke: currentcolor; stroke-width: 2; opacity: 0.9; =
+}
+
+.group:hover svg.icon-tabler { fill: transparent; }
+
+@media (min-width: 640px) {
+  svg.icon-tabler { --tw-scale-x: 1.1; --tw-scale-y: 1.1; transform: transl=
+ate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) s=
+kew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) sca=
+leY(var(--tw-scale-y)); }
+}
+
+.prose :is(:where(h1, h2, h3, h4, h5, h6, th):not(:where([class~=3D"not-pro=
+se"] *))) { margin-bottom: 0.75rem !important; --tw-text-opacity: 1 !import=
+ant; color: rgba(var(--color-text-base),var(--tw-text-opacity)) !important;=
+ }
+
+.prose :is(:where(h3):not(:where([class~=3D"not-prose"] *))) { font-style: =
+italic; }
+
+.prose :is(:where(p):not(:where([class~=3D"not-prose"] *))) { --tw-text-opa=
+city: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opacit=
+y)) !important; }
+
+.prose :is(:where(a):not(:where([class~=3D"not-prose"] *))) { text-underlin=
+e-offset: 8px; --tw-text-opacity: 1 !important; color: rgba(var(--color-tex=
+t-base),var(--tw-text-opacity)) !important; text-decoration-style: dashed !=
+important; }
+
+.prose :is(:where(a):not(:where([class~=3D"not-prose"] *))):hover { --tw-te=
+xt-opacity: 1; color: rgba(var(--color-accent),var(--tw-text-opacity)); }
+
+.prose :is(:where(blockquote):not(:where([class~=3D"not-prose"] *))) { --tw=
+-border-opacity: .5; opacity: 0.8; border-left-color: rgba(var(--color-acce=
+nt),var(--tw-border-opacity)) !important; }
+
+.prose :is(:where(figcaption):not(:where([class~=3D"not-prose"] *))) { opac=
+ity: 0.7; --tw-text-opacity: 1 !important; color: rgba(var(--color-text-bas=
+e),var(--tw-text-opacity)) !important; }
+
+.prose :is(:where(strong):not(:where([class~=3D"not-prose"] *))) { --tw-tex=
+t-opacity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-o=
+pacity)) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *))) { border-rad=
+ius: 0.25rem; background-color: rgba(var(--color-card),var(--tw-bg-opacity)=
+); --tw-bg-opacity: .75; padding: 0.25rem; --tw-text-opacity: 1 !important;=
+ color: rgba(var(--color-text-base),var(--tw-text-opacity)) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *)))::before { --=
+tw-content: "" !important; content: var(--tw-content) !important; }
+
+.prose :is(:where(code):not(:where([class~=3D"not-prose"] *)))::after { --t=
+w-content: "" !important; content: var(--tw-content) !important; }
+
+.prose :is(:where(pre):not(:where([class~=3D"not-prose"] *))) { --tw-text-o=
+pacity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opac=
+ity)) !important; }
+
+.prose :is(:where(ol):not(:where([class~=3D"not-prose"] *))) { --tw-text-op=
+acity: 1 !important; color: rgba(var(--color-text-base),var(--tw-text-opaci=
+ty)) !important; }
+
+.prose :is(:where(ul):not(:where([class~=3D"not-prose"] *))) { overflow-x: =
+clip; --tw-text-opacity: 1 !important; color: rgba(var(--color-text-base),v=
+ar(--tw-text-opacity)) !important; }
+
+.prose :is(:where(table):not(:where([class~=3D"not-prose"] *))) { --tw-text=
+-opacity: 1; color: rgba(var(--color-text-base),var(--tw-text-opacity)); }
+
+.prose :is(:where(th):not(:where([class~=3D"not-prose"] *))) { border-width=
+: 1px; --tw-border-opacity: 1; border-color: rgba(var(--color-border),var(-=
+-tw-border-opacity)); }
+
+.prose :is(:where(td):not(:where([class~=3D"not-prose"] *))) { border-width=
+: 1px; --tw-border-opacity: 1; border-color: rgba(var(--color-border),var(-=
+-tw-border-opacity)); }
+
+.prose :is(:where(img):not(:where([class~=3D"not-prose"] *))) { margin-left=
+: auto; margin-right: auto; border-width: 2px; --tw-border-opacity: 1; bord=
+er-color: rgba(var(--color-border),var(--tw-border-opacity)); margin-top: 0=
+.5rem !important; }
+
+.prose :is(:where(hr):not(:where([class~=3D"not-prose"] *))) { --tw-border-=
+opacity: 1 !important; border-color: rgba(var(--color-border),var(--tw-bord=
+er-opacity)) !important; }
+
+.prose a:hover { --tw-text-opacity: 1 !important; color: rgba(var(--color-a=
+ccent),var(--tw-text-opacity)) !important; }
+
+.prose thead th:first-child, tbody td:first-child, tfoot td:first-child { p=
+adding-left: 0.571429em; }
+
+.prose h2#table-of-contents { margin-bottom: 0.5rem; }
+
+.prose details { display: inline-block; cursor: pointer; user-select: none;=
+ --tw-text-opacity: 1; color: rgba(var(--color-text-base),var(--tw-text-opa=
+city)); }
+
+.prose summary { outline-width: 2px; outline-offset: 1px; outline-color: rg=
+b(var(--color-accent)); }
+
+.prose summary:focus-visible { text-decoration-line: none; outline-style: d=
+ashed; }
+
+.prose h2#table-of-contents + p { display: none; }
+
+html { overflow-y: scroll; }
+
+::-webkit-scrollbar { width: 0.75rem; }
+
+::-webkit-scrollbar-track { --tw-bg-opacity: 1; background-color: rgba(var(=
+--color-fill),var(--tw-bg-opacity)); }
+
+::-webkit-scrollbar-thumb { --tw-bg-opacity: 1; background-color: rgba(var(=
+--color-card),var(--tw-bg-opacity)); }
+
+::-webkit-scrollbar-thumb:hover { --tw-bg-opacity: 1; background-color: rgb=
+a(var(--color-card-muted),var(--tw-bg-opacity)); }
+
+code { white-space: pre; overflow: scroll; }
+
+*, ::before, ::after { --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; =
+--tw-translate-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; -=
+-tw-skew-y: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: =
+; --tw-pinch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-=
+from-position: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ;=
+ --tw-ordinal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-s=
+pacing: ; --tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-widt=
+h: 0px; --tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5)=
+; --tw-ring-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-sha=
+dow: 0 0 #0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightnes=
+s: ; --tw-contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; -=
+-tw-saturate: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --t=
+w-backdrop-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale:=
+ ; --tw-backdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacit=
+y: ; --tw-backdrop-saturate: ; --tw-backdrop-sepia: ; }
+
+::backdrop { --tw-border-spacing-x: 0; --tw-border-spacing-y: 0; --tw-trans=
+late-x: 0; --tw-translate-y: 0; --tw-rotate: 0; --tw-skew-x: 0; --tw-skew-y=
+: 0; --tw-scale-x: 1; --tw-scale-y: 1; --tw-pan-x: ; --tw-pan-y: ; --tw-pin=
+ch-zoom: ; --tw-scroll-snap-strictness: proximity; --tw-gradient-from-posit=
+ion: ; --tw-gradient-via-position: ; --tw-gradient-to-position: ; --tw-ordi=
+nal: ; --tw-slashed-zero: ; --tw-numeric-figure: ; --tw-numeric-spacing: ; =
+--tw-numeric-fraction: ; --tw-ring-inset: ; --tw-ring-offset-width: 0px; --=
+tw-ring-offset-color: #fff; --tw-ring-color: rgb(59 130 246 / .5); --tw-rin=
+g-offset-shadow: 0 0 #0000; --tw-ring-shadow: 0 0 #0000; --tw-shadow: 0 0 #=
+0000; --tw-shadow-colored: 0 0 #0000; --tw-blur: ; --tw-brightness: ; --tw-=
+contrast: ; --tw-grayscale: ; --tw-hue-rotate: ; --tw-invert: ; --tw-satura=
+te: ; --tw-sepia: ; --tw-drop-shadow: ; --tw-backdrop-blur: ; --tw-backdrop=
+-brightness: ; --tw-backdrop-contrast: ; --tw-backdrop-grayscale: ; --tw-ba=
+ckdrop-hue-rotate: ; --tw-backdrop-invert: ; --tw-backdrop-opacity: ; --tw-=
+backdrop-saturate: ; --tw-backdrop-sepia: ; }
+
+.prose { color: var(--tw-prose-body); max-width: 65ch; }
+
+.prose :where(p):not(:where([class~=3D"not-prose"] *)) { margin-top: 1.25em=
+; margin-bottom: 1.25em; }
+
+.prose :where([class~=3D"lead"]):not(:where([class~=3D"not-prose"] *)) { co=
+lor: var(--tw-prose-lead); font-size: 1.25em; line-height: 1.6; margin-top:=
+ 1.2em; margin-bottom: 1.2em; }
+
+.prose :where(a):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-pr=
+ose-links); text-decoration: underline; font-weight: 500; }
+
+.prose :where(strong):not(:where([class~=3D"not-prose"] *)) { color: var(--=
+tw-prose-bold); font-weight: 600; }
+
+.prose :where(a strong):not(:where([class~=3D"not-prose"] *)) { color: inhe=
+rit; }
+
+.prose :where(blockquote strong):not(:where([class~=3D"not-prose"] *)) { co=
+lor: inherit; }
+
+.prose :where(thead th strong):not(:where([class~=3D"not-prose"] *)) { colo=
+r: inherit; }
+
+.prose :where(ol):not(:where([class~=3D"not-prose"] *)) { list-style-type: =
+decimal; margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; =
+}
+
+.prose :where(ol[type=3D"A"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: upper-alpha; }
+
+.prose :where(ol[type=3D"a"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: lower-alpha; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: up=
+per-alpha; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: lo=
+wer-alpha; }
+
+.prose :where(ol[type=3D"I"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: upper-roman; }
+
+.prose :where(ol[type=3D"i"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: lower-roman; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: up=
+per-roman; }
+
+.prose :where():not(:where([class~=3D"not-prose"] *)) { list-style-type: lo=
+wer-roman; }
+
+.prose :where(ol[type=3D"1"]):not(:where([class~=3D"not-prose"] *)) { list-=
+style-type: decimal; }
+
+.prose :where(ul):not(:where([class~=3D"not-prose"] *)) { list-style-type: =
+disc; margin-top: 1.25em; margin-bottom: 1.25em; padding-left: 1.625em; }
+
+.prose :where(ol > li):not(:where([class~=3D"not-prose"] *))::marker { font=
+-weight: 400; color: var(--tw-prose-counters); }
+
+.prose :where(ul > li):not(:where([class~=3D"not-prose"] *))::marker { colo=
+r: var(--tw-prose-bullets); }
+
+.prose :where(hr):not(:where([class~=3D"not-prose"] *)) { border-color: var=
+(--tw-prose-hr); border-top-width: 1px; margin-top: 3em; margin-bottom: 3em=
+; }
+
+.prose :where(blockquote):not(:where([class~=3D"not-prose"] *)) { font-weig=
+ht: 500; font-style: italic; color: var(--tw-prose-quotes); border-left-wid=
+th: 0.25rem; border-left-color: var(--tw-prose-quote-borders); quotes: "=E2=
+=80=9C" "=E2=80=9D" "=E2=80=98" "=E2=80=99"; margin-top: 1.6em; margin-bott=
+om: 1.6em; padding-left: 1em; }
+
+.prose :where(blockquote p:first-of-type):not(:where([class~=3D"not-prose"]=
+ *))::before { content: open-quote; }
+
+.prose :where(blockquote p:last-of-type):not(:where([class~=3D"not-prose"] =
+*))::after { content: close-quote; }
+
+.prose :where(h1):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 800; font-size: 2.25em; margin-top: 0px; margi=
+n-bottom: 0.888889em; line-height: 1.11111; }
+
+.prose :where(h1 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 900; color: inherit; }
+
+.prose :where(h2):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 700; font-size: 1.5em; margin-top: 2em; margin=
+-bottom: 1em; line-height: 1.33333; }
+
+.prose :where(h2 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 800; color: inherit; }
+
+.prose :where(h3):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 600; font-size: 1.25em; margin-top: 1.6em; mar=
+gin-bottom: 0.6em; line-height: 1.6; }
+
+.prose :where(h3 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 700; color: inherit; }
+
+.prose :where(h4):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-p=
+rose-headings); font-weight: 600; margin-top: 1.5em; margin-bottom: 0.5em; =
+line-height: 1.5; }
+
+.prose :where(h4 strong):not(:where([class~=3D"not-prose"] *)) { font-weigh=
+t: 700; color: inherit; }
+
+.prose :where(img):not(:where([class~=3D"not-prose"] *)) { margin-top: 2em;=
+ margin-bottom: 2em; }
+
+.prose :where(figure > *):not(:where([class~=3D"not-prose"] *)) { margin-to=
+p: 0px; margin-bottom: 0px; }
+
+.prose :where(figcaption):not(:where([class~=3D"not-prose"] *)) { color: va=
+r(--tw-prose-captions); font-size: 0.875em; line-height: 1.42857; margin-to=
+p: 0.857143em; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *)) { color: var(--tw=
+-prose-code); font-weight: 600; font-size: 0.875em; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *))::before { content=
+: "`"; }
+
+.prose :where(code):not(:where([class~=3D"not-prose"] *))::after { content:=
+ "`"; }
+
+.prose :where(a code):not(:where([class~=3D"not-prose"] *)) { color: inheri=
+t; }
+
+.prose :where(h1 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; }
+
+.prose :where(h2 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; font-size: 0.875em; }
+
+.prose :where(h3 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; font-size: 0.9em; }
+
+.prose :where(h4 code):not(:where([class~=3D"not-prose"] *)) { color: inher=
+it; }
+
+.prose :where(blockquote code):not(:where([class~=3D"not-prose"] *)) { colo=
+r: inherit; }
+
+.prose :where(thead th code):not(:where([class~=3D"not-prose"] *)) { color:=
+ inherit; }
+
+.prose :where(pre):not(:where([class~=3D"not-prose"] *)) { color: var(--tw-=
+prose-pre-code); background-color: var(--tw-prose-pre-bg); overflow-x: auto=
+; font-weight: 400; font-size: 0.875em; line-height: 1.71429; margin-top: 1=
+.71429em; margin-bottom: 1.71429em; border-radius: 0.375rem; padding: 0.857=
+143em 1.14286em; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *)) { background-=
+color: transparent; border-width: 0px; border-radius: 0px; padding: 0px; fo=
+nt-weight: inherit; color: inherit; font-size: inherit; font-family: inheri=
+t; line-height: inherit; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *))::before { con=
+tent: none; }
+
+.prose :where(pre code):not(:where([class~=3D"not-prose"] *))::after { cont=
+ent: none; }
+
+.prose :where(table):not(:where([class~=3D"not-prose"] *)) { width: 100%; t=
+able-layout: auto; text-align: left; margin-top: 2em; margin-bottom: 2em; f=
+ont-size: 0.875em; line-height: 1.71429; }
+
+.prose :where(thead):not(:where([class~=3D"not-prose"] *)) { border-bottom-=
+width: 1px; border-bottom-color: var(--tw-prose-th-borders); }
+
+.prose :where(thead th):not(:where([class~=3D"not-prose"] *)) { color: var(=
+--tw-prose-headings); font-weight: 600; vertical-align: bottom; padding-rig=
+ht: 0.571429em; padding-bottom: 0.571429em; padding-left: 0.571429em; }
+
+.prose :where(tbody tr):not(:where([class~=3D"not-prose"] *)) { border-bott=
+om-width: 1px; border-bottom-color: var(--tw-prose-td-borders); }
+
+.prose :where(tbody tr:last-child):not(:where([class~=3D"not-prose"] *)) { =
+border-bottom-width: 0px; }
+
+.prose :where(tbody td):not(:where([class~=3D"not-prose"] *)) { vertical-al=
+ign: baseline; }
+
+.prose :where(tfoot):not(:where([class~=3D"not-prose"] *)) { border-top-wid=
+th: 1px; border-top-color: var(--tw-prose-th-borders); }
+
+.prose :where(tfoot td):not(:where([class~=3D"not-prose"] *)) { vertical-al=
+ign: top; }
+
+.prose { --tw-prose-body: #374151; --tw-prose-headings: #111827; --tw-prose=
+-lead: #4b5563; --tw-prose-links: #111827; --tw-prose-bold: #111827; --tw-p=
+rose-counters: #6b7280; --tw-prose-bullets: #d1d5db; --tw-prose-hr: #e5e7eb=
+; --tw-prose-quotes: #111827; --tw-prose-quote-borders: #e5e7eb; --tw-prose=
+-captions: #6b7280; --tw-prose-code: #111827; --tw-prose-pre-code: #e5e7eb;=
+ --tw-prose-pre-bg: #1f2937; --tw-prose-th-borders: #d1d5db; --tw-prose-td-=
+borders: #e5e7eb; --tw-prose-invert-body: #d1d5db; --tw-prose-invert-headin=
+gs: #fff; --tw-prose-invert-lead: #9ca3af; --tw-prose-invert-links: #fff; -=
+-tw-prose-invert-bold: #fff; --tw-prose-invert-counters: #9ca3af; --tw-pros=
+e-invert-bullets: #4b5563; --tw-prose-invert-hr: #374151; --tw-prose-invert=
+-quotes: #f3f4f6; --tw-prose-invert-quote-borders: #374151; --tw-prose-inve=
+rt-captions: #9ca3af; --tw-prose-invert-code: #fff; --tw-prose-invert-pre-c=
+ode: #d1d5db; --tw-prose-invert-pre-bg: rgb(0 0 0 / 50%); --tw-prose-invert=
+-th-borders: #4b5563; --tw-prose-invert-td-borders: #374151; font-size: 1re=
+m; line-height: 1.75; }
+
+.prose :where(video):not(:where([class~=3D"not-prose"] *)) { margin-top: 2e=
+m; margin-bottom: 2em; }
+
+.prose :where(figure):not(:where([class~=3D"not-prose"] *)) { margin-top: 2=
+em; margin-bottom: 2em; }
+
+.prose :where(li):not(:where([class~=3D"not-prose"] *)) { margin-top: 0.5em=
+; margin-bottom: 0.5em; }
+
+.prose :where(ol > li):not(:where([class~=3D"not-prose"] *)) { padding-left=
+: 0.375em; }
+
+.prose :where(ul > li):not(:where([class~=3D"not-prose"] *)) { padding-left=
+: 0.375em; }
+
+.prose :where(.prose > ul > li p):not(:where([class~=3D"not-prose"] *)) { m=
+argin-top: 0.75em; margin-bottom: 0.75em; }
+
+.prose :where(.prose > ul > li > :first-child):not(:where([class~=3D"not-pr=
+ose"] *)) { margin-top: 1.25em; }
+
+.prose :where(.prose > ul > li > :last-child):not(:where([class~=3D"not-pro=
+se"] *)) { margin-bottom: 1.25em; }
+
+.prose :where(.prose > ol > li > :first-child):not(:where([class~=3D"not-pr=
+ose"] *)) { margin-top: 1.25em; }
+
+.prose :where(.prose > ol > li > :last-child):not(:where([class~=3D"not-pro=
+se"] *)) { margin-bottom: 1.25em; }
+
+.prose :where(ul ul, ul ol, ol ul, ol ol):not(:where([class~=3D"not-prose"]=
+ *)) { margin-top: 0.75em; margin-bottom: 0.75em; }
+
+.prose :where(hr + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h2 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h3 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(h4 + *):not(:where([class~=3D"not-prose"] *)) { margin-top: 0=
+px; }
+
+.prose :where(thead th:first-child):not(:where([class~=3D"not-prose"] *)) {=
+ padding-left: 0px; }
+
+.prose :where(thead th:last-child):not(:where([class~=3D"not-prose"] *)) { =
+padding-right: 0px; }
+
+.prose :where(tbody td, tfoot td):not(:where([class~=3D"not-prose"] *)) { p=
+adding: 0.571429em; }
+
+.prose :where(tbody td:first-child, tfoot td:first-child):not(:where([class=
+~=3D"not-prose"] *)) { padding-left: 0px; }
+
+.prose :where(tbody td:last-child, tfoot td:last-child):not(:where([class~=
+=3D"not-prose"] *)) { padding-right: 0px; }
+
+.prose :where(.prose > :first-child):not(:where([class~=3D"not-prose"] *)) =
+{ margin-top: 0px; }
+
+.prose :where(.prose > :last-child):not(:where([class~=3D"not-prose"] *)) {=
+ margin-bottom: 0px; }
+
+.display-none { display: none; }
+
+.focus-outline { outline-width: 2px; outline-offset: 1px; outline-color: rg=
+b(var(--color-accent)); }
+
+.focus-outline:focus-visible { text-decoration-line: none; outline-style: d=
+ashed; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0px; margi=
+n: -1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px); white-space: now=
+rap; border-width: 0px; }
+
+.pointer-events-none { pointer-events: none; }
+
+.visible { visibility: visible; }
+
+.static { position: static; }
+
+.fixed { position: fixed; }
+
+.absolute { position: absolute; }
+
+.relative { position: relative; }
+
+.sticky { position: sticky; }
+
+.inset-y-0 { top: 0px; bottom: 0px; }
+
+.-top-full { top: -100%; }
+
+.left-0 { left: 0px; }
+
+.left-16 { left: 4rem; }
+
+.z-50 { z-index: 50; }
+
+.col-span-2 { grid-column: span 2 / span 2; }
+
+.mx-1 { margin-left: 0.25rem; margin-right: 0.25rem; }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.my-1 { margin-top: 0.25rem; margin-bottom: 0.25rem; }
+
+.my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+
+.my-3 { margin-top: 0.75rem; margin-bottom: 0.75rem; }
+
+.my-4 { margin-top: 1rem; margin-bottom: 1rem; }
+
+.my-6 { margin-top: 1.5rem; margin-bottom: 1.5rem; }
+
+.my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+
+.-mr-5 { margin-right: -1.25rem; }
+
+.mb-1 { margin-bottom: 0.25rem; }
+
+.mb-14 { margin-bottom: 3.5rem; }
+
+.mb-2 { margin-bottom: 0.5rem; }
+
+.mb-28 { margin-bottom: 7rem; }
+
+.mb-6 { margin-bottom: 1.5rem; }
+
+.mb-8 { margin-bottom: 2rem; }
+
+.ml-4 { margin-left: 1rem; }
+
+.mr-2 { margin-right: 0.5rem; }
+
+.mr-4 { margin-right: 1rem; }
+
+.mt-2 { margin-top: 0.5rem; }
+
+.mt-4 { margin-top: 1rem; }
+
+.mt-8 { margin-top: 2rem; }
+
+.mt-auto { margin-top: auto; }
+
+.block { display: block; }
+
+.inline-block { display: inline-block; }
+
+.inline { display: inline; }
+
+.flex { display: flex; }
+
+.table { display: table; }
+
+.grid { display: grid; }
+
+.contents { display: contents; }
+
+.hidden { display: none; }
+
+.h-6 { height: 1.5rem; }
+
+.w-44 { width: 11rem; }
+
+.w-6 { width: 1.5rem; }
+
+.w-full { width: 100%; }
+
+.max-w-3xl { max-width: 48rem; }
+
+.flex-1 { flex: 1 1 0%; }
+
+.scale-100 { --tw-scale-x: 1; --tw-scale-y: 1; transform: translate(var(--t=
+w-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--t=
+w-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--t=
+w-scale-y)); }
+
+.scale-110 { --tw-scale-x: 1.1; --tw-scale-y: 1.1; transform: translate(var=
+(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var=
+(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var=
+(--tw-scale-y)); }
+
+.scale-125 { --tw-scale-x: 1.25; --tw-scale-y: 1.25; transform: translate(v=
+ar(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(v=
+ar(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(v=
+ar(--tw-scale-y)); }
+
+.scale-75 { --tw-scale-x: .75; --tw-scale-y: .75; transform: translate(var(=
+--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(=
+--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(=
+--tw-scale-y)); }
+
+.scale-90 { --tw-scale-x: .9; --tw-scale-y: .9; transform: translate(var(--=
+tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--=
+tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--=
+tw-scale-y)); }
+
+.scale-95 { --tw-scale-x: .95; --tw-scale-y: .95; transform: translate(var(=
+--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(=
+--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(=
+--tw-scale-y)); }
+
+.select-none { user-select: none; }
+
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0px, 1fr)); }
+
+.grid-rows-4 { grid-template-rows: repeat(4, minmax(0px, 1fr)); }
+
+.flex-col { flex-direction: column; }
+
+.flex-wrap { flex-wrap: wrap; }
+
+.items-start { align-items: flex-start; }
+
+.items-center { align-items: center; }
+
+.justify-start { justify-content: flex-start; }
+
+.justify-center { justify-content: center; }
+
+.justify-between { justify-content: space-between; }
+
+.gap-x-2 { column-gap: 0.5rem; }
+
+.gap-y-2 { row-gap: 0.5rem; }
+
+.space-x-2 > :not([hidden]) ~ :not([hidden]) { --tw-space-x-reverse: 0; mar=
+gin-right: calc(.5rem * var(--tw-space-x-reverse)); margin-left: calc(.5rem=
+ * calc(1 - var(--tw-space-x-reverse))); }
+
+.self-end { align-self: flex-end; }
+
+.whitespace-nowrap { white-space: nowrap; }
+
+.rounded { border-radius: 0.25rem; }
+
+.border { border-width: 1px; }
+
+.border-skin-fill { --tw-border-opacity: 1; border-color: rgba(var(--color-=
+text-base),var(--tw-border-opacity)); }
+
+.border-skin-line { --tw-border-opacity: 1; border-color: rgba(var(--color-=
+border),var(--tw-border-opacity)); }
+
+.border-opacity-40 { --tw-border-opacity: .4; }
+
+.bg-skin-accent { --tw-bg-opacity: 1; background-color: rgba(var(--color-ac=
+cent),var(--tw-bg-opacity)); }
+
+.bg-skin-fill { --tw-bg-opacity: 1; background-color: rgba(var(--color-fill=
+),var(--tw-bg-opacity)); }
+
+.fill-skin-accent { fill: rgb(var(--color-accent)); }
+
+.fill-skin-base { fill: rgb(var(--color-text-base)); }
+
+.p-2 { padding: 0.5rem; }
+
+.p-3 { padding: 0.75rem; }
+
+.p-4 { padding: 1rem; }
+
+.px-0 { padding-left: 0px; padding-right: 0px; }
+
+.px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+
+.px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+
+.px-4 { padding-left: 1rem; padding-right: 1rem; }
+
+.py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+
+.py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+
+.py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
+
+.py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+
+.pb-6 { padding-bottom: 1.5rem; }
+
+.pl-10 { padding-left: 2.5rem; }
+
+.pl-2 { padding-left: 0.5rem; }
+
+.pr-2 { padding-right: 0.5rem; }
+
+.pr-3 { padding-right: 0.75rem; }
+
+.text-center { text-align: center; }
+
+.text-2xl { font-size: 1.5rem; line-height: 2rem; }
+
+.text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+
+.text-9xl { font-size: 8rem; line-height: 1; }
+
+.text-base { font-size: 1rem; line-height: 1.5rem; }
+
+.text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+
+.text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+
+.text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+
+.font-bold { font-weight: 700; }
+
+.font-medium { font-weight: 500; }
+
+.font-semibold { font-weight: 600; }
+
+.lowercase { text-transform: lowercase; }
+
+.capitalize { text-transform: capitalize; }
+
+.italic { font-style: italic; }
+
+.tracking-wider { letter-spacing: 0.05em; }
+
+.text-skin-accent { --tw-text-opacity: 1; color: rgba(var(--color-accent),v=
+ar(--tw-text-opacity)); }
+
+.text-skin-base { --tw-text-opacity: 1; color: rgba(var(--color-text-base),=
+var(--tw-text-opacity)); }
+
+.text-skin-inverted { --tw-text-opacity: 1; color: rgba(var(--color-fill),v=
+ar(--tw-text-opacity)); }
+
+.underline { text-decoration-line: underline; }
+
+.decoration-dashed { text-decoration-style: dashed; }
+
+.decoration-wavy { text-decoration-style: wavy; }
+
+.decoration-2 { text-decoration-thickness: 2px; }
+
+.underline-offset-4 { text-underline-offset: 4px; }
+
+.underline-offset-8 { text-underline-offset: 8px; }
+
+.opacity-50 { opacity: 0.5; }
+
+.opacity-75 { opacity: 0.75; }
+
+.opacity-80 { opacity: 0.8; }
+
+.outline { outline-style: solid; }
+
+.ring { --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-o=
+ffset-width) var(--tw-ring-offset-color); --tw-ring-shadow: var(--tw-ring-i=
+nset) 0 0 0 calc(3px + var(--tw-ring-offset-width)) var(--tw-ring-color); b=
+ox-shadow: var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shad=
+ow, 0 0 #0000); }
+
+.filter { filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) va=
+r(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) =
+var(--tw-sepia) var(--tw-drop-shadow); }
+
+.transition-all { transition-property: all; transition-timing-function: cub=
+ic-bezier(0.4, 0, 0.2, 1); transition-duration: 0.15s; }
+
+.transition-opacity { transition-property: opacity; transition-timing-funct=
+ion: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 0.15s; }
+
+.duration-75 { transition-duration: 75ms; }
+
+.placeholder\:italic::placeholder { font-style: italic; }
+
+.placeholder\:text-opacity-75::placeholder { --tw-text-opacity: .75; }
+
+.hover\:-top-0:hover { top: 0px; }
+
+.hover\:-top-0\.5:hover { top: -0.125rem; }
+
+.hover\:rotate-12:hover { --tw-rotate: 12deg; transform: translate(var(--tw=
+-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw=
+-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw=
+-scale-y)); }
+
+.hover\:rotate-6:hover { --tw-rotate: 6deg; transform: translate(var(--tw-t=
+ranslate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-s=
+kew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-s=
+cale-y)); }
+
+.hover\:text-skin-accent:hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); }
+
+.hover\:text-skin-base:hover { --tw-text-opacity: 1; color: rgba(var(--colo=
+r-text-base),var(--tw-text-opacity)); }
+
+.hover\:underline:hover { text-decoration-line: underline; }
+
+.hover\:opacity-75:hover { opacity: 0.75; }
+
+.focus\:border-skin-accent:focus { --tw-border-opacity: 1; border-color: rg=
+ba(var(--color-accent),var(--tw-border-opacity)); }
+
+.focus\:outline-none:focus { outline: transparent solid 2px; outline-offset=
+: 2px; }
+
+.focus-visible\:no-underline:focus-visible { text-decoration-line: none; }
+
+.focus-visible\:underline-offset-0:focus-visible { text-underline-offset: 0=
+px; }
+
+.prose-img\:border-0 :is(:where(img):not(:where([class~=3D"not-prose"] *)))=
+ { border-width: 0px; }
+
+@media (min-width: 640px) {
+  .sm\:static { position: static; }
+  .sm\:my-0 { margin-top: 0px; margin-bottom: 0px; }
+  .sm\:my-8 { margin-top: 2rem; margin-bottom: 2rem; }
+  .sm\:mb-3 { margin-bottom: 0.75rem; }
+  .sm\:ml-0 { margin-left: 0px; }
+  .sm\:ml-2 { margin-left: 0.5rem; }
+  .sm\:mt-0 { margin-top: 0px; }
+  .sm\:inline { display: inline; }
+  .sm\:flex { display: flex; }
+  .sm\:hidden { display: none; }
+  .sm\:w-auto { width: auto; }
+  .sm\:scale-100 { --tw-scale-x: 1; --tw-scale-y: 1; transform: translate(v=
+ar(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skew(v=
+ar(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(v=
+ar(--tw-scale-y)); }
+  .sm\:flex-row { flex-direction: row; }
+  .sm\:flex-row-reverse { flex-direction: row-reverse; }
+  .sm\:items-center { align-items: center; }
+  .sm\:justify-end { justify-content: flex-end; }
+  .sm\:gap-x-5 { column-gap: 1.25rem; }
+  .sm\:space-x-4 > :not([hidden]) ~ :not([hidden]) { --tw-space-x-reverse: =
+0; margin-right: calc(1rem * var(--tw-space-x-reverse)); margin-left: calc(=
+1rem * calc(1 - var(--tw-space-x-reverse))); }
+  .sm\:p-1 { padding: 0.25rem; }
+  .sm\:px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .sm\:text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
+}
+
+a:where(.astro-5EUNQZKT):hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); }
+
+#skip-to-content:where(.astro-3EF6KSR2) { position: absolute; top: -100%; l=
+eft: 4rem; z-index: 50; --tw-bg-opacity: 1; background-color: rgba(var(--co=
+lor-accent),var(--tw-bg-opacity)); padding: 0.5rem 0.75rem; --tw-text-opaci=
+ty: 1; color: rgba(var(--color-fill),var(--tw-text-opacity)); transition-pr=
+operty: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); tran=
+sition-duration: 0.15s; }
+
+#skip-to-content:where(.astro-3EF6KSR2):focus { top: 1rem; }
+
+.nav-container:where(.astro-3EF6KSR2) { margin-left: auto; margin-right: au=
+to; display: flex; max-width: 48rem; flex-direction: column; align-items: c=
+enter; justify-content: space-between; }
+
+@media (min-width: 640px) {
+  .nav-container:where(.astro-3EF6KSR2) { flex-direction: row; }
+}
+
+.top-nav-wrap:where(.astro-3EF6KSR2) { position: relative; display: flex; w=
+idth: 100%; align-items: flex-start; justify-content: space-between; paddin=
+g: 1rem; }
+
+@media (min-width: 640px) {
+  .top-nav-wrap:where(.astro-3EF6KSR2) { align-items: center; padding-top: =
+2rem; padding-bottom: 2rem; }
+}
+
+.logo:where(.astro-3EF6KSR2) { position: absolute; padding-top: 0.25rem; pa=
+dding-bottom: 0.25rem; font-size: 1.25rem; line-height: 1.75rem; font-weigh=
+t: 600; }
+
+@media (min-width: 640px) {
+  .logo:where(.astro-3EF6KSR2) { position: static; font-size: 1.5rem; line-=
+height: 2rem; }
+}
+
+.hamburger-menu:where(.astro-3EF6KSR2) { align-self: flex-end; padding: 0.5=
+rem; }
+
+@media (min-width: 640px) {
+  .hamburger-menu:where(.astro-3EF6KSR2) { display: none; }
+}
+
+.hamburger-menu:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { height:=
+ 1.5rem; width: 1.5rem; --tw-scale-x: 1.25; --tw-scale-y: 1.25; transform: =
+translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rota=
+te)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x=
+)) scaleY(var(--tw-scale-y)); fill: rgb(var(--color-text-base)); }
+
+nav:where(.astro-3EF6KSR2) { display: flex; width: 100%; flex-direction: co=
+lumn; align-items: center; --tw-bg-opacity: 1; background-color: rgba(var(-=
+-color-fill),var(--tw-bg-opacity)); }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) { margin-left: 0.5rem; flex-direction: row; ju=
+stify-content: flex-end; }
+  nav:where(.astro-3EF6KSR2) > :not([hidden]):where(.astro-3EF6KSR2) ~ :not=
+([hidden]):where(.astro-3EF6KSR2) { --tw-space-x-reverse: 0; margin-right: =
+calc(1rem * var(--tw-space-x-reverse)); margin-left: calc(1rem * calc(1 - v=
+ar(--tw-space-x-reverse))); }
+  nav:where(.astro-3EF6KSR2) { padding-top: 0px; padding-bottom: 0px; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) { margin-top: 1rem; di=
+splay: grid; width: 11rem; grid-template-columns: repeat(2, minmax(0px, 1fr=
+)); grid-template-rows: repeat(4, minmax(0px, 1fr)); gap: 0.5rem; }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) { margin-left: 0px; =
+margin-top: 0px; width: auto; gap: 0px 1.25rem; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) { grid-column: span 2 / span 2; display: flex; align-items: center; jus=
+tify-content: center; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) a:where(.astro-3EF6KSR2) { width: 100%; padding: 0.75rem 1rem; text-ali=
+gn: center; font-weight: 500; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2) a:where(.astro-3EF6KSR2):hover { --tw-text-opacity: 1; color: rgba(var(=
+--color-accent),var(--tw-text-opacity)); }
+
+@media (min-width: 640px) {
+  nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6=
+KSR2) a:where(.astro-3EF6KSR2) { margin-top: 0px; margin-bottom: 0px; paddi=
+ng: 0.25rem 0.5rem; }
+}
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2):nth-child(4) a:where(.astro-3EF6KSR2) { width: auto; }
+
+nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:where(.astro-3EF6KS=
+R2):nth-child(4), nav:where(.astro-3EF6KSR2) ul:where(.astro-3EF6KSR2) li:w=
+here(.astro-3EF6KSR2):nth-child(5) { grid-column: span 1 / span 1; }
+
+nav:where(.astro-3EF6KSR2) a:where(.astro-3EF6KSR2).active { text-decoratio=
+n-line: underline; text-decoration-style: wavy; text-decoration-thickness: =
+2px; text-underline-offset: 4px; }
+
+nav:where(.astro-3EF6KSR2) a:where(.astro-3EF6KSR2).active svg:where(.astro=
+-3EF6KSR2) { fill: rgb(var(--color-accent)); }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) { padding: 0.25rem=
+; }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) svg:where(.astro-3=
+EF6KSR2) { height: 1.5rem; width: 1.5rem; fill: rgb(var(--color-text-base))=
+; }
+
+nav:where(.astro-3EF6KSR2) button:where(.astro-3EF6KSR2) svg:where(.astro-3=
+EF6KSR2):hover { fill: rgb(var(--color-accent)); }
+
+#theme-btn:where(.astro-3EF6KSR2) { padding: 0.75rem; }
+
+@media (min-width: 640px) {
+  #theme-btn:where(.astro-3EF6KSR2) { padding: 0.25rem; }
+}
+
+#theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { --tw-scale-x=
+: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translate-x),var(=
+--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(va=
+r(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+#theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2):hover { --tw-r=
+otate: 12deg; transform: translate(var(--tw-translate-x),var(--tw-translate=
+-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)=
+) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+@media (min-width: 640px) {
+  #theme-btn:where(.astro-3EF6KSR2) svg:where(.astro-3EF6KSR2) { --tw-scale=
+-x: 1; --tw-scale-y: 1; transform: translate(var(--tw-translate-x),var(--tw=
+-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(var(--=
+tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+}
+
+.menu-icon:where(.astro-3EF6KSR2) line:where(.astro-3EF6KSR2) { transition-=
+property: opacity; transition-duration: 75ms; transition-timing-function: c=
+ubic-bezier(0.4, 0, 0.2, 1); }
+
+.menu-icon:where(.astro-3EF6KSR2) .close:where(.astro-3EF6KSR2) { opacity: =
+0; }
+
+.menu-icon:where(.astro-3EF6KSR2).is-active .line:where(.astro-3EF6KSR2) { =
+opacity: 0; }
+
+.menu-icon:where(.astro-3EF6KSR2).is-active .close:where(.astro-3EF6KSR2) {=
+ opacity: 1; }
+
+.social-icons:where(.astro-UPU6FZXR) { flex-wrap: wrap; justify-content: ce=
+nter; gap: 0.25rem; }
+
+.link-button:where(.astro-UPU6FZXR) { padding: 0.5rem; }
+
+.link-button:where(.astro-UPU6FZXR):hover { --tw-rotate: 6deg; transform: t=
+ranslate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotat=
+e)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)=
+) scaleY(var(--tw-scale-y)); }
+
+@media (min-width: 640px) {
+  .link-button:where(.astro-UPU6FZXR) { padding: 0.25rem; }
+}
+
+footer:where(.astro-SZ7XMLTE) { width: 100%; }
+
+.footer-wrapper:where(.astro-SZ7XMLTE) { display: flex; flex-direction: col=
+umn; align-items: center; justify-content: space-between; padding-top: 1.5r=
+em; padding-bottom: 1.5rem; }
+
+@media (min-width: 640px) {
+  .footer-wrapper:where(.astro-SZ7XMLTE) { flex-direction: row-reverse; pad=
+ding-top: 1rem; padding-bottom: 1rem; }
+}
+
+.link-button:where(.astro-SZ7XMLTE) { margin-top: 0.25rem; margin-bottom: 0=
+.25rem; padding: 0.5rem; }
+
+.link-button:where(.astro-SZ7XMLTE):hover { --tw-rotate: 6deg; transform: t=
+ranslate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotat=
+e)) skew(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)=
+) scaleY(var(--tw-scale-y)); }
+
+.link-button:where(.astro-SZ7XMLTE) svg:where(.astro-SZ7XMLTE) { --tw-scale=
+-x: 1.25; --tw-scale-y: 1.25; transform: translate(var(--tw-translate-x),va=
+r(--tw-translate-y)) rotate(var(--tw-rotate)) skew(var(--tw-skew-x)) skewY(=
+var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y)); }
+
+.copyright-wrapper:where(.astro-SZ7XMLTE) { margin-top: 0.5rem; margin-bott=
+om: 0.5rem; display: flex; flex-direction: column; align-items: center; whi=
+te-space: nowrap; }
+
+@media (min-width: 640px) {
+  .copyright-wrapper:where(.astro-SZ7XMLTE) { flex-direction: row; }
+}
+
+.separator:where(.astro-SZ7XMLTE) { display: none; }
+
+@media (min-width: 640px) {
+  .separator:where(.astro-SZ7XMLTE) { display: inline; }
+}
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/about.6e6daff0.css
+
+@charset "utf-8";
+
+.breadcrumb:where(.astro-ILHXCYM7) { width: 100%; max-width: 48rem; margin:=
+ 2rem auto 0.25rem; padding-left: 1rem; padding-right: 1rem; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) { display: inline; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) a:where(.astro-ILHXCYM7) { text-transform: capitalize; opacity:=
+ 0.7; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7) span:where(.astro-ILHXCYM7) { opacity: 0.7; }
+
+.breadcrumb:where(.astro-ILHXCYM7) ul:where(.astro-ILHXCYM7) li:where(.astr=
+o-ILHXCYM7):not(:last-child) a:where(.astro-ILHXCYM7):hover { opacity: 1; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.40cf44c5.css
+
+@charset "utf-8";
+
+#main-content:where(.astro-HSP6OTUF) { width: 100%; max-width: 48rem; margi=
+n-left: auto; margin-right: auto; padding-bottom: 3rem; padding-left: 1rem;=
+ padding-right: 1rem; }
+
+#main-content:where(.astro-HSP6OTUF) h1:where(.astro-HSP6OTUF) { font-size:=
+ 1.5rem; font-weight: 600; line-height: 2rem; }
+
+@media (width >=3D 640px) {
+  #main-content:where(.astro-HSP6OTUF) h1:where(.astro-HSP6OTUF) { font-siz=
+e: 1.875rem; line-height: 2.25rem; }
+}
+
+#main-content:where(.astro-HSP6OTUF) p:where(.astro-HSP6OTUF) { margin-top:=
+ 0.5rem; margin-bottom: 1.5rem; font-style: italic; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.41a32359.css
+
+@charset "utf-8";
+
+a:where(.astro-BLWJYJPT) { text-decoration-line: underline; text-decoration=
+-style: dashed; position: relative; }
+
+a:where(.astro-BLWJYJPT):hover { --tw-text-opacity: 1; color: rgba(var(--co=
+lor-accent),var(--tw-text-opacity)); top: -0.125rem; }
+
+a:where(.astro-BLWJYJPT):focus-visible { padding: 0.25rem; }
+
+a:where(.astro-BLWJYJPT) svg:where(.astro-BLWJYJPT) { --tw-scale-x: .95; --=
+tw-scale-y: .95; transform: translate(var(--tw-translate-x),var(--tw-transl=
+ate-y))rotate(var(--tw-rotate))skew(var(--tw-skew-x))skewY(var(--tw-skew-y)=
+)scaleX(var(--tw-scale-x))scaleY(var(--tw-scale-y)); --tw-text-opacity: 1; =
+color: rgba(var(--color-text-base),var(--tw-text-opacity)); opacity: 0.8; w=
+idth: 1.5rem; height: 1.5rem; margin-right: -1.25rem; }
+
+.group:where(.astro-BLWJYJPT):hover a:where(.astro-BLWJYJPT) svg:where(.ast=
+ro-BLWJYJPT) { fill: rgb(var(--color-accent)); }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.3b14054e.css
+
+@charset "utf-8";
+
+main:where(.astro-VJ4TPSPI) { width: 100%; max-width: 48rem; margin-left: a=
+uto; margin-right: auto; padding-bottom: 3rem; padding-left: 1rem; padding-=
+right: 1rem; }
+
+.post-title:where(.astro-VJ4TPSPI) { --tw-text-opacity: 1; color: rgba(var(=
+--color-accent),var(--tw-text-opacity)); font-size: 1.5rem; font-weight: 60=
+0; line-height: 2rem; }
+
+.tags-container:where(.astro-VJ4TPSPI) { margin-top: 2rem; margin-bottom: 2=
+rem; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://popovicu.com/_astro/_slug_.906d67ca.css
+
+@charset "utf-8";
+
+.pagination-wrapper:where(.astro-EENKY23Y) { justify-content: center; margi=
+n-top: auto; margin-bottom: 2rem; display: flex; }
+
+.disabled:where(.astro-EENKY23Y) { pointer-events: none; user-select: none;=
+ opacity: 0.5; }
+
+.disabled:where(.astro-EENKY23Y):hover { --tw-text-opacity: 1; color: rgba(=
+var(--color-text-base),var(--tw-text-opacity)); }
+
+.group:where(.astro-EENKY23Y):hover .disabled:where(.astro-EENKY23Y) { fill=
+: rgb(var(--color-text-base)); }
+
+.group:where(.astro-EENKY23Y):hover .disabled-svg:where(.astro-EENKY23Y) { =
+fill: rgb(var(--color-text-base)) !important; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/html
+Content-ID: <frame-7A3D5BF47157C334F72D1546835831DC@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://platform.twitter.com/widgets/widget_iframe.2f70fb173b9000da126c79afe2098f02.html?origin=https%3A%2F%2Fpopovicu.com
+
+<!DOCTYPE html><html><head><meta http-equiv=3D"Content-Type" content=3D"tex=
+t/html; charset=3DUTF-8"><meta chartset=3D"utf-8">
+<title>Twitter Widget Iframe</title>
+</head><body>
+
+
+</body></html>
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/html
+Content-ID: <frame-4B7706989EDDC5C5A2E54B1AFA157DDB@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://platform.twitter.com/widgets/follow_button.2f70fb173b9000da126c79afe2098f02.en.html#dnt=false&id=twitter-widget-0&lang=en&screen_name=popovicu94&show_count=false&show_screen_name=true&size=m&time=1706203523604
+
+<!DOCTYPE html><html data-scribe=3D"page:button" lang=3D"en" class=3D" en">=
+<head><meta http-equiv=3D"Content-Type" content=3D"text/html; charset=3DUTF=
+-8"><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-7f6074d7-7de=
+b-453b-ab7c-42fc61c9473a@mhtml.blink" />
+ =20
+  <title>X Follow Button</title>
+  <base target=3D"_blank">
+  <link rel=3D"dns-prefetch" href=3D"https://twitter.com/">
+  <link rel=3D"profile" href=3D"http://microformats.org/profile/hcard">
+ =20
+</head>
+<body data-scribe=3D"section:follow" class=3D" ltr ready ncount">
+<div id=3D"widget">
+  <div class=3D"btn-o" contextmenu=3D"menu" data-scribe=3D"component:button=
+"><a id=3D"follow-button" class=3D"btn" title=3D"Follow @popovicu94 on X" h=
+ref=3D"https://twitter.com/intent/follow?original_referer=3Dhttps%3A%2F%2Fp=
+opovicu.com%2F&amp;ref_src=3Dtwsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5E=
+follow%7Ctwgr%5Epopovicu94&amp;region=3Dfollow_link&amp;screen_name=3Dpopov=
+icu94"><i></i><span class=3D"label" id=3D"l">Follow <b>@popovicu94</b></spa=
+n></a></div><div class=3D"count-o" id=3D"c" data-scribe=3D"component:count"=
+><i></i><u></u><a id=3D"count" class=3D"note" href=3D"https://twitter.com/i=
+ntent/user?original_referer=3Dhttps%3A%2F%2Fpopovicu.com%2F&amp;ref_src=3Dt=
+wsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5Epopovicu94&amp=
+;region=3Dcount_link&amp;screen_name=3Dpopovicu94"></a></div>
+</div>
+<div style=3D"display:none">
+  <menu type=3D"context" id=3D"menu" data-scribe=3D"component:contextmenu">
+    <menuitem id=3D"m-follow" label=3D"Follow user"></menuitem>
+    <menuitem id=3D"m-profile" label=3D"View user on X"></menuitem>
+    <menuitem id=3D"m-tweet" label=3D"Send post to user"></menuitem>
+  </menu>
+</div>
+
+
+
+</body></html>
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-7f6074d7-7deb-453b-ab7c-42fc61c9473a@mhtml.blink
+
+@charset "utf-8";
+
+html { margin: 0px; padding: 0px; font: 12px / 18px "Helvetica Neue", Arial=
+, sans-serif; color: rgb(51, 51, 51); user-select: none; }
+
+body { margin: 0px; padding: 0px; background: 0px 0px; }
+
+a { outline: 0px; text-decoration: none; }
+
+body.rtl { direction: rtl; }
+
+#widget { display: inline-block; white-space: nowrap; overflow: hidden; tex=
+t-align: left; }
+
+#count, .btn, .btn .label, .btn-o, .count-o { display: inline-block; vertic=
+al-align: top; zoom: 1; }
+
+.btn-o { max-width: 100%; }
+
+.btn { position: relative; height: 20px; box-sizing: border-box; padding: 1=
+px 12px; background-color: rgb(0, 0, 0); color: rgb(255, 255, 255); border-=
+radius: 9999px; font-weight: 500; cursor: pointer; }
+
+.rtl .btn { padding: 1px 12px; }
+
+.btn:active, .btn:focus, .btn:hover { background-color: rgb(51, 51, 51); }
+
+.btn:active { box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 5px inset; }
+
+.xl .btn:active { box-shadow: rgba(0, 0, 0, 0.1) 0px 3px 7px inset; }
+
+.btn i { position: relative; top: 2px; display: inline-block; width: 14px; =
+height: 14px; background: url("data:image/svg+xml,%3C%3Fxml version=3D'1.0'=
+ encoding=3D'utf-8'%3F%3E%3Csvg viewBox=3D'0 0 32 32' fill=3D'none' xmlns=
+=3D'http://www.w3.org/2000/svg'%3E%3Crect width=3D'32' height=3D'32' fill=
+=3D'none'/%3E%3Cpath d=3D'M17.9686 14.1623L26.7065 4H24.6358L17.0488 12.823=
+8L10.9891 4H4L13.1634 17.3432L4 28H6.07069L14.0827 18.6817L20.4822 28H27.47=
+14L17.9681 14.1623H17.9686ZM15.1326 17.4607L14.2041 16.132L6.81679 5.55961H=
+9.99723L15.9589 14.0919L16.8873 15.4206L24.6368 26.5113H21.4564L15.1326 17.=
+4612V17.4607Z' fill=3D'white'/%3E%3C/svg%3E%0A") 0px 0px no-repeat transpar=
+ent; }
+
+.btn .label { margin-left: 3px; white-space: nowrap; }
+
+.btn .label b { font-weight: 500; white-space: nowrap; }
+
+.rtl .btn .label { margin-right: 3px; }
+
+.rtl .btn .label b { display: inline-block; direction: ltr; }
+
+.xl { font-size: 13px; line-height: 26px; }
+
+.xl .btn { height: 28px; border-radius: 9999px; padding: 1px 12px; }
+
+.rtl.xl .btn { padding: 1px 12px; }
+
+.xl .btn i { top: 4px; height: 18px; width: 18px; }
+
+.xl .btn .label { margin-left: 4px; }
+
+.rtl.xl .btn .label { margin-right: 4px; }
+
+.aria { position: absolute; left: -999em; }
+
+.rtl .aria { left: auto; right: -999em; }
+
+.count-o { position: relative; background: rgb(255, 255, 255); border: 1px =
+solid rgb(130, 154, 171); border-radius: 4px; visibility: hidden; min-heigh=
+t: 18px; min-width: 15px; text-align: center; }
+
+#count { white-space: nowrap; color: rgb(41, 47, 51); }
+
+#count:focus, #count:hover { color: rgb(51, 51, 51); text-decoration: under=
+line; }
+
+.ncount .count-o { display: none; }
+
+.count-ready .count-o { visibility: visible; }
+
+.count-o i, .count-o u { position: absolute; zoom: 1; line-height: 0; width=
+: 0px; height: 0px; left: 0px; top: 50%; margin: -4px 0px 0px -4px; border-=
+width: 4px 4px 4px 0px; border-top-style: solid; border-right-style: solid;=
+ border-bottom-style: solid; border-top-color: transparent; border-bottom-c=
+olor: transparent; border-image: initial; border-right-color: rgb(130, 154,=
+ 171); border-left-style: initial; border-left-color: initial; }
+
+.count-o u { margin-left: -3px; border-right-color: rgb(255, 255, 255); }
+
+.rtl .count-o i, .rtl .count-o u { left: auto; right: 0px; margin: -4px -4p=
+x 0px 0px; border-width: 4px 0px 4px 4px; border-top-style: solid; border-b=
+ottom-style: solid; border-left-style: solid; border-top-color: transparent=
+; border-bottom-color: transparent; border-image: initial; border-left-colo=
+r: rgb(130, 154, 171); border-right-style: initial; border-right-color: ini=
+tial; }
+
+.rtl .count-o u { margin-right: -3px; border-left-color: rgb(255, 255, 255)=
+; }
+
+.hcount .count-o { margin: 0px 0px 0px 5px; }
+
+.hcount.rtl .count-o { margin: 0px 5px 0px 0px; }
+
+.hcount #count { padding: 0px 8px; }
+
+.xl .count-o { font-size: 11px; border-radius: 4px; }
+
+.xl.hcount .count-o { margin: 0px 0px 0px 6px; }
+
+.xl.rtl.hcount .count-o { margin: 0px 6px 0px 0px; }
+
+.xl.hcount .count-o i, .xl.hcount .count-o u { margin: -5px 0px 0px -5px; b=
+order-width: 5px 5px 5px 0px; }
+
+.xl.hcount .count-o u { margin-left: -4px; }
+
+.xl.rtl.hcount .count-o i, .xl.rtl.hcount .count-o u { margin: -5px -5px 0p=
+x 0px; border-width: 5px 0px 5px 5px; }
+
+.xl.rtl.hcount .count-o u { margin-right: -4px; }
+
+.xl #count { padding: 0px 8px; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/html
+Content-ID: <frame-753829D9E3223378D806C6A0D4173AFE@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+
+<html class=3D"SandboxRoot"><head><meta http-equiv=3D"Content-Type" content=
+=3D"text/html; charset=3DUTF-8"><link rel=3D"stylesheet" type=3D"text/css" =
+href=3D"cid:css-a6c44a98-609f-4297-957e-b8f9677b3477@mhtml.blink" /><base t=
+arget=3D"_blank"></head><body></body></html>
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-a6c44a98-609f-4297-957e-b8f9677b3477@mhtml.blink
+
+@charset "utf-8";
+
+.SandboxRoot { display: none; }
+------MultipartBoundary--0pSTMp2PIwYV4UUu1zkXJ6hYId2vxF88s5V6KHxVBi------
