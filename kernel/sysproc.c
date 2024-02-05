@@ -97,6 +97,17 @@ sys_uptime(void)
   return xticks;
 }
 
+static uint64 
+get_systick(void)
+{
+  uint xticks;
+
+  acquire(&tickslock);
+  xticks = ticks;
+  release(&tickslock);
+  return xticks;
+}
+
 uint64 
 sys_sigalarm(void)
 {
