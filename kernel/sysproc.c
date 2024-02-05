@@ -108,10 +108,28 @@ get_systick(void)
   return xticks;
 }
 
+// a0: alarm interval in ticks, 
+// a1: pointer to handler
 uint64 
 sys_sigalarm(void)
 {
+  int alarmIntervalTicks;
+  uint64 handlerAddr;
+  struct proc *p = myproc();
+  
+  if(argint(0, &alarmIntervalTicks) < 0)
+    return -1;
+  if(argaddr(1, &handlerAddr) < 0)
+    return -1;
 
+  // alarm interval in ticks
+  p->ticksToAlarm = alarmIntervalTicks;
+  // Capture current tick
+  p->alarmTick = get_systick();
+  // Address of alarm handler in user space
+  p->handlerAddr = handlerAddr;
+
+  return 0;
 }
 
 uint64 

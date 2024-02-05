@@ -95,6 +95,9 @@ struct proc {
   int pid;                     // Process ID
 
   // these are private to the process, so p->lock need not be held.
+  uint64 alarmTick;            // Record the tick at last call to alarm handler.
+  uint64 ticksToAlarm;         // Alarm interval in ticks.
+  uint64 handlerAddr;          // Address of Alarm handler in user space
   uint64 kstack;               // Virtual address of kernel stack
   uint64 sz;                   // Size of process memory (bytes)
   pagetable_t pagetable;       // User page table
