@@ -67,7 +67,46 @@ usertrap(void)
     syscall();
   } else if((which_dev = devintr()) != 0){
     // ok
-  } else {
+  }
+#ifdef LAB_LAZY
+  else if ((r_scause() == 13) || (r_scause() == 15)) {
+    // Load page fault (13) 
+    // or Store/AMO page fault (15)
+    #ifdef DBG_PRINT
+    printf("page fault\n");
+    #endif
+    uint64 faultVa = r_stval();
+    if (faultVa < p->sz) {
+      // Locate in a legal user memory region
+      #ifdef DBG_PRINT
+      printf("Legal: %p, %p\n",r_scause(), r_stval());
+      #endif
+      char *mem;
+      mem = kalloc();
+      if(mem == 0){
+        p->killed = 1;
+      } else {
+        memset(mem, 0, PGSIZE);
+        if(mappages(p->pagetable, PGROUNDDOWN(faultVa), PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_U) != 0){
+          #ifdef DBG_PRINT
+          printf("MAP fail \n");
+          #endif
+          p->killed = 1;
+        }
+        #ifdef DBG_PRINT
+        printf("MAP: va %p, pa %p \n", PGROUNDDOWN(faultVa), (uint64)mem);
+        #endif
+      }
+    } else {
+      #ifdef DBG_PRINT
+      printf("Illegal: %p, %p\n",r_scause(), r_stval());
+      #endif
+      p->killed = 1;
+    }
+  
+  } 
+#endif
+  else {
     printf("usertrap(): unexpected scause %p pid=%d\n", r_scause(), p->pid);
     printf("            sepc=%p stval=%p\n", r_sepc(), r_stval());
     p->killed = 1;
