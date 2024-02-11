@@ -47,8 +47,16 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
+#ifdef LAB_LAZY
+  #ifdef DBG_PRINT
+  printf("old_sz: %p\n", myproc()->sz);
+  printf("new_sz: %p\n", myproc()->sz + n);
+  #endif
+  myproc()->sz += n;
+#else
   if(growproc(n) < 0)
     return -1;
+#endif
   return addr;
 }
 
