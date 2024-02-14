@@ -52,7 +52,12 @@ sys_sbrk(void)
   printf("old_sz: %p\n", myproc()->sz);
   printf("new_sz: %p\n", myproc()->sz + n);
   #endif
-  myproc()->sz += n;
+  if (n > 0) {
+    myproc()->sz += n;
+  } else if (n < 0) {
+    if(growproc(n) < 0)
+      return -1;
+  }
 #else
   if(growproc(n) < 0)
     return -1;
