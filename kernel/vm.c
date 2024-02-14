@@ -103,10 +103,18 @@ walkaddr(pagetable_t pagetable, uint64 va)
   pte = walk(pagetable, va, 0);
   if(pte == 0)
     return 0;
-  if((*pte & PTE_V) == 0)
+  if((*pte & PTE_V) == 0) {
+#ifdef DBG_PRINT
+    printf("walkaddr: PTE_V != 1\n");
+#endif
     return 0;
-  if((*pte & PTE_U) == 0)
+  }
+  if((*pte & PTE_U) == 0) {
+#ifdef DBG_PRINT
+    printf("walkaddr: PTE_U != 1\n");
+#endif
     return 0;
+  }
   pa = PTE2PA(*pte);
   return pa;
 }
