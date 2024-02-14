@@ -41,12 +41,12 @@ int userlazyalloc(uint64 va)
     memset(mem, 0, PGSIZE);
     if(mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_U) != 0){
       #ifdef DBG_PRINT
-      printf("MAP fail \n");
+      printf("userlazyalloc MAP: fail \n");
       #endif
       return -1;
     }
     #ifdef DBG_PRINT
-    printf("MAP: va %p, pa %p \n", PGROUNDDOWN(faultVa), (uint64)mem);
+    printf("userlazyalloc MAP: va %p, pa %p \n", PGROUNDDOWN(faultVa), (uint64)mem);
     #endif
   }
 
