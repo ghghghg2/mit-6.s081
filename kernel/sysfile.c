@@ -480,6 +480,9 @@ sys_pipe(void)
     p->ofile[fd1] = 0;
     fileclose(rf);
     fileclose(wf);
+#ifdef DBG_PRINT
+    printf("copyout: Fail.\n");
+#endif
     return -1;
   }
   return 0;
