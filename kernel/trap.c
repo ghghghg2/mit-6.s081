@@ -29,6 +29,29 @@ trapinithart(void)
   w_stvec((uint64)kernelvec);
 }
 
+int userlazyalloc(uint64 va)
+{
+  char *mem;
+  struct proc *p = myproc();
+
+  mem = kalloc();
+  if(mem == 0){
+    return -1;
+  } else {
+    memset(mem, 0, PGSIZE);
+    if(mappages(p->pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_U) != 0){
+      #ifdef DBG_PRINT
+      printf("MAP fail \n");
+      #endif
+      return -1;
+    }
+    #ifdef DBG_PRINT
+    printf("MAP: va %p, pa %p \n", PGROUNDDOWN(faultVa), (uint64)mem);
+    #endif
+  }
+
+  return 0;
+}
 //
 // handle an interrupt, exception, or system call from user space.
 // called from trampoline.S
@@ -81,21 +104,8 @@ usertrap(void)
       #ifdef DBG_PRINT
       printf("Legal: %p, %p\n",r_scause(), r_stval());
       #endif
-      char *mem;
-      mem = kalloc();
-      if(mem == 0){
+      if (userlazyalloc(faultVa) != 0) {
         p->killed = 1;
-      } else {
-        memset(mem, 0, PGSIZE);
-        if(mappages(p->pagetable, PGROUNDDOWN(faultVa), PGSIZE, (uint64)mem, PTE_W|PTE_R|PTE_U) != 0){
-          #ifdef DBG_PRINT
-          printf("MAP fail \n");
-          #endif
-          p->killed = 1;
-        }
-        #ifdef DBG_PRINT
-        printf("MAP: va %p, pa %p \n", PGROUNDDOWN(faultVa), (uint64)mem);
-        #endif
       }
     } else {
       #ifdef DBG_PRINT
