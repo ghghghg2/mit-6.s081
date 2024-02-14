@@ -34,6 +34,14 @@ int userlazyalloc(uint64 va)
   char *mem;
   struct proc *p = myproc();
 
+  if ((va < PGROUNDUP(p->trapframe->sp)) || (va >= p->sz)) {
+    // invalid va below the user stack
+    #ifdef DBG_PRINT
+    printf("userlazyalloc: invalid va below user stack.\n");
+    #endif
+    return -1;
+  }
+
   mem = kalloc();
   if(mem == 0){
     return -1;
