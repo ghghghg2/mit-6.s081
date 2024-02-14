@@ -333,10 +333,20 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   char *mem;
 
   for(i = 0; i < sz; i += PGSIZE){
-    if((pte = walk(old, i, 0)) == 0)
+    if((pte = walk(old, i, 0)) == 0) {
+#ifdef LAB_LAZY
+      continue;
+#else
       panic("uvmcopy: pte should exist");
-    if((*pte & PTE_V) == 0)
+#endif
+    }
+    if((*pte & PTE_V) == 0) {
+#ifdef LAB_LAZY
+      continue;
+#else
       panic("uvmcopy: page not present");
+#endif
+    }
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
     if((mem = kalloc()) == 0)
