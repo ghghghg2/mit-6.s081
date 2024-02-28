@@ -326,6 +326,8 @@ sfence_vma()
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
+#define IDX_MEM_MAP(pa) ((PGROUNDDOWN(pa) - KERNBASE) >> PGSHIFT) // index to mem_map
+
 #define PTE_V (1L << 0) // valid
 #define PTE_R (1L << 1)
 #define PTE_W (1L << 2)
