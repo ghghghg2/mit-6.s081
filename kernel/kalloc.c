@@ -103,7 +103,12 @@ kalloc(void)
     kmem.freelist = r->next;
   release(&kmem.lock);
 
-  if(r)
+  if(r) {
+    if(set_pageRefCnt((uint64)r, 1) != 0) {
+      panic("kalloc: set_pageRefCnt");
+    }
     memset((char*)r, 5, PGSIZE); // fill with junk
+  }
+    
   return (void*)r;
 }
