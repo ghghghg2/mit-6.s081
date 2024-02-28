@@ -11,6 +11,13 @@
 
 void freerange(void *pa_start, void *pa_end);
 
+struct page_info {
+  uint8 refCnt;
+};
+
+// Declare a map stores information of each page.
+static struct page_info mem_map[(PHYSTOP - KERNBASE) >> PGSHIFT]; 
+
 extern char end[]; // first address after kernel.
                    // defined by kernel.ld.
 
