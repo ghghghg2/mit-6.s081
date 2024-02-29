@@ -498,6 +498,7 @@ int allocCowPage(pagetable_t pagetable, uint64 va)
     flags = (flags | PTE_W) & (~PTE_COW);
     if (mappages(pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, flags)) {
       // map failed
+      kfree(mem);
       return -1;
     }
   } 
