@@ -342,7 +342,7 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-    if ((*pte & PTE_W) != 0) {
+    if ((*pte & PTE_W) || (*pte & PTE_COW)) {
       // Set COW bit and clear W bit
       *pte = (*pte | PTE_COW) & (~PTE_W);
       if(mappages(new, i, PGSIZE, pa, PTE_FLAGS(*pte)) != 0){
