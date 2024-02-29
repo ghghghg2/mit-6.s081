@@ -173,6 +173,8 @@ int             copyout(pagetable_t, uint64, char *, uint64);
 int             copyin(pagetable_t, char *, uint64, uint64);
 int             copyinstr(pagetable_t, char *, uint64, uint64);
 int             allocCowPage(pagetable_t pagetable, uint64 va);
+int             incr_pageRefCnt(uint64 pa);
+int             decr_pageRefCnt(uint64 pa);
 
 // plic.c
 void            plicinit(void);

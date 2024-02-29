@@ -30,6 +30,35 @@ struct {
   struct run *freelist;
 } kmem;
 
+int incr_pageRefCnt(uint64 pa)
+{
+  int tmp;
+  if ((pa >= PHYSTOP) || (pa < (uint64)end)) {
+    return -1;
+  }
+  acquire(&kmem.lock);
+  mem_map[IDX_MEM_MAP(pa)].refCnt++;
+  tmp = mem_map[IDX_MEM_MAP(pa)].refCnt;
+  release(&kmem.lock);
+  return tmp;
+}
+
+int decr_pageRefCnt(uint64 pa)
+{
+  int tmp;
+  if ((pa >= PHYSTOP) || (pa < (uint64)end)) {
+    return -1;
+  }
+  acquire(&kmem.lock);
+  tmp = mem_map[IDX_MEM_MAP(pa)].refCnt;
+  if (tmp > 0) {
+    mem_map[IDX_MEM_MAP(pa)].refCnt--;
+    tmp--;
+  }
+  release(&kmem.lock);
+  return tmp;
+}
+
 void
 kinit()
 {
