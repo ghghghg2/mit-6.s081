@@ -472,3 +472,38 @@ copyinstr(pagetable_t pagetable, char *dst, uint64 srcva, uint64 max)
     return -1;
   }
 }
+
+int allocCowPage(pagetable_t pagetable, uint64 va)
+{
+  uint64 pa = walkaddr(pagetable, va);
+  pte_t *pte = walkpte(pagetable, va);
+  uint64 flags;
+  void* mem;
+
+  if ((pa == 0) || (pte == 0)) {
+    // Memory is not mapped
+    return -1;
+  } else if ((*pte & PTE_COW) != 0) {
+    // This is a COW page
+    if ((mem = kalloc()) == 0) {
+      return -1;
+    }
+    flags = PTE_FLAGS(*pte);
+    // copy content of COW page to new page
+    memmove((char *)mem, (char *)PGROUNDDOWN(pa), PGSIZE);
+    // Unmap the COW page from pagetable and kfree() its physical memory.
+    // kfree() determines whether to free it by refcnt of each page.
+    uvmunmap(pagetable, PGROUNDDOWN(va), 1, 1);
+    // Make newly allocated memory writable
+    flags = (flags | PTE_W) & (~PTE_COW);
+    if (mappages(pagetable, PGROUNDDOWN(va), PGSIZE, (uint64)mem, flags)) {
+      // map failed
+      return -1;
+    }
+  } 
+  else {
+    // This is not a COW page
+    return -1;
+  }
+  return 0;
+}
