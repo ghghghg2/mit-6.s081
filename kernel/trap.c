@@ -65,6 +65,34 @@ usertrap(void)
     intr_on();
 
     syscall();
+  } else if (r_scause() == 15) {
+    // Store page fault
+    uint64 faultva = r_stval();
+    uint64 faultpa = walkaddr(p->pagetable, faultva);
+    pte_t *faultpte = walkpte(p->pagetable, faultva);
+    uint64 flags;
+    void* mem;
+    if ((faultpa == 0) || (faultpte == 0)) {
+      // Memory is not mapped
+      p->killed = 1;
+    } else if ((*faultpte & PTE_COW) != 0) {
+      // This is a COW page
+      if ((mem = kalloc()) == 0) {
+        p->killed = 1;
+      } else {
+        flags = PTE_FLAGS(*faultpte);
+        // copy content of COW page to new page
+        memmove((char *)mem, (char *)PGROUNDDOWN(faultpa), PGSIZE);
+        // Unmap the COW page from pagetable and kfree() its physical memory.
+        // kfree() determines whether to free it by refcnt of each page.
+        uvmunmap(p->pagetable, PGROUNDDOWN(faultva), 1, 1);
+        // Make newly allocated memory writable
+        flags = (flags | PTE_W) & (~PTE_COW);
+        if (mappages(p->pagetable, PGROUNDDOWN(faultva), PGSIZE, (uint64)mem, flags)) {
+          p->killed = 1;
+        }
+      }
+    }
   } else if((which_dev = devintr()) != 0){
     // ok
   } else {
