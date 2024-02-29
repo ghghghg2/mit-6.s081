@@ -342,12 +342,22 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       panic("uvmcopy: page not present");
     pa = PTE2PA(*pte);
     flags = PTE_FLAGS(*pte);
-    if((mem = kalloc()) == 0)
-      goto err;
-    memmove(mem, (char*)pa, PGSIZE);
-    if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
-      kfree(mem);
-      goto err;
+    if ((*pte & PTE_W) != 0) {
+      // Set COW bit and clear W bit
+      *pte = (*pte | PTE_COW) & (~PTE_W);
+      if(mappages(new, i, PGSIZE, pa, PTE_FLAGS(*pte)) != 0){
+        goto err;
+      }
+      // Increment the refCnt of this page
+      set_pageRefCnt(pa, get_pageRefCnt(pa) + 1);
+    } else {
+      if((mem = kalloc()) == 0)
+        goto err;
+      memmove(mem, (char*)pa, PGSIZE);
+      if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
+        kfree(mem);
+        goto err;
+      }
     }
   }
   return 0;
