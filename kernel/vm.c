@@ -349,7 +349,7 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
         goto err;
       }
       // Increment the refCnt of this page
-      set_pageRefCnt(pa, get_pageRefCnt(pa) + 1);
+      incr_pageRefCnt(pa);
     } else {
       if((mem = kalloc()) == 0)
         goto err;
