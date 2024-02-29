@@ -30,26 +30,6 @@ struct {
   struct run *freelist;
 } kmem;
 
-int set_pageRefCnt(uint64 pa, uint8 cnt)
-{
-  if ((pa >= PHYSTOP) || (pa < (uint64)end)) {
-    return -1;
-  }
-  mem_map[IDX_MEM_MAP(pa)].refCnt = cnt;
-  return 0;
-}
-
-int get_pageRefCnt(uint64 pa)
-{
-  uint8 tmp;
-  if ((pa >= PHYSTOP) || (pa < (uint64)end)) {
-    return -1;
-  }
-  tmp = mem_map[IDX_MEM_MAP(pa)].refCnt;
-  
-  return tmp;
-}
-
 void
 kinit()
 {
