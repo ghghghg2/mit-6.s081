@@ -12,7 +12,7 @@
 
 
 struct thread {
-  char       stack[STACK_SIZE]; /* the thread's stack */
+  char       stack[STACK_SIZE] __attribute__ ((aligned (16))); /* the thread's stack */
   int        state;             /* FREE, RUNNING, RUNNABLE */
 
 };
