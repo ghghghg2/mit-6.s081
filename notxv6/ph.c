@@ -149,6 +149,9 @@ main(int argc, char *argv[])
     assert(pthread_create(&tha[i], NULL, get_thread, (void *) (long) i) == 0);
   }
   for(int i = 0; i < nthread; i++) {
+    // The reason why pthread_join() use copy of pthread_t instead of
+    // pointer to pthread_t is that a p_thread_t is just an id, it's 
+    // the kernel who maintains the thread.
     assert(pthread_join(tha[i], &value) == 0);
   }
   t1 = now();
