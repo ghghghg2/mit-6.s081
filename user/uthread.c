@@ -77,6 +77,11 @@ thread_create(void (*func)())
   }
   t->state = RUNNABLE;
   // YOUR CODE HERE
+  uint64 tmp;
+  tmp = (uint64)func;
+  memmove(&t->stack[0], &tmp, 8); // ra
+  tmp = (uint64)&t->stack[STACK_SIZE];
+  memmove(&t->stack[8], &tmp, 8); // sp 
 }
 
 void 
