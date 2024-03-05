@@ -119,6 +119,9 @@ kalloc(void)
   r = kmem.freelist;
   if(r) {
     kmem.freelist = r->next;
+    if (mem_map[IDX_MEM_MAP((uint64)r)].refCnt != 0) {
+      panic("kalloc: re-alloc");
+    }
     mem_map[IDX_MEM_MAP((uint64)r)].refCnt = 1;
   }
   release(&kmem.lock);
