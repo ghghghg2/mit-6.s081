@@ -63,6 +63,7 @@ thread_schedule(void)
      * Invoke thread_switch to switch from t to next_thread:
      * thread_switch(??, ??);
      */
+    thread_switch((uint64)&t->stack[0], (uint64)&next_thread->stack[0]);
   } else
     next_thread = 0;
 }
