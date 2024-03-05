@@ -333,7 +333,6 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
   pte_t *pte;
   uint64 pa, i;
   uint flags;
-  char *mem;
 
   for(i = 0; i < sz; i += PGSIZE){
     if((pte = walk(old, i, 0)) == 0)
@@ -351,13 +350,11 @@ uvmcopy(pagetable_t old, pagetable_t new, uint64 sz)
       // Increment the refCnt of this page
       incr_pageRefCnt(pa);
     } else {
-      if((mem = kalloc()) == 0)
-        goto err;
-      memmove(mem, (char*)pa, PGSIZE);
-      if(mappages(new, i, PGSIZE, (uint64)mem, flags) != 0){
-        kfree(mem);
+      if(mappages(new, i, PGSIZE, pa, flags) != 0){
         goto err;
       }
+      // Increment the refCnt of this page
+      incr_pageRefCnt(pa);
     }
   }
   return 0;
