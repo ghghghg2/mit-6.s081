@@ -17,6 +17,8 @@ struct entry *table[NBUCKET];
 int keys[NKEYS];
 int nthread = 1;
 
+pthread_mutex_t lockarr[NBUCKET];
+
 double
 now()
 {
@@ -108,6 +110,11 @@ main(int argc, char *argv[])
     exit(-1);
   }
   nthread = atoi(argv[1]);
+  
+  for (int i = 0; i < NBUCKET; i++) {
+    pthread_mutex_init(&lockarr[i], NULL);
+  }
+
   tha = malloc(sizeof(pthread_t) * nthread);
   srandom(0);
   assert(NKEYS % nthread == 0);
