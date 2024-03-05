@@ -1,0 +1,10 @@
+Q. Why are there missing keys with 2 threads, but not with 1 thread? 
+Identify a sequence of events with 2 threads that can lead to a key being missing. 
+Submit your sequence with a short explanation in answers-thread.txt
+
+A. 
+A sequence could leads to missing key:
+Thread 1: Executing *p = e in function insert();
+Thread 2: Executing *p = e in function insert();
+Both thread above modify the entry (*p) in table[] simultaneously.
+This will let key in either Thread 1 or Thread 2 miss. 
