@@ -28,7 +28,11 @@ struct {
 void
 kinit()
 {
-  initlock(&kmem.lock, "kmem");
+  for (uint16 i = 0; i < NCPU; i++) {
+    initlock(&kmem[i].lock, "kmem");
+    kmem[i].cpuid = i;
+  }
+  
   freerange(end, (void*)PHYSTOP);
 }
 
