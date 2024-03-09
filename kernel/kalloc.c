@@ -21,7 +21,9 @@ struct run {
 struct {
   struct spinlock lock;
   struct run *freelist;
-} kmem;
+  uint16 cpuid; // which cpu the kmem list belongs to
+} kmem[NCPU];
+
 
 void
 kinit()
