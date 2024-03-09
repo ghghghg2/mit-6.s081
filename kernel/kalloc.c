@@ -97,6 +97,10 @@ kalloc(void)
   listId = cpuid(); // Current CPU
   pop_off();
 
+  // CPU could have yield here which makes the result of cpuid()
+  // inconsistent with the executing CPU. However, it's ok since 
+  // cpuid() is only used as a start point for searching free memory.
+
   for (int i = listId; cnt < NCPU; i = (i + 1) % NCPU) {
     acquire(&kmem[i].lock);
     r = kmem[i].freelist;
