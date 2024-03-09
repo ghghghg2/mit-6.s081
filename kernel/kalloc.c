@@ -24,6 +24,18 @@ struct {
   uint16 cpuid; // which cpu the kmem list belongs to
 } kmem[NCPU];
 
+// Map pa to the mem list it belongs to
+static uint16 pa2listid(uint64 pa)
+{
+  uint16 ret;
+  if ((pa >= PHYSTOP) || (pa < (uint64)end)) {
+    panic("pa2listid");
+  }
+
+  ret = (pa >> PGSHIFT) % NCPU;
+
+  return ret;
+}
 
 void
 kinit()
