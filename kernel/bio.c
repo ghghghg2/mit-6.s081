@@ -44,17 +44,22 @@ binit(void)
 {
   struct buf *b;
 
-  initlock(&bcache.lock, "bcache");
+  for (uint i = 0; i < NBUCKETS; i++) {
+    initlock(&bcache.locks[i], "bcache");
+    // Create linked list of buffers
+    bcache.head[i].prev = &bcache.head[i];
+    bcache.head[i].next = &bcache.head[i];
+  }
 
-  // Create linked list of buffers
-  bcache.head.prev = &bcache.head;
-  bcache.head.next = &bcache.head;
+  uint cnt = 0;
   for(b = bcache.buf; b < bcache.buf+NBUF; b++){
-    b->next = bcache.head.next;
-    b->prev = &bcache.head;
     initsleeplock(&b->lock, "buffer");
-    bcache.head.next->prev = b;
-    bcache.head.next = b;
+    // Distribute the block to buckets evenly
+    b->next = bcache.head[cnt % NBUCKETS].next;
+    b->prev = &bcache.head[cnt % NBUCKETS];
+    bcache.head[cnt % NBUCKETS].next->prev = b;
+    bcache.head[cnt % NBUCKETS].next = b;
+    cnt++;
   }
 }
 
