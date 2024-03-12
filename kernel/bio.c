@@ -204,22 +204,23 @@ brelse(struct buf *b)
 {
   if(!holdingsleep(&b->lock))
     panic("brelse");
-
+  
+  uint xticks;
   releasesleep(&b->lock);
 
-  acquire(&bcache.lock);
+  uint idx = blockno2Idx(b->blockno); // mapped bucket
+
+  acquire(&bcache.locks[idx]);
   b->refcnt--;
   if (b->refcnt == 0) {
     // no one is waiting for it.
-    b->next->prev = b->prev;
-    b->prev->next = b->next;
-    b->next = bcache.head.next;
-    b->prev = &bcache.head;
-    bcache.head.next->prev = b;
-    bcache.head.next = b;
+    acquire(&tickslock);
+    xticks = ticks;
+    release(&tickslock);
+    b->lastUsedTime = xticks;
   }
   
-  release(&bcache.lock);
+  release(&bcache.locks[idx]);
 }
 
 void
