@@ -35,6 +35,10 @@ struct {
   struct buf head[NBUCKETS];
 } bcache;
 
+static uint16 blockno2Idx(uint blockno) {
+  return (blockno % NBUCKETS);
+}
+
 void
 binit(void)
 {
