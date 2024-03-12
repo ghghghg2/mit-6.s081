@@ -35,6 +35,36 @@ struct {
   struct buf head[NBUCKETS];
 } bcache;
 
+// Insert block b into bucket[idx].
+// If the block with same blockno has already been cached, 
+// clear the blockno and insert.
+// The reason why we need this check is finding block and 
+// allocating new block is not atomic in bget().
+// return the block with blockno whether it's input one or not.
+// Should be called with acquired lock of bucket[idx]
+static struct buf* insert_block(uint idx, struct buf *b) {
+  struct buf* tmp = b;
+  for(struct buf *pb = bcache.head[idx].next; pb != &bcache.head[idx]; pb = pb->next) {
+    if ((b->blockno == pb->blockno) && (b->dev == pb->dev)) {
+      // The block has already been cached
+      // insert as an invalid blockno
+      b->blockno = -1;
+      b->dev = -1;
+      b->refcnt = 0;
+      tmp = pb;
+      // Imcrement the refcnt since it has been cached.
+      pb->refcnt++;
+      break;
+    }
+  }
+  // Insert block b into bucket no matter it's valid or not
+  b->next = bcache.head[idx].next;
+  b->prev = &bcache.head[idx];
+  bcache.head[idx].next->prev = b;
+  bcache.head[idx].next = b;
+  return tmp;
+}
+
 // Find and Remove unused LRU block in bucket[idx]
 // If the block is found and removed, return its handle. 
 // Otherwise, 0 is returned.
