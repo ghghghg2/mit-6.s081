@@ -225,16 +225,18 @@ brelse(struct buf *b)
 
 void
 bpin(struct buf *b) {
-  acquire(&bcache.lock);
+  uint idx = blockno2Idx(b->blockno); // mapped bucket
+  acquire(&bcache.locks[idx]);
   b->refcnt++;
-  release(&bcache.lock);
+  release(&bcache.locks[idx]);
 }
 
 void
 bunpin(struct buf *b) {
-  acquire(&bcache.lock);
+  uint idx = blockno2Idx(b->blockno); // mapped bucket
+  acquire(&bcache.locks[idx]);
   b->refcnt--;
-  release(&bcache.lock);
+  release(&bcache.locks[idx]);
 }
 
 
