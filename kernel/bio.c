@@ -23,14 +23,16 @@
 #include "fs.h"
 #include "buf.h"
 
+#define NBUCKETS (13)
+
 struct {
-  struct spinlock lock;
+  struct spinlock locks[NBUCKETS];
   struct buf buf[NBUF];
 
   // Linked list of all buffers, through prev/next.
   // Sorted by how recently the buffer was used.
   // head.next is most recent, head.prev is least.
-  struct buf head;
+  struct buf head[NBUCKETS];
 } bcache;
 
 void
