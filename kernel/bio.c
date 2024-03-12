@@ -35,6 +35,33 @@ struct {
   struct buf head[NBUCKETS];
 } bcache;
 
+// Find and Remove unused LRU block in bucket[idx]
+// If the block is found and removed, return its handle. 
+// Otherwise, 0 is returned.
+// Should be called with acquired lock of bucket[idx]
+static struct buf* find_and_remove_lru(uint idx) {
+  struct buf *lowestpb = 0;
+  uint lowestTime = 0xFFFFFFFF;
+
+  for(struct buf *pb = bcache.head[idx].next; pb != &bcache.head[idx]; pb = pb->next) {
+    if (pb->refcnt == 0) {
+      if (pb->lastUsedTime <= lowestTime) {
+        lowestpb = pb;
+        lowestTime = pb->lastUsedTime;
+      }
+    }
+  }
+  if (lowestpb) {
+    // remove from the bucket so that no other thread can access it
+    lowestpb->prev->next = lowestpb->next;
+    lowestpb->next->prev = lowestpb->prev;
+    lowestpb->next = 0;
+    lowestpb->prev = 0;
+  }
+
+  return lowestpb;
+}
+
 static uint16 blockno2Idx(uint blockno) {
   return (blockno % NBUCKETS);
 }
