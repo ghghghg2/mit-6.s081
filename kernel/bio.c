@@ -127,31 +127,49 @@ static struct buf*
 bget(uint dev, uint blockno)
 {
   struct buf *b;
+  uint cnt = 0;
+  uint idx = blockno2Idx(blockno); // mapped bucket
 
-  acquire(&bcache.lock);
+  acquire(&bcache.locks[idx]);
 
   // Is the block already cached?
-  for(b = bcache.head.next; b != &bcache.head; b = b->next){
+  for(b = bcache.head[idx].next; b != &bcache.head[idx]; b = b->next){
     if(b->dev == dev && b->blockno == blockno){
       b->refcnt++;
-      release(&bcache.lock);
+      release(&bcache.locks[idx]);
       acquiresleep(&b->lock);
       return b;
     }
   }
+  // Release lock to prevent deadlock
+  release(&bcache.locks[idx]);
 
-  // Not cached.
-  // Recycle the least recently used (LRU) unused buffer.
-  for(b = bcache.head.prev; b != &bcache.head; b = b->prev){
-    if(b->refcnt == 0) {
+  // Not cached
+  // Look for the unused block in all buckets
+  for (uint i = idx; cnt < NBUCKETS; i = (i + 1) % NBUCKETS) {
+    cnt++;
+    acquire(&bcache.locks[i]);
+    // Search for unused LRU block in each bucket
+    if ((b = find_and_remove_lru(i)) != 0) {
       b->dev = dev;
       b->blockno = blockno;
       b->valid = 0;
       b->refcnt = 1;
-      release(&bcache.lock);
+      release(&bcache.locks[i]);
+      
+      // Put new block into the mapped bucket.
+      acquire(&bcache.locks[idx]);
+      // Another process may have already insert the blockno
+      // into the bucket since we release &bcache.locks[idx]
+      // to prevent deadlock. It is insert_block() which handles
+      // the repeating insetion problem.
+      b = insert_block(idx, b);
+      release(&bcache.locks[idx]);
       acquiresleep(&b->lock);
       return b;
+      break;
     }
+    release(&bcache.locks[i]);
   }
   panic("bget: no buffers");
 }
