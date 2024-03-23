@@ -1,0 +1,806 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/thread.html
+Subject: Lab: Multithreading
+Date: Sat, 23 Mar 2024 22:09:44 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----"
+
+
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/html
+Content-ID: <frame-EADFCFB7AB32AE6B4D6737CC0CD71329@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/thread.html
+
+<html class=3D"cm-retina" collamark=3D"crx"><head><meta http-equiv=3D"Conte=
+nt-Type" content=3D"text/html; charset=3Dwindows-1252"><link rel=3D"stylesh=
+eet" type=3D"text/css" href=3D"cid:css-41d27424-ce36-475d-bb86-8682dce23f59=
+@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-=
+aa892003-59c6-44f4-84cb-5a4ff1ddb659@mhtml.blink" /><link rel=3D"stylesheet=
+" type=3D"text/css" href=3D"cid:css-cdfe3dca-6c55-4f9a-b75b-dfbf0abfa4b5@mh=
+tml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-bd5=
+02c37-8fc8-4af8-bf28-4d7ba2196623@mhtml.blink" />
+<title>Lab: Multithreading</title>
+<link rel=3D"stylesheet" href=3D"https://pdos.csail.mit.edu/6.S081/2020/lab=
+s/labs.css" type=3D"text/css">
+
+
+</head>
+<body>
+
+<h1>Lab: Multithreading</h1>
+
+<p>This lab will familiarize you with multithreading.  You will
+implement switching between threads in a user-level threads package,
+use multiple threads to speed up a program, and implement a barrier.
+
+</p><div class=3D"prereq">
+<p>Before writing code, you should make sure you have read "Chapter 7: Sche=
+duling" from
+  the <a href=3D"https://pdos.csail.mit.edu/6.S081/2020/xv6/book-riscv-rev1=
+.pdf">xv6 book</a> and studied
+  the corresponding code.
+</p></div>
+
+<p>To start the lab, switch to the thread branch:
+  </p><pre>  $ <kbd>git fetch</kbd>
+  $ <kbd>git checkout thread</kbd>
+  $ <kbd>make clean</kbd>
+  </pre>
+
+
+<h2>Uthread: switching between threads (<a class=3D"moderate" href=3D"https=
+://pdos.csail.mit.edu/6.S081/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>In this exercise you will design the context switch mechanism for a
+  user-level threading system, and then implement it.  To get you
+  started, your xv6 has two files user/uthread.c and
+  user/uthread_switch.S, and a rule in the Makefile to build a uthread
+  program.  uthread.c contains most of a user-level threading package,
+  and code for three simple test threads.
+  The threading package is missing some of the code to create a thread and =
+to switch
+  between threads.
+
+  </p><div class=3D"required">
+<p>
+Your job is to come up with a plan to create threads and save/restore
+registers to switch between threads, and implement that plan.
+When you're done,
+<tt>make grade</tt> should say that your solution passes the
+<tt>uthread</tt> test.
+</p></div>
+
+Once you've finished, you should see the following output when you
+run <tt>uthread</tt> on xv6 (the three threads might start in
+a different order):
+
+<pre>$ <kbd>make qemu</kbd>
+...
+$ <kbd>uthread</kbd>
+thread_a started
+thread_b started
+thread_c started
+thread_c 0
+thread_a 0
+thread_b 0
+thread_c 1
+thread_a 1
+thread_b 1
+...
+thread_c 99
+thread_a 99
+thread_b 99
+thread_c: exit after 100
+thread_a: exit after 100
+thread_b: exit after 100
+thread_schedule: no runnable threads
+$
+</pre>
+
+<p>
+This output comes from the three test threads, each of which has
+a loop that prints a line and then yields the CPU to the
+other threads.
+</p><p>
+
+</p><p>
+At this point, however, with no context switch code, you'll see
+no output.
+</p><p>
+
+</p><p>You will need to add code to <tt>thread_create()</tt> and
+   <tt>thread_schedule()</tt> in <tt>user/uthread.c</tt>,
+   and <tt>thread_switch</tt> in <tt>user/uthread_switch.S</tt>.
+   One goal is ensure that when <tt>thread_schedule()</tt> runs a given
+   thread for the first time, the thread executes
+   the function passed to <tt>thread_create()</tt>, on its own stack.
+   Another goal is to ensure that <tt>thread_switch</tt> saves
+   the registers of the thread being switched away from, restores the regis=
+ters
+   of the thread being switched to, and returns to the point in the
+   latter thread's instructions where it last left off.
+   You will
+  have to decide where to save/restore registers; modifying
+  <tt>struct thread</tt> to hold registers is a good plan.
+  You'll need to add a call to <tt>thread_switch</tt> in <tt>thread_schedul=
+e</tt>;
+  you can pass whatever arguments you need to <tt>thread_switch</tt>,
+  but the intent is to switch from thread <tt>t</tt> to
+  <tt>next_thread</tt>.
+
+</p><p>Some hints:
+  </p><ul>
+    <li> <tt>thread_switch</tt> needs to save/restore only
+the callee-save registers. Why?
+    </li><li> You can see the assembly code for uthread in user/uthread.asm=
+, which
+may be handy for debugging.
+</li><li>To test your code it might be helpful to single step through your
+<tt>thread_switch</tt> using <tt>riscv64-linux-gnu-gdb</tt>.  You can
+get started in this way:
+
+<pre>(gdb) file user/_uthread
+Reading symbols from user/_uthread...
+(gdb) b uthread.c:60
+
+</pre>
+
+<p>This sets a breakpoint at line 60 of <tt>uthread.c</tt>.
+The breakpoint may (or may not) be triggered before you even run
+<tt>uthread</tt>. How could that happen?
+
+</p><p>Once your xv6 shell runs, type "uthread", and gdb will break at line=
+ 60.
+Now you can type commands like the following to inspect
+the state of <tt>uthread</tt>:
+
+</p><pre>  (gdb) p/x *next_thread
+</pre>
+
+With "x", you can examine the content of a memory location:
+<pre>  (gdb) x/x next_thread-&gt;stack
+</pre>
+
+<p>You can skip to the start of <tt>thread_switch</tt> thus:
+</p><pre>   (gdb) b thread_switch
+   (gdb) c
+</pre>
+
+<p>You can single step assembly instructions using:
+</p><pre>   (gdb) si
+</pre>
+
+<p>On-line documentation for gdb is <a href=3D"https://sourceware.org/gdb/c=
+urrent/onlinedocs/gdb/">here</a>.
+
+</p></li></ul>
+
+<h2>Using threads  (<a class=3D"moderate" href=3D"https://pdos.csail.mit.ed=
+u/6.S081/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>In this assignment you will explore parallel programming with
+threads and locks using a hash table. You should do this assignment on
+a real Linux or MacOS computer (not xv6, not qemu) that has multiple
+cores. Most recent laptops have multicore processors.
+
+</p><p>
+This assignment uses the UNIX <tt>pthread</tt> threading library.
+You can find information about it from the manual page, with
+<tt>man pthreads</tt>, and you can look on the web, for example
+<a href=3D"https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_mute=
+x_lock.html">here</a>,
+<a href=3D"https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_mute=
+x_init.html">here</a>,
+and
+<a href=3D"https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_crea=
+te.html">here</a>.
+
+</p><p>The file <tt>notxv6/ph.c</tt> contains a simple hash table that
+is correct if used from a single thread, but incorrect when used from
+multiple threads.
+In your main xv6 directory (perhaps <tt>~/xv6-labs-2020</tt>),
+type this:
+</p><pre>$ make ph
+$ ./ph 1
+</pre>
+Note that to build <tt>ph</tt> the Makefile uses your OS's gcc, not
+the 6.S081 tools.
+The argument to <tt>ph</tt> specifies the number of threads that
+execute put and get operations on the the hash table.
+After running for a little while, <tt>ph 1</tt> will produce output similar
+to this:
+
+<pre>100000 puts, 3.991 seconds, 25056 puts/second
+0: 0 keys missing
+100000 gets, 3.981 seconds, 25118 gets/second
+</pre>
+
+<p>
+The numbers you see may differ from this sample output by a factor of
+two or more, depending on how fast your computer is, whether it has
+multiple cores, and whether it's busy doing other things.
+
+</p><p>
+<tt>ph</tt> runs two benchmarks. First it adds lots of keys to the
+hash table by calling <tt>put()</tt>, and prints the achieved rate in
+puts per second. The it fetches keys from the hash table
+with <tt>get()</tt>. It prints the number keys that should have been
+in the hash table as a result of the puts but are missing (zero in
+this case), and it prints the number of gets per second it achieved.
+
+</p><p>
+You can tell <tt>ph</tt> to use its hash table from multiple
+threads at the same time by giving it an argument greater than
+one. Try <tt>ph 2</tt>:
+
+</p><pre>$ ./ph 2
+100000 puts, 1.885 seconds, 53044 puts/second
+1: 16579 keys missing
+0: 16579 keys missing
+200000 gets, 4.322 seconds, 46274 gets/second
+</pre>
+
+<pp>
+The first line of this <tt>ph 2</tt> output indicates that when two
+threads concurrently add entries to the hash table, they
+achieve a total rate of 53,044 inserts per second. That's about
+twice the rate of the single thread from running
+<tt>ph 1</tt>. That's an excellent "parallel speedup" of about 2x,
+as much as one could possibly hope for (i.e. twice as many
+cores yielding twice as much work per unit time).
+
+<p>
+However, the two lines saying <tt>16579 keys missing</tt> indicate that
+a large number of keys that should have been in the hash table are not
+there. That is, the puts were supposed to add those keys to the hash
+table, but something went wrong.
+Have a look at <tt>notxv6/ph.c</tt>, particularly at <tt>put()</tt>
+and <tt>insert()</tt>.
+
+</p><div class=3D"question">
+Why are there missing keys
+with 2 threads, but not with 1 thread?  Identify a sequence of
+events with 2 threads that can lead to a key being missing.
+Submit your sequence with a short explanation in answers-thread.txt
+</div>
+
+<div class=3D"required">
+
+<p>To avoid this sequence of events, insert lock and unlock statements
+in
+<tt>put</tt> and <tt>get</tt> in <tt>notxv6/ph.c</tt> so that the
+number of keys missing is always 0 with two threads. The relevant
+pthread calls are:
+
+</p><pre>pthread_mutex_t lock;            // declare a lock
+pthread_mutex_init(&amp;lock, NULL); // initialize the lock
+pthread_mutex_lock(&amp;lock);       // acquire lock
+pthread_mutex_unlock(&amp;lock);     // release lock
+</pre>
+
+<p>
+You're done when <tt>make grade</tt> says that your code passes the <tt>ph_=
+safe</tt> test,
+which requires zero missing keys with two threads.
+It's OK at this point to fail the <tt>ph_fast</tt> test.
+</p></div>
+
+<p>
+Don't forget to call <tt>pthread_mutex_init()</tt>.
+Test your code first with 1 thread, then test it with 2 threads.
+Is it correct (i.e. have you eliminated missing keys?)?  Does the
+two-threaded version achieve parallel speedup (i.e. more total
+work per unit time) relative
+to the single-threaded version?
+
+</p><p>
+There are situations where concurrent <tt>put()</tt>s
+have no overlap in the memory they read or write in the
+hash table, and thus don't need a lock to protect against
+each other.
+Can you change <tt>ph.c</tt> to take advantage of such situations to obtain=
+ parallel
+speedup for some <tt>put()</tt>s?
+Hint: how about a lock per hash bucket?
+
+</p><div class=3D"required">
+<p>Modify your code so that some <tt>put</tt> operations run in parallel
+  while maintaining correctness.
+You're done when <tt>make grade</tt> says your code passes
+both the <tt>ph_safe</tt> and <tt>ph_fast</tt> tests.
+The <tt>ph_fast</tt> test requires that two threads yield at least 1.25 tim=
+es as
+many puts/second as one thread.
+</p></div>
+
+<h2>Barrier(<a class=3D"moderate" href=3D"https://pdos.csail.mit.edu/6.S081=
+/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>In this assignment you'll implement a <a href=3D"http://en.wikipedia.org=
+/wiki/Barrier_(computer_science)">barrier</a>:
+a point in an
+application at which all participating threads must wait until all other pa=
+rticipating threads reach
+that point too. You'll use pthread condition variables, which are a sequenc=
+e
+coordination technique similar to xv6's sleep and wakeup.
+
+</p><p>You should do this assignment on a real computer (not xv6, not qemu)=
+.
+
+</p><p>The file <tt>notxv6/barrier.c</tt> contains a broken barrier.
+</p><pre>$ make barrier
+$ ./barrier 2
+barrier: notxv6/barrier.c:42: thread: Assertion `i =3D=3D t' failed.
+</pre>
+
+The 2 specifies the number of threads that synchronize on the barrier (
+<tt>nthread</tt> in <tt>barrier.c</tt>).  Each thread executes a loop. In
+each loop iteration a thread calls <tt>barrier()</tt> and then sleeps for a
+random number of microseconds. The assert triggers, because one thread leav=
+es the
+barrier before the other thread has reached the barrier.  The desired behav=
+ior is
+that each thread blocks in <tt>barrier()</tt> until all <tt>nthreads</tt> o=
+f them have called
+<tt>barrier()</tt>.
+
+<div class=3D"required">
+<p>Your goal is to achieve the desired barrier behavior. In addition to the
+ lock primitives that you have seen in the <tt>ph</tt> assignment, you will=
+ need
+ the following new pthread primitives;
+look
+<a href=3D"https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_cond=
+_wait.html">here</a> and
+<a href=3D"https://pubs.opengroup.org/onlinepubs/007908799/xsh/pthread_cond=
+_broadcast.html">here</a>
+for details.
+
+</p><pre>pthread_cond_wait(&amp;cond, &amp;mutex);  // go to sleep on cond,=
+ releasing lock mutex, acquiring upon wake up
+pthread_cond_broadcast(&amp;cond);     // wake up every thread sleeping on =
+cond
+</pre>
+
+<p>
+Make sure your solution passes <tt>make grade</tt>'s <tt>barrier</tt> test.
+</p></div>
+
+<tt>pthread_cond_wait</tt> releases the <tt>mutex</tt> when called,
+and re-acquires the <tt>mutex</tt> before returning.
+
+<p>We have given you <tt>barrier_init()</tt>. Your job is to implement
+<tt>barrier()</tt> so that the panic doesn't occur.
+We've defined <tt>struct barrier</tt> for you; its fields are for
+your use.
+
+</p><p>There are two issues that complicate your task:
+
+</p><ul>
+
+<li> You have to deal with a succession of barrier calls,
+each of which we'll call a round.
+  <tt>bstate.round</tt> records the current round.  You
+  should increment <tt>bstate.round</tt> each time all
+  threads have reached the barrier.
+
+</li><li> You have to handle the case in which one thread races around the =
+loop before
+the others have exited the barrier. In particular, you are re-using
+the <tt>bstate.nthread</tt> variable from one round to the next.  Make sure=
+ that a thread that
+leaves the barrier and races around the loop doesn't increase <tt>bstate.nt=
+hread</tt>
+while a previous round is still using it.
+
+</li></ul>
+
+<p>Test your code with one, two, and more than two threads.
+
+
+</p><p><a name=3D"submit">
+</a></p><h2><a name=3D"submit">Submit the lab</a></h2><a name=3D"submit">
+
+<p><b>This completes the lab.</b> Make sure you pass all of the make
+grade tests. If this lab had questions, don't forget to write up your
+answers to the questions in answers-<i>lab-name</i>.txt. Commit your change=
+s
+(including adding answers-<i>lab-name</i>.txt) and type make handin in the =
+lab
+  directory to hand in your lab.
+
+</p><h3>Time spent</h3>
+
+<p>Create a new file, <tt>time.txt</tt>, and put in it a single integer, th=
+e
+number of hours you spent on the lab. Don't forget to <tt>git add</tt> and
+<tt>git commit</tt> the file.
+
+</p><h3>Submit</h3>
+
+You will turn in your assignments using
+the </a><a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">submission
+website</a>.  You need to request once an API key from the submission
+website before you can turn in any assignments or labs.
+<p></p>
+
+<p>After committing your final changes to the lab, type <kbd>make
+handin</kbd> to submit your lab.
+</p><pre>$ <kbd>git commit -am "ready to submit my lab"</kbd>
+[util c2e3c8b] ready to submit my lab
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+$ <kbd>make handin</kbd>
+tar: Removing leading `/' from member names
+Get an API key for yourself by visiting https://6828.scripts.mit.edu/2020/h=
+andin.py/
+Please enter your API key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Cur=
+rent
+                                 Dload  Upload   Total   Spent    Left  Spe=
+ed
+100 79258  100   239  100 79019    853   275k --:--:-- --:--:-- --:--:--  2=
+76k
+$
+</pre>
+<kbd>make handin</kbd> will store your API key in <i>myapi.key</i>. If you =
+need
+to change your API key, just remove this file and let <kbd>make handin</kbd=
+>
+generate it again (<i>myapi.key</i> must not include newline characters).
+<p></p>
+
+<p>
+If you run <kbd>make handin</kbd> and you have either uncomitted changes or
+untracked files, you will see output similar to the following:
+</p><pre> M hello.c
+?? bar.c
+?? foo.pyc
+Untracked files will not be handed in.  Continue? [y/N]
+</pre>
+Inspect the above lines and make sure all files that your lab solution need=
+s
+are tracked i.e. not listed in a line that begins with <kbd>??</kbd>.
+You can cause <tt>git</tt> to track a new file that you create using
+<tt>git add filename</tt>.
+<p></p>
+
+<p>
+If <kbd>make handin</kbd> does not work properly,=20
+try fixing the problem with the curl or Git commands.
+Or you can run <kbd>make tarball</kbd>.
+This will make a tar file for you, which you can
+then upload via our=20
+<a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">web interface</a>.
+</p>
+
+<p>
+</p><div class=3D"warning">
+<ul>
+  <li>Please run `make grade` to ensure that your code passes all of the te=
+sts</li>
+  <li>Commit any modified source code before running `make handin`</li>
+  <li>You can inspect the status of your submission and download the submit=
+ted code at <a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">https:=
+//6828.scripts.mit.edu/2020/handin.py/</a> </li>
+</ul>
+</div>
+
+
+
+
+<h2>Optional challenges for uthread</h2>
+
+<p>The user-level thread package interacts badly with the operating system =
+in
+several ways.  For example, if one user-level thread blocks in a system cal=
+l,
+another user-level thread won't run, because the user-level threads schedul=
+er
+doesn't know that one of its threads has been descheduled by the xv6 schedu=
+ler.  As
+another example, two user-level threads will not run concurrently on differ=
+ent
+cores, because the xv6 scheduler isn't aware that there are multiple
+threads that could run in parallel.  Note that if two user-level threads we=
+re to
+run truly in parallel, this implementation won't work because of several ra=
+ces
+(e.g., two threads on different processors could call <tt>thread_schedule</=
+tt>
+concurrently, select the same runnable thread, and both run it on different
+processors.)
+
+</p><p>There are several ways of addressing these problems.  One is
+ using <a href=3D"http://en.wikipedia.org/wiki/Scheduler_activations">sched=
+uler
+ activations</a> and another is to use one kernel thread per
+ user-level thread (as Linux kernels do).  Implement one of these ways
+ in xv6.  This is not easy to get right; for example, you will need to
+ implement TLB shootdown when updating a page table for a
+ multithreaded user process.
+
+</p><p>Add locks, condition variables, barriers,
+etc. to your thread package.
+
+
+
+</p></pp><div class=3D"cm-popover" id=3D"cm-popover">                <div c=
+lass=3D"cm-popover__arrow">                    <span class=3D"cm-popover__a=
+rrow-bg"></span>                </div>                <div class=3D"cm-popo=
+ver__raw-open">null</div>            </div><div id=3D"webhighlights-notific=
+ations"></div><webhighlights-extension></webhighlights-extension><webhighli=
+ghts-sidebar alignment=3D"left" sidebar-width=3D"410"><template shadowmode=
+=3D"open"><!---->
+      <!--?lit$341893316$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$341893316$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$341893316$--><!--?-->
+      <!--?lit$341893316$-->
+    </template></main-component>
+         =20
+      <!--?lit$341893316$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$341893316$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$341893316$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$341893316$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$341893316$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker></body></html>
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-41d27424-ce36-475d-bb86-8682dce23f59@mhtml.blink
+
+@charset "windows-1252";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-aa892003-59c6-44f4-84cb-5a4ff1ddb659@mhtml.blink
+
+@charset "windows-1252";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00aa7424; --wh-primary-color-transparent-light: #00a8730=
+f; --wh-primary-light: #53e3a6; --wh-primary-dark: #007f4b; --wh-primary-da=
+rk-hover: #017444; --wh-primary-shadow: #00b07841; --wh-primary-shadow-2: #=
+00b07870; --wh-primary-border-color: #c8c8c870; --secondary-color: #3d4455;=
+ --secondary-color-hover: #3a4052; --secondary-color-transparent: #3d44556b=
+; --secondary-light: #4c556d; --secondary-dark: #252934; --secondary-dark-h=
+over: #191b22; --secondary-dark-transparent: #2e2d2d46; --highlight-color: =
+#92ffaa; --error-color: #d62d4c; --warning-color: #ffcc00; --error-info: #1=
+4854e; --success-color: #4BB543; --font-color: #2f3237; --font-color-light:=
+ #626364; --font-color-dark: #252525; --wh-font-family: 'Inter', 'SF Pro Di=
+splay', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--wh-red-600); --wh-danger-color-hover: var(--=
+wh-red-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-b=
+g-base: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500=
+); --wh-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(-=
+-wh-secondary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-=
+border-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong=
+: var(--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-b=
+ack-strong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-se=
+condary-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hov=
+er-strong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-10=
+0); --wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--w=
+h-secondary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-fr=
+ont-strong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-se=
+condary-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-bor=
+der-front: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%)=
+; --wh-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0,=
+ 0%, 100%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(=
+255, 255, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-lig=
+ht: rgba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63)=
+; --wh-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, =
+0%, 100%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-no=
+te-editor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: =
+hsl(221, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hov=
+er: var(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05=
+); --wh-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(=
+220, 22%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --=
+wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gr=
+ay: rgb(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 1=
+00%, 0.1),
+      /* 2. shadow ring \1f447  */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
+      /* 3. multiple soft shadows \1f447  */ 0 0.3px 0.4px hsla(230, 13%, 9=
+%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); --wh-shadow-primary: var(--wh-p=
+rimary-500) 0px 0px 0px 1px inset,
+      var(--wh-primary-500) 0px 0px 1px; }
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-cdfe3dca-6c55-4f9a-b75b-dfbf0abfa4b5@mhtml.blink
+
+@charset "windows-1252";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-bd502c37-8fc8-4af8-bf28-4d7ba2196623@mhtml.blink
+
+@charset "windows-1252";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; visibility: visible !important; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/labs.css
+
+@charset "windows-1252";
+
+.easy { color: rgb(0, 204, 0); }
+
+.moderate { color: rgb(0, 102, 255); }
+
+.hard { color: rgb(255, 51, 0); }
+
+div.required, div.challenge, div.question, div.warning, div.prereq { margin=
+: 1em auto; width: 80%; background-color: rgb(224, 224, 255); padding-left:=
+ 1em; padding-right: 1em; }
+
+div.required .header { font-weight: bold; }
+
+div.challenge .header { font-style: italic; }
+
+div.question .header { font-weight: bold; }
+
+div.required { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.challenge { background-color: rgb(255, 224, 224); border: 1px solid rgb=
+(255, 192, 192); }
+
+div.question { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.warning { background-color: rgb(255, 224, 224); border: 1px solid rgb(2=
+55, 192, 192); }
+
+div.prereq { background-color: rgb(255, 239, 213); border: 1px solid rgb(25=
+5, 192, 192); }
+
+kbd { color: rgb(0, 119, 0); font-family: monospace; font-weight: bold; }
+------MultipartBoundary--JggLQ3d0xNvRD9qtCpZ8Bh7gZpU7KpjJ0Qxze5dhdt------

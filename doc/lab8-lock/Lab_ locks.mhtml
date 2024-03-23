@@ -1,0 +1,757 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/lock.html
+Subject: Lab: locks
+Date: Sat, 23 Mar 2024 22:09:27 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----"
+
+
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/html
+Content-ID: <frame-A4A202597FD21C16FCD75965D0D3A4A5@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/lock.html
+
+<html class=3D"cm-retina" collamark=3D"crx"><head><meta http-equiv=3D"Conte=
+nt-Type" content=3D"text/html; charset=3Dwindows-1252"><link rel=3D"stylesh=
+eet" type=3D"text/css" href=3D"cid:css-9e2ac08b-afeb-4337-8ae9-2d1a0335115c=
+@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-=
+00cfd15d-2c83-4e9f-8e28-0ea63147e7be@mhtml.blink" /><link rel=3D"stylesheet=
+" type=3D"text/css" href=3D"cid:css-8f138454-7f34-4d4b-9bf1-441384936c4c@mh=
+tml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-47d=
+c0eee-b8fd-4815-90d8-4fdac7489845@mhtml.blink" />
+<title>Lab: locks</title>
+<link rel=3D"stylesheet" href=3D"https://pdos.csail.mit.edu/6.S081/2020/lab=
+s/labs.css" type=3D"text/css">
+
+</head>
+<body>
+
+<h1>Lab: locks</h1>
+
+<p>In this lab you'll gain experience in re-designing code to increase
+parallelism. A common symptom of poor parallelism on multi-core
+machines is high lock contention. Improving parallelism often involves
+changing both data structures and locking strategies in order to
+reduce contention. You'll do this for the xv6 memory allocator and
+block cache.
+
+</p><div class=3D"prereq">
+
+  <p>Before writing code, make sure to read the following
+    parts from  the <a href=3D"https://pdos.csail.mit.edu/6.S081/2020/xv6/b=
+ook-riscv-rev1.pdf">xv6 book</a> :
+    </p><ul>
+
+    <li> Chapter 6: "Locking" and the corresponding code.
+
+    </li><li> Section 3.5: "Code: Physical memory allocator"
+
+    </li><li> Section 8.1 through 8.3: "Overview", "Buffer cache layer", an=
+d
+    "Code: Buffer cache"
+
+    </li></ul>
+
+</div>
+
+ =20
+<pre>  $ <kbd>git fetch</kbd>
+  $ <kbd>git checkout lock</kbd>
+  $ <kbd>make clean</kbd>
+</pre>
+
+ =20
+<h2>Memory allocator (<a class=3D"moderate" href=3D"https://pdos.csail.mit.=
+edu/6.S081/2020/labs/guidance.html">moderate</a>)</h2>
+
+<p>The program user/kalloctest stresses xv6's memory allocator: three
+  processes grow and shrink their address spaces, resulting in many
+  calls to <tt>kalloc</tt> and <tt>kfree</tt>.
+  <tt>kalloc</tt> and <tt>kfree</tt>
+  obtain <tt>kmem.lock</tt>.  kalloctest prints (as "#fetch-and-add") the n=
+umber of
+  loop iterations in <tt>acquire</tt> due to attempts to acquire a lock
+  that another core already holds, for the
+  <tt>kmem</tt> lock and a few other locks.
+  The number of loop iterations in <tt>acquire</tt>
+  is a rough measure of lock contention.
+  The output of <tt>kalloctest</tt> looks similar to this
+  before you complete the lab:
+
+</p><pre>$ <kbd>kalloctest</kbd>
+start test1
+test1 results:
+--- lock kmem/bcache stats
+lock: kmem: #fetch-and-add 83375 #acquire() 433015
+lock: bcache: #fetch-and-add 0 #acquire() 1260
+--- top 5 contended locks:
+lock: kmem: #fetch-and-add 83375 #acquire() 433015
+lock: proc: #fetch-and-add 23737 #acquire() 130718
+lock: virtio_disk: #fetch-and-add 11159 #acquire() 114
+lock: proc: #fetch-and-add 5937 #acquire() 130786
+lock: proc: #fetch-and-add 4080 #acquire() 130786
+tot=3D 83375
+test1 FAIL
+</pre>
+
+<p>
+<tt>acquire</tt> maintains, for each lock, the count of
+calls to <tt>acquire</tt> for that lock, and the
+number of times the loop in <tt>acquire</tt> tried but failed to set the lo=
+ck.
+  kalloctest calls
+  a system call that causes the kernel to print those counts for the
+  kmem and bcache locks (which are the focus of this lab) and for
+  the 5 most contended locks.  If there is lock contention the
+  number of <tt>acquire</tt> loop iterations will be large.
+  The system call returns
+  the sum of the number of loop iterations for the kmem and bcache locks.
+
+</p><p>For this lab, you must use a dedicated unloaded machine with multipl=
+e
+cores. If you use a machine that is doing other things, the=20
+counts that kalloctest prints will be nonsense. You can use a dedicated
+Athena workstation, or your own laptop, but don't use a dialup machine.
+
+</p><p>The root cause of lock contention in kalloctest is that <tt>kalloc()=
+</tt> has a
+  single free list, protected by a single lock.  To remove lock
+  contention, you will have to redesign the memory allocator to avoid
+  a single lock and list.  The basic idea is to maintain a free list
+  per CPU, each list with its own lock. Allocations and frees on different
+  CPUs can run in parallel, because each CPU will operate on a
+  different list. The main challenge will be to deal with the case
+  in which one CPU's free list is empty, but another CPU's list has free
+  memory; in that case, the one CPU must "steal" part of the other
+  CPU's free list.  Stealing may introduce lock contention, but that
+  will hopefully be infrequent.
+
+</p><div class=3D"required">
+<p>Your job is to implement per-CPU freelists, and stealing when a
+  CPU's free list is empty.
+  You must give all of your locks names that start with "kmem".
+That is, you should call
+<tt>initlock</tt>
+for each of your locks,
+and pass a name that starts with "kmem".
+ Run kalloctest to see if your
+  implementation has reduced lock contention. To check that it can still al=
+locate
+  all of memory, run <tt>usertests sbrkmuch</tt>. Your output will look sim=
+ilar to that shown below,
+  with much-reduced contention in total on kmem locks, although
+  the specific numbers will differ. Make sure all tests in <tt>usertests</t=
+t> pass.
+  <tt>make grade</tt> should say that the kalloctests pass.
+</p></div>
+
+<pre>$ <kbd>kalloctest</kbd>
+start test1
+test1 results:
+--- lock kmem/bcache stats
+lock: kmem: #fetch-and-add 0 #acquire() 42843
+lock: kmem: #fetch-and-add 0 #acquire() 198674
+lock: kmem: #fetch-and-add 0 #acquire() 191534
+lock: bcache: #fetch-and-add 0 #acquire() 1242
+--- top 5 contended locks:
+lock: proc: #fetch-and-add 43861 #acquire() 117281
+lock: virtio_disk: #fetch-and-add 5347 #acquire() 114
+lock: proc: #fetch-and-add 4856 #acquire() 117312
+lock: proc: #fetch-and-add 4168 #acquire() 117316
+lock: proc: #fetch-and-add 2797 #acquire() 117266
+tot=3D 0
+test1 OK
+start test2
+total free number of pages: 32499 (out of 32768)
+.....
+test2 OK
+$ <kbd>usertests sbrkmuch</kbd>
+usertests starting
+test sbrkmuch: OK
+ALL TESTS PASSED
+$ <kbd>usertests</kbd>
+...
+ALL TESTS PASSED
+$
+</pre>
+ =20
+<p>Some hints:
+  </p><ul>
+    <li>You can use the constant <tt>NCPU</tt> from kernel/param.h
+    </li><li>Let <tt>freerange</tt> give all free memory to the CPU
+      running <tt>freerange</tt>.
+    </li><li>The function <tt>cpuid</tt> returns the current core number, b=
+ut=20
+    it's only safe to call it and use its result when
+    interrupts are turned off. You should use
+    <tt>push_off()</tt> and <tt>pop_off()</tt> to turn
+    interrupts off and on.
+    </li><li>Have a look at the <tt>snprintf</tt> function in kernel/sprint=
+f.c for string formatting ideas. It 	is OK to just name all locks "kmem" th=
+ough.
+  </li></ul>
+
+<h2>Buffer cache  (<a class=3D"hard" href=3D"https://pdos.csail.mit.edu/6.S=
+081/2020/labs/guidance.html">hard</a>)</h2>
+
+<p> This half of the assignment is independent from the first half;
+you can work on this half (and pass the tests) whether or not you
+have completed the first half.
+
+</p><p>If multiple processes use the file system intensively, they
+  will likely contend for <tt>bcache.lock</tt>, which protects the disk blo=
+ck
+  cache in kernel/bio.c.
+  <tt>bcachetest</tt> creates
+  several processes that repeatedly read different files
+  in order to generate contention on <tt>bcache.lock</tt>;
+  its output looks like this (before you complete this lab):
+
+</p><pre>$ <kbd>bcachetest</kbd>
+start test0
+test0 results:
+--- lock kmem/bcache stats
+lock: kmem: #fetch-and-add 0 #acquire() 33035
+lock: bcache: #fetch-and-add 16142 #acquire() 65978
+--- top 5 contended locks:
+lock: virtio_disk: #fetch-and-add 162870 #acquire() 1188
+lock: proc: #fetch-and-add 51936 #acquire() 73732
+lock: bcache: #fetch-and-add 16142 #acquire() 65978
+lock: uart: #fetch-and-add 7505 #acquire() 117
+lock: proc: #fetch-and-add 6937 #acquire() 73420
+tot=3D 16142
+test0: FAIL
+start test1
+test1 OK
+</pre>
+You will likely see different output, but
+the number of <tt>acquire</tt> loop iterations for the <tt>bcache</tt> lock=
+ will be high.
+If you look at the code in <tt>kernel/bio.c</tt>, you'll see that
+<tt>bcache.lock</tt> protects the list of cached block buffers,
+the reference count (<tt>b-&gt;refcnt</tt>) in each block buffer, and the i=
+dentities of
+the cached blocks (<tt>b-&gt;dev</tt> and <tt>b-&gt;blockno</tt>).
+
+<p>
+
+</p><div class=3D"required">
+  <p>Modify the block cache so that the number of <tt>acquire</tt> loop ite=
+rations
+    for all locks in the bcache is close to zero when running <tt>bcachetes=
+t</tt>.
+    Ideally the sum of the counts for all locks involved in the block
+    cache should be zero, but it's OK if the sum is less than 500.
+    Modify <tt>bget</tt>
+    and <tt>brelse</tt> so that concurrent lookups and releases for
+    different blocks that are in the bcache are unlikely to conflict
+    on locks (e.g., don't all have to wait for
+  <tt>bcache.lock</tt>).
+You must maintain the invariant that at
+  most one copy of each block is cached.  When you are done, your
+  output should be similar to that shown below (though not identical).
+  Make sure usertests still passes.
+  <tt>make grade</tt> should pass all tests when you are done.
+</p></div>
+
+<pre>$ <kbd>bcachetest</kbd>
+start test0
+test0 results:
+--- lock kmem/bcache stats
+lock: kmem: #fetch-and-add 0 #acquire() 32954
+lock: kmem: #fetch-and-add 0 #acquire() 75
+lock: kmem: #fetch-and-add 0 #acquire() 73
+lock: bcache: #fetch-and-add 0 #acquire() 85
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 4159
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 2118
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 4274
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 4326
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 6334
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 6321
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 6704
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 6696
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 7757
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 6199
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 4136
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 4136
+lock: bcache.bucket: #fetch-and-add 0 #acquire() 2123
+--- top 5 contended locks:
+lock: virtio_disk: #fetch-and-add 158235 #acquire() 1193
+lock: proc: #fetch-and-add 117563 #acquire() 3708493
+lock: proc: #fetch-and-add 65921 #acquire() 3710254
+lock: proc: #fetch-and-add 44090 #acquire() 3708607
+lock: proc: #fetch-and-add 43252 #acquire() 3708521
+tot=3D 128
+test0: OK
+start test1
+test1 OK
+$ <kbd>usertests</kbd>
+  ...
+ALL TESTS PASSED
+$
+</pre>
+
+<p>
+Please give all of your locks  names that start with "bcache".
+That is, you should call
+<tt>initlock</tt>
+for each of your locks,
+and pass a name that starts with "bcache".
+
+</p><p>
+  Reducing contention in the block cache is more
+  tricky than for kalloc, because bcache buffers are truly
+  shared among processes (and thus CPUs).
+  For kalloc, one could eliminate most contention by
+  giving each CPU its own
+  allocator; that won't work for the block cache.
+We suggest you look up block numbers in the cache with a hash table
+that has a lock per hash bucket.
+
+</p><p>
+There are some circumstances in which it's OK if your solution
+has lock conflicts:
+</p><ul>
+<li>When two processes concurrently use the same block number.
+<tt>bcachetest</tt> <tt>test0</tt> doesn't ever do this.
+</li><li>When two processes concurrently miss in the cache, and
+need to find an unused block to replace.
+<tt>bcachetest</tt> <tt>test0</tt> doesn't ever do this.
+</li><li>When two processes concurrently use blocks that conflict
+in whatever scheme you use to partition the blocks and
+locks; for example, if two processes use blocks whose block
+numbers hash to the same slot in a hash table.
+<tt>bcachetest</tt> <tt>test0</tt> might do this, depending on your
+design, but you should try to adjust your scheme's
+details to avoid conflicts (e.g., change the size of
+your hash table).
+</li></ul>
+
+<p>
+<tt>bcachetest</tt>'s <tt>test1</tt> uses more distinct blocks than there a=
+re buffers,
+  and exercises lots of file system code paths.
+
+</p><p>Here are some hints:
+  </p><ul>
+    <li>Read the description of the block cache in the xv6 book (Section 8.=
+1-8.3).
+
+    </li><li>It is OK to use a fixed number of buckets and not resize the
+    hash table dynamically. Use a prime number of
+    buckets (e.g., 13) to reduce the likelihood of hashing conflicts.
+
+    </li><li>Searching in the hash table for a buffer and allocating an
+      entry for that buffer when the buffer is not found must be
+      atomic.
+
+    </li><li>Remove the list of all buffers (<tt>bcache.head</tt> etc.)
+    and instead time-stamp buffers using the
+    time of their last use (i.e., using <tt>ticks</tt> in kernel/trap.c).
+    With this change <tt>brelse</tt> doesn't need to acquire the bcache
+    lock, and <tt>bget</tt> can select the least-recently used block
+    based on the time-stamps.
+
+    </li><li>It is OK to serialize eviction in <tt>bget</tt> (i.e., the
+    part of <tt>bget</tt> that selects a buffer to re-use when
+    a lookup misses in the cache).
+
+    </li><li>Your solution might need to hold two locks in some cases; for
+    example, during eviction you may need to hold the bcache lock and
+    a lock per bucket.  Make sure you avoid deadlock.
+
+    </li><li>When replacing a block, you might move a <tt>struct buf</tt> f=
+rom one
+    bucket to another bucket, because the new block hashes to a
+    different bucket.  You might have a
+    tricky case: the new block might hash to the same bucket as the
+    old block.  Make sure you avoid deadlock in that case.
+
+    </li><li>Some debugging tips: implement bucket locks but leave the glob=
+al=20
+    bcache.lock acquire/release at the beginning/end of bget to serialize
+    the code. Once you are sure it is correct without race conditions,
+    remove the global locks and deal with concurrency issues. You can also
+    run <tt>make CPUS=3D1 qemu</tt> to test with one core.
+         =20
+  </li></ul>
+
+<p><a name=3D"submit">
+</a></p><h2><a name=3D"submit">Submit the lab</a></h2><a name=3D"submit">
+
+<p><b>This completes the lab.</b> Make sure you pass all of the make
+grade tests. If this lab had questions, don't forget to write up your
+answers to the questions in answers-<i>lab-name</i>.txt. Commit your change=
+s
+(including adding answers-<i>lab-name</i>.txt) and type make handin in the =
+lab
+  directory to hand in your lab.
+
+</p><h3>Time spent</h3>
+
+<p>Create a new file, <tt>time.txt</tt>, and put in it a single integer, th=
+e
+number of hours you spent on the lab. Don't forget to <tt>git add</tt> and
+<tt>git commit</tt> the file.
+
+</p><h3>Submit</h3>
+
+You will turn in your assignments using
+the </a><a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">submission
+website</a>.  You need to request once an API key from the submission
+website before you can turn in any assignments or labs.
+<p></p>
+
+<p>After committing your final changes to the lab, type <kbd>make
+handin</kbd> to submit your lab.
+</p><pre>$ <kbd>git commit -am "ready to submit my lab"</kbd>
+[util c2e3c8b] ready to submit my lab
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+$ <kbd>make handin</kbd>
+tar: Removing leading `/' from member names
+Get an API key for yourself by visiting https://6828.scripts.mit.edu/2020/h=
+andin.py/
+Please enter your API key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Cur=
+rent
+                                 Dload  Upload   Total   Spent    Left  Spe=
+ed
+100 79258  100   239  100 79019    853   275k --:--:-- --:--:-- --:--:--  2=
+76k
+$
+</pre>
+<kbd>make handin</kbd> will store your API key in <i>myapi.key</i>. If you =
+need
+to change your API key, just remove this file and let <kbd>make handin</kbd=
+>
+generate it again (<i>myapi.key</i> must not include newline characters).
+<p></p>
+
+<p>
+If you run <kbd>make handin</kbd> and you have either uncomitted changes or
+untracked files, you will see output similar to the following:
+</p><pre> M hello.c
+?? bar.c
+?? foo.pyc
+Untracked files will not be handed in.  Continue? [y/N]
+</pre>
+Inspect the above lines and make sure all files that your lab solution need=
+s
+are tracked i.e. not listed in a line that begins with <kbd>??</kbd>.
+You can cause <tt>git</tt> to track a new file that you create using
+<tt>git add filename</tt>.
+<p></p>
+
+<p>
+If <kbd>make handin</kbd> does not work properly,=20
+try fixing the problem with the curl or Git commands.
+Or you can run <kbd>make tarball</kbd>.
+This will make a tar file for you, which you can
+then upload via our=20
+<a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">web interface</a>.
+</p>
+
+<p>
+</p><div class=3D"warning">
+<ul>
+  <li>Please run `make grade` to ensure that your code passes all of the te=
+sts</li>
+  <li>Commit any modified source code before running `make handin`</li>
+  <li>You can inspect the status of your submission and download the submit=
+ted code at <a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">https:=
+//6828.scripts.mit.edu/2020/handin.py/</a> </li>
+</ul>
+</div>
+
+
+
+
+<h2>Optional challenge exercises</h2>
+ =20
+  <ul>
+  <li>make lookup in the buffer cache lock-free. Hint: use
+    gcc's <tt>__sync_*</tt> functions. How do you convince yourself
+    that your implementation is correct?
+  </li></ul>
+
+
+
+<div class=3D"cm-popover" id=3D"cm-popover">                <div class=3D"c=
+m-popover__arrow">                    <span class=3D"cm-popover__arrow-bg">=
+</span>                </div>                <div class=3D"cm-popover__raw-=
+open">null</div>            </div><div id=3D"webhighlights-notifications"><=
+/div><webhighlights-extension></webhighlights-extension><webhighlights-side=
+bar alignment=3D"left" sidebar-width=3D"410"><template shadowmode=3D"open">=
+<!---->
+      <!--?lit$1131839577$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$1131839577$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$1131839577$--><!--?-->
+      <!--?lit$1131839577$-->
+    </template></main-component>
+         =20
+      <!--?lit$1131839577$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$1131839577$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$1131839577$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$1131839577$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$1131839577$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker></body></html>
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-9e2ac08b-afeb-4337-8ae9-2d1a0335115c@mhtml.blink
+
+@charset "windows-1252";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-00cfd15d-2c83-4e9f-8e28-0ea63147e7be@mhtml.blink
+
+@charset "windows-1252";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00aa7424; --wh-primary-color-transparent-light: #00a8730=
+f; --wh-primary-light: #53e3a6; --wh-primary-dark: #007f4b; --wh-primary-da=
+rk-hover: #017444; --wh-primary-shadow: #00b07841; --wh-primary-shadow-2: #=
+00b07870; --wh-primary-border-color: #c8c8c870; --secondary-color: #3d4455;=
+ --secondary-color-hover: #3a4052; --secondary-color-transparent: #3d44556b=
+; --secondary-light: #4c556d; --secondary-dark: #252934; --secondary-dark-h=
+over: #191b22; --secondary-dark-transparent: #2e2d2d46; --highlight-color: =
+#92ffaa; --error-color: #d62d4c; --warning-color: #ffcc00; --error-info: #1=
+4854e; --success-color: #4BB543; --font-color: #2f3237; --font-color-light:=
+ #626364; --font-color-dark: #252525; --wh-font-family: 'Inter', 'SF Pro Di=
+splay', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--wh-red-600); --wh-danger-color-hover: var(--=
+wh-red-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-b=
+g-base: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500=
+); --wh-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(-=
+-wh-secondary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-=
+border-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong=
+: var(--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-b=
+ack-strong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-se=
+condary-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hov=
+er-strong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-10=
+0); --wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--w=
+h-secondary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-fr=
+ont-strong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-se=
+condary-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-bor=
+der-front: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%)=
+; --wh-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0,=
+ 0%, 100%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(=
+255, 255, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-lig=
+ht: rgba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63)=
+; --wh-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, =
+0%, 100%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-no=
+te-editor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: =
+hsl(221, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hov=
+er: var(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05=
+); --wh-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(=
+220, 22%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --=
+wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gr=
+ay: rgb(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 1=
+00%, 0.1),
+      /* 2. shadow ring \1f447  */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
+      /* 3. multiple soft shadows \1f447  */ 0 0.3px 0.4px hsla(230, 13%, 9=
+%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); --wh-shadow-primary: var(--wh-p=
+rimary-500) 0px 0px 0px 1px inset,
+      var(--wh-primary-500) 0px 0px 1px; }
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-8f138454-7f34-4d4b-9bf1-441384936c4c@mhtml.blink
+
+@charset "windows-1252";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-47dc0eee-b8fd-4815-90d8-4fdac7489845@mhtml.blink
+
+@charset "windows-1252";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; visibility: visible !important; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/labs.css
+
+@charset "windows-1252";
+
+.easy { color: rgb(0, 204, 0); }
+
+.moderate { color: rgb(0, 102, 255); }
+
+.hard { color: rgb(255, 51, 0); }
+
+div.required, div.challenge, div.question, div.warning, div.prereq { margin=
+: 1em auto; width: 80%; background-color: rgb(224, 224, 255); padding-left:=
+ 1em; padding-right: 1em; }
+
+div.required .header { font-weight: bold; }
+
+div.challenge .header { font-style: italic; }
+
+div.question .header { font-weight: bold; }
+
+div.required { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.challenge { background-color: rgb(255, 224, 224); border: 1px solid rgb=
+(255, 192, 192); }
+
+div.question { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.warning { background-color: rgb(255, 224, 224); border: 1px solid rgb(2=
+55, 192, 192); }
+
+div.prereq { background-color: rgb(255, 239, 213); border: 1px solid rgb(25=
+5, 192, 192); }
+
+kbd { color: rgb(0, 119, 0); font-family: monospace; font-weight: bold; }
+------MultipartBoundary--WZhsYBq9czRaz7z1Nxuv4A8udNigFiyD9y4fJxayb5------

@@ -1,0 +1,633 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/cow.html
+Subject: Lab: Copy-on-Write Fork for xv6
+Date: Sat, 23 Mar 2024 22:10:28 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----"
+
+
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/html
+Content-ID: <frame-2BAF583EA1854EF48412F9F264FAF803@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/cow.html
+
+<html class=3D"cm-retina" collamark=3D"crx"><head><meta http-equiv=3D"Conte=
+nt-Type" content=3D"text/html; charset=3Dwindows-1252"><link rel=3D"stylesh=
+eet" type=3D"text/css" href=3D"cid:css-be4a98c9-289e-44c0-9b84-bd8626906c57=
+@mhtml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-=
+d3739df8-2169-450f-aed7-217476975b35@mhtml.blink" /><link rel=3D"stylesheet=
+" type=3D"text/css" href=3D"cid:css-e35df1c0-995f-4930-8d68-b09e9cb2864d@mh=
+tml.blink" /><link rel=3D"stylesheet" type=3D"text/css" href=3D"cid:css-b63=
+fe2e0-95f3-4ed1-821c-545638430d47@mhtml.blink" /><link rel=3D"stylesheet" t=
+ype=3D"text/css" href=3D"cid:css-924ee210-4d50-4f56-91c4-4243852853ba@mhtml=
+.blink" />
+<title>Lab: Copy-on-Write Fork for xv6</title>
+<link rel=3D"stylesheet" href=3D"https://pdos.csail.mit.edu/6.S081/2020/lab=
+s/labs.css" type=3D"text/css">
+
+</head>
+<body>
+
+<h1>Lab: Copy-on-Write Fork for xv6</h1>
+
+<p> Virtual memory provides a level of indirection: the kernel can
+intercept memory references by marking PTEs invalid or read-only,
+leading to page faults,
+and can change what addresses mean by modifying PTEs.
+There is a saying in computer systems that any systems problem can be
+solved with a level of indirection.  The lazy allocation lab provided one
+example.  This lab explores another example: copy-on write fork.
+   =20
+</p><p>To start the lab, switch to the cow branch:
+</p><pre>$ <kbd>git fetch</kbd>
+$ <kbd>git checkout cow</kbd>
+$ <kbd>make clean</kbd>
+</pre>
+
+<h2>The problem</h2>
+
+The fork() system call in xv6 copies all of the parent process's
+user-space memory into the child. If the parent is large, copying can
+take a long time. Worse, the work is often largely wasted; for example,
+a fork() followed by exec() in the child will cause the child to
+discard the copied memory, probably without ever using most of it.
+On the other hand, if both parent and child use a page, and one or both
+writes it, a copy is truly needed.
+
+<h2>The solution</h2>
+
+The goal of copy-on-write (COW) fork() is to defer allocating and
+copying physical memory pages for the child until the copies are actually
+needed, if ever.
+
+<p>
+COW fork() creates just a pagetable for the child, with PTEs for user
+memory pointing to the parent's physical pages. COW fork() marks all
+the user PTEs in both parent and child as not writable. When either
+process tries to write one of these COW pages, the CPU will force a
+page fault. The kernel page-fault handler detects this case, allocates
+a page of physical memory for the faulting process, copies the
+original page into the new page, and modifies the relevant PTE in the
+faulting process to refer to the new page, this time with the PTE
+marked writeable. When the page fault handler returns, the user
+process will be able to write its copy of the page.
+
+</p><p>
+COW fork() makes freeing of the physical pages that implement user
+memory a little trickier. <web-highlight class=3D"webhighlights-highlight" =
+data-highlight-id=3D"cf74a252-f602-42b4-b7a8-359beb2a4da1" data-highlight-s=
+plit-type=3D"both" data-highlight-id-extra=3D"" markid=3D"65dcb397f9dc29fce=
+08b4cb8" media-type=3D"blockquote" style=3D"background-color: rgb(248, 252,=
+ 70); cursor: pointer;">A given physical page may be referred to by
+multiple processes' page tables, and should be freed only when the last
+reference disappears</web-highlight>.
+
+</p><h2>Implement copy-on write(<a class=3D"hard" href=3D"https://pdos.csai=
+l.mit.edu/6.S081/2020/labs/guidance.html">hard</a>)</h2>
+
+<p>
+</p><div class=3D"required">
+Your task is to implement copy-on-write fork in the xv6 kernel. You are
+done if your modified kernel executes both the cowtest and usertests
+programs successfully.
+</div>
+
+<p>To help you test your implementation, we've provided an xv6 program
+called cowtest (source in user/cowtest.c). cowtest runs various tests, but
+even the first will fail on unmodified xv6. Thus, initially, you
+will see:
+
+</p><pre>$ <kbd>cowtest</kbd>
+simple: fork() failed
+$=20
+</pre>
+
+The "simple" test allocates more than half of available physical
+memory, and then fork()s. The fork fails because there is not enough
+free physical memory to give the child a complete copy of the parent's memo=
+ry.
+
+<p>
+When you are done, your kernel should pass all the tests in both cowtest an=
+d
+usertests. That is:
+
+</p><pre>$ <kbd>cowtest</kbd>
+simple: ok
+simple: ok
+three: zombie!
+ok
+three: zombie!
+ok
+three: zombie!
+ok
+file: ok
+ALL COW TESTS PASSED
+$ <kbd>usertests</kbd>
+...
+ALL TESTS PASSED
+$
+</pre>
+
+<p>
+Here's a reasonable plan of attack.
+
+</p><ol>
+
+<li> Modify uvmcopy() to map the parent's physical pages into the
+child, instead of allocating new pages. Clear <tt>PTE_W</tt> in the PTEs of
+both child and parent.
+
+</li><li> Modify usertrap() to recognize page faults. When a page-fault
+occurs on a COW page, allocate a new page with kalloc(), copy the old
+page to the new page, and install the new page in the PTE with <tt>PTE_W</t=
+t>
+set.
+
+</li><li> Ensure that each physical page is freed when the last PTE
+reference to it goes away -- but not before.
+A good way to do this is to keep, for each physical page, a "reference coun=
+t"
+of the number of user page tables that refer to that page.
+Set a page's reference count to one when <tt>kalloc()</tt> allocates it.
+<web-highlight class=3D"webhighlights-highlight" data-highlight-id=3D"20420=
+2bb-3d6b-443a-8af1-594a04f2ce67" data-highlight-split-type=3D"both" data-hi=
+ghlight-id-extra=3D"" markid=3D"65de18299a96cefafd247fa4" media-type=3D"blo=
+ckquote" style=3D"background-color: rgb(248, 252, 70); cursor: pointer;">In=
+crement a page's reference count
+when fork causes a child to share the page, and
+decrement a page's count each time any process drops
+the page from its page table</web-highlight>.
+<tt>kfree()</tt> should only place a page back on the free list
+if its reference count is zero.
+It's OK to to keep these counts in a fixed-size array of integers.
+You'll have to work out a scheme for how to index the array and
+how to choose its size. For example, you could index the array
+with the page's physical address divided by 4096, and give
+the array a number of elements equal to highest physical
+address of any page placed on the free list by <tt>kinit()</tt> in
+kalloc.c.
+
+</li><li> Modify copyout() to use the
+same scheme as page faults when it encounters a COW page.
+
+</li></ol>
+
+<p>Some hints:
+
+  </p><ul>
+   =20
+<li>The lazy page allocation lab has likely made you familiar with much of
+the xv6 kernel code that's relevant for copy-on-write. However, you
+should not base this lab on your lazy allocation solution; instead,
+please start with a fresh copy of xv6 as directed above.
+
+</li><li>
+It may be useful to have a way to record, for each PTE, whether it is
+a COW mapping. <web-highlight class=3D"webhighlights-highlight" data-highli=
+ght-id=3D"d7b68680-8c66-4017-b7f7-c06bc6ae2055" data-highlight-split-type=
+=3D"both" data-highlight-id-extra=3D"" markid=3D"65dcb62512bb68fe6cfe412e" =
+media-type=3D"blockquote" style=3D"background-color: rgb(248, 252, 70); cur=
+sor: pointer;">You can use the RSW (reserved for software) bits in
+the RISC-V PTE for this.</web-highlight>
+
+</li><li>
+<tt>usertests</tt> explores scenarios that <tt>cowtest</tt> does not test,
+so don't forget to check that all tests pass for both.
+
+</li><li>Some helpful macros and definitions for page table flags are at th=
+e
+end of <tt>kernel/riscv.h</tt>.
+
+</li><li>If a COW page fault occurs and there's no free memory, the process
+should be killed.
+
+  </li></ul>
+ =20
+<p><a name=3D"submit">
+</a></p><h2><a name=3D"submit">Submit the lab</a></h2><a name=3D"submit">
+
+<p><b>This completes the lab.</b> Make sure you pass all of the make
+grade tests. If this lab had questions, don't forget to write up your
+answers to the questions in answers-<i>lab-name</i>.txt. Commit your change=
+s
+(including adding answers-<i>lab-name</i>.txt) and type make handin in the =
+lab
+  directory to hand in your lab.
+
+</p><h3>Time spent</h3>
+
+<p>Create a new file, <tt>time.txt</tt>, and put in it a single integer, th=
+e
+number of hours you spent on the lab. Don't forget to <tt>git add</tt> and
+<tt>git commit</tt> the file.
+
+</p><h3>Submit</h3>
+
+You will turn in your assignments using
+the </a><a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">submission
+website</a>.  You need to request once an API key from the submission
+website before you can turn in any assignments or labs.
+<p></p>
+
+<p>After committing your final changes to the lab, type <kbd>make
+handin</kbd> to submit your lab.
+</p><pre>$ <kbd>git commit -am "ready to submit my lab"</kbd>
+[util c2e3c8b] ready to submit my lab
+ 2 files changed, 18 insertions(+), 2 deletions(-)
+
+$ <kbd>make handin</kbd>
+tar: Removing leading `/' from member names
+Get an API key for yourself by visiting https://6828.scripts.mit.edu/2020/h=
+andin.py/
+Please enter your API key: XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Cur=
+rent
+                                 Dload  Upload   Total   Spent    Left  Spe=
+ed
+100 79258  100   239  100 79019    853   275k --:--:-- --:--:-- --:--:--  2=
+76k
+$
+</pre>
+<kbd>make handin</kbd> will store your API key in <i>myapi.key</i>. If you =
+need
+to change your API key, just remove this file and let <kbd>make handin</kbd=
+>
+generate it again (<i>myapi.key</i> must not include newline characters).
+<p></p>
+
+<p>
+If you run <kbd>make handin</kbd> and you have either uncomitted changes or
+untracked files, you will see output similar to the following:
+</p><pre> M hello.c
+?? bar.c
+?? foo.pyc
+Untracked files will not be handed in.  Continue? [y/N]
+</pre>
+Inspect the above lines and make sure all files that your lab solution need=
+s
+are tracked i.e. not listed in a line that begins with <kbd>??</kbd>.
+You can cause <tt>git</tt> to track a new file that you create using
+<tt>git add filename</tt>.
+<p></p>
+
+<p>
+If <kbd>make handin</kbd> does not work properly,=20
+try fixing the problem with the curl or Git commands.
+Or you can run <kbd>make tarball</kbd>.
+This will make a tar file for you, which you can
+then upload via our=20
+<a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">web interface</a>.
+</p>
+
+<p>
+</p><div class=3D"warning">
+<ul>
+  <li>Please run `make grade` to ensure that your code passes all of the te=
+sts</li>
+  <li>Commit any modified source code before running `make handin`</li>
+  <li>You can inspect the status of your submission and download the submit=
+ted code at <a href=3D"https://6828.scripts.mit.edu/2020/handin.py/">https:=
+//6828.scripts.mit.edu/2020/handin.py/</a> </li>
+</ul>
+</div>
+
+
+
+
+<h2>Optional challenge exercises</h2>
+
+<ul>
+
+  <li>Modify xv6 to support both lazy page allocation and COW.
+
+  </li><li>Measure how much your COW implementation reduces the number
+  of bytes xv6 copies and the number of physical pages it allocates.
+  Find and exploit opportunities to further reduce those numbers.
+
+</li></ul>
+
+
+
+<div class=3D"cm-popover" id=3D"cm-popover">                <div class=3D"c=
+m-popover__arrow">                    <span class=3D"cm-popover__arrow-bg">=
+</span>                </div>                <div class=3D"cm-popover__raw-=
+open">null</div>            </div><div id=3D"webhighlights-notifications"><=
+/div><webhighlights-extension></webhighlights-extension><webhighlights-side=
+bar alignment=3D"left" sidebar-width=3D"410"><template shadowmode=3D"open">=
+<!---->
+      <!--?lit$09996348$-->
+            <main-component part=3D"main-component" data-testid=3D"webhighl=
+ights-sidebar-MAIN_COMPONENT" style=3D"left: 0px; right: unset;"><template =
+shadowmode=3D"open"><!---->
+      <webhighlights-popover data-testid=3D"main-component-POPOVER">
+        <!--?lit$09996348$--><!--?-->
+      <template shadowmode=3D"open"><!----><!--?--></template></webhighligh=
+ts-popover>
+
+      <!-- Button to toggle side-bar. It hides when animation is active -->
+      <!--?lit$09996348$--><!--?-->
+      <!--?lit$09996348$-->
+    </template></main-component>
+         =20
+      <!--?lit$09996348$--><!--?-->
+    </template></webhighlights-sidebar><webhighlights-popup-toolbox><templa=
+te shadowmode=3D"open"><!---->
+      <!--?lit$09996348$-->
+    </template></webhighlights-popup-toolbox><webhighlights-notification><t=
+emplate shadowmode=3D"open"><!---->
+      <div class=3D"notification-wrapper slide-right ">
+        <!--?lit$09996348$--><!--?-->
+      </div>
+    </template></webhighlights-notification><webhighlights-marker><template=
+ shadowmode=3D"open"><!---->
+      <!--?lit$09996348$-->
+            <webhighlights-popup-toolbox data-testid=3D"webhighlights-marke=
+r-POPUP_TOOLBOX"><template shadowmode=3D"open"><!---->
+      <!--?lit$09996348$-->
+    </template></webhighlights-popup-toolbox>
+         =20
+    </template></webhighlights-marker><div id=3D"snackbar" class=3D"">
+   =20
+    &#9989; 3 Highlights applied
+           =20
+           =20
+    </div></body></html>
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-be4a98c9-289e-44c0-9b84-bd8626906c57@mhtml.blink
+
+@charset "windows-1252";
+
+.highlight-mengshou-wrap { background: rgb(255, 255, 153); cursor: pointer;=
+ }
+
+.highlight-mengshou-wrap.active { background: rgb(255, 255, 187); }
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-d3739df8-2169-450f-aed7-217476975b35@mhtml.blink
+
+@charset "windows-1252";
+
+:root { --wh-slate-50: #f8fafc; --wh-slate-100: #f1f5f9; --wh-slate-200: #e=
+2e8f0; --wh-slate-300: #cbd5e1; --wh-slate-400: #94a3b8; --wh-slate-500: #6=
+4748b; --wh-slate-600: #475569; --wh-slate-700: #334155; --wh-slate-800: #1=
+e293b; --wh-slate-900: #0f172a; --wh-slate-950: #020617; --wh-primary-50: r=
+gb(187, 219, 204); --wh-primary-100: rgb(153, 208, 184); --wh-primary-200: =
+rgb(120, 197, 164); --wh-primary-300: rgb(86, 186, 144); --wh-primary-400: =
+rgb(53, 176, 125); --wh-primary-500: hsl(161, 100%, 35%); --wh-primary-600:=
+ hsl(161, 100%, 33%); --wh-primary-700: hsl(161, 100%, 31%); --wh-primary-8=
+00: hsl(161, 100%, 29%); --wh-primary-900: hsl(161, 100%, 25%); --wh-primar=
+y-950: hsl(161, 100%, 20%); --wh-secondary-50: hsl(218, 22%, 30%); --wh-sec=
+ondary-100: hsl(218, 22%, 27%); --wh-secondary-200: hsl(218, 22%, 25%); --w=
+h-secondary-300: hsl(218, 22%, 22%); --wh-secondary-400: hsl(218, 22%, 20%)=
+; --wh-secondary-500: hsl(218, 22%, 18%); --wh-secondary-600: hsl(218, 22%,=
+ 16%); --wh-secondary-700: hsl(218, 22%, 14%); --wh-secondary-800: hsl(218,=
+ 22%, 12%); --wh-secondary-900: hsl(218, 22%, 8%); --wh-secondary-950: hsl(=
+218, 22%, 6%); --wh-gray-50: #f9fafb; --wh-gray-100: #f3f4f6; --wh-gray-200=
+: #e5e7eb; --wh-gray-300: #d1d5db; --wh-gray-400: #9ca3af; --wh-gray-500: #=
+6b7280; --wh-gray-600: #4b5563; --wh-gray-700: #374151; --wh-gray-800: #1f2=
+937; --wh-gray-900: #111827; --wh-gray-950: #030712; --wh-zinc-50: #fafafa;=
+ --wh-zinc-100: #f4f4f5; --wh-zinc-200: #e4e4e7; --wh-zinc-300: #d4d4d8; --=
+wh-zinc-400: #a1a1aa; --wh-zinc-500: #71717a; --wh-zinc-600: #52525b; --wh-=
+zinc-700: #3f3f46; --wh-zinc-800: #27272a; --wh-zinc-900: #18181b; --wh-zin=
+c-950: #09090b; --wh-neutral-50: #fafafa; --wh-neutral-100: #f5f5f5; --wh-n=
+eutral-200: #e5e5e5; --wh-neutral-300: #d4d4d4; --wh-neutral-400: #a3a3a3; =
+--wh-neutral-500: #737373; --wh-neutral-600: #525252; --wh-neutral-700: #40=
+4040; --wh-neutral-800: #262626; --wh-neutral-900: #171717; --wh-neutral-95=
+0: #0a0a0a; --wh-stone-50: #fafaf9; --wh-stone-100: #f5f5f4; --wh-stone-200=
+: #e7e5e4; --wh-stone-300: #d6d3d1; --wh-stone-400: #a8a29e; --wh-stone-500=
+: #78716c; --wh-stone-600: #57534e; --wh-stone-700: #44403c; --wh-stone-800=
+: #292524; --wh-stone-900: #1c1917; --wh-stone-950: #0c0a09; --wh-red-50: #=
+fef2f2; --wh-red-100: #fee2e2; --wh-red-200: #fecaca; --wh-red-300: #fca5a5=
+; --wh-red-400: #f87171; --wh-red-500: #ef4444; --wh-red-600: #dc2626; --wh=
+-red-700: #b91c1c; --wh-red-800: #991b1b; --wh-red-900: #7f1d1d; --wh-red-9=
+50: #450a0a; --wh-orange-50: #fff7ed; --wh-orange-100: #ffedd5; --wh-orange=
+-200: #fed7aa; --wh-orange-300: #fdba74; --wh-orange-400: #fb923c; --wh-ora=
+nge-500: #f97316; --wh-orange-600: #ea580c; --wh-orange-700: #c2410c; --wh-=
+orange-800: #9a3412; --wh-orange-900: #7c2d12; --wh-orange-950: #431407; --=
+wh-amber-50: #fffbeb; --wh-amber-100: #fef3c7; --wh-amber-200: #fde68a; --w=
+h-amber-300: #fcd34d; --wh-amber-400: #fbbf24; --wh-amber-500: #f59e0b; --w=
+h-amber-600: #d97706; --wh-amber-700: #b45309; --wh-amber-800: #92400e; --w=
+h-amber-900: #78350f; --wh-amber-950: #451a03; --wh-yellow-50: #fefce8; --w=
+h-yellow-100: #fef9c3; --wh-yellow-200: #fef08a; --wh-yellow-300: #fde047; =
+--wh-yellow-400: #facc15; --wh-yellow-500: #eab308; --wh-yellow-600: #ca8a0=
+4; --wh-yellow-700: #a16207; --wh-yellow-800: #854d0e; --wh-yellow-900: #71=
+3f12; --wh-yellow-950: #422006; --wh-lime-50: #f7fee7; --wh-lime-100: #ecfc=
+cb; --wh-lime-200: #d9f99d; --wh-lime-300: #bef264; --wh-lime-400: #a3e635;=
+ --wh-lime-500: #84cc16; --wh-lime-600: #65a30d; --wh-lime-700: #4d7c0f; --=
+wh-lime-800: #3f6212; --wh-lime-900: #365314; --wh-lime-950: #1a2e05; --wh-=
+green-50: #f0fdf4; --wh-green-100: #dcfce7; --wh-green-200: #bbf7d0; --wh-g=
+reen-300: #86efac; --wh-green-400: #4ade80; --wh-green-500: #22c55e; --wh-g=
+reen-600: #16a34a; --wh-green-700: #15803d; --wh-green-800: #166534; --wh-g=
+reen-900: #14532d; --wh-green-950: #052e16; --wh-emerald-50: #ecfdf5; --wh-=
+emerald-100: #d1fae5; --wh-emerald-200: #a7f3d0; --wh-emerald-300: #6ee7b7;=
+ --wh-emerald-400: #34d399; --wh-emerald-500: #10b981; --wh-emerald-600: #0=
+59669; --wh-emerald-700: #047857; --wh-emerald-800: #065f46; --wh-emerald-9=
+00: #064e3b; --wh-emerald-950: #022c22; --wh-teal-50: #f0fdfa; --wh-teal-10=
+0: #ccfbf1; --wh-teal-200: #99f6e4; --wh-teal-300: #5eead4; --wh-teal-400: =
+#2dd4bf; --wh-teal-500: #14b8a6; --wh-teal-600: #0d9488; --wh-teal-700: #0f=
+766e; --wh-teal-800: #115e59; --wh-teal-900: #134e4a; --wh-teal-950: #042f2=
+e; --wh-cyan-50: #ecfeff; --wh-cyan-100: #cffafe; --wh-cyan-200: #a5f3fc; -=
+-wh-cyan-300: #67e8f9; --wh-cyan-400: #22d3ee; --wh-cyan-500: #06b6d4; --wh=
+-cyan-600: #0891b2; --wh-cyan-700: #0e7490; --wh-cyan-800: #155e75; --wh-cy=
+an-900: #164e63; --wh-cyan-950: #083344; --wh-sky-50: #f0f9ff; --wh-sky-100=
+: #e0f2fe; --wh-sky-200: #bae6fd; --wh-sky-300: #7dd3fc; --wh-sky-400: #38b=
+df8; --wh-sky-500: #0ea5e9; --wh-sky-600: #0284c7; --wh-sky-700: #0369a1; -=
+-wh-sky-800: #075985; --wh-sky-900: #0c4a6e; --wh-sky-950: #082f49; --wh-bl=
+ue-50: #eff6ff; --wh-blue-100: #dbeafe; --wh-blue-200: #bfdbfe; --wh-blue-3=
+00: #93c5fd; --wh-blue-400: #60a5fa; --wh-blue-500: #3b82f6; --wh-blue-600:=
+ #2563eb; --wh-blue-700: #1d4ed8; --wh-blue-800: #1e40af; --wh-blue-900: #1=
+e3a8a; --wh-blue-950: #172554; --wh-indigo-50: #eef2ff; --wh-indigo-100: #e=
+0e7ff; --wh-indigo-200: #c7d2fe; --wh-indigo-300: #a5b4fc; --wh-indigo-400:=
+ #818cf8; --wh-indigo-500: #6366f1; --wh-indigo-600: #4f46e5; --wh-indigo-7=
+00: #4338ca; --wh-indigo-800: #3730a3; --wh-indigo-900: #312e81; --wh-indig=
+o-950: #1e1b4b; --wh-violet-50: #f5f3ff; --wh-violet-100: #ede9fe; --wh-vio=
+let-200: #ddd6fe; --wh-violet-300: #c4b5fd; --wh-violet-400: #a78bfa; --wh-=
+violet-500: #8b5cf6; --wh-violet-600: #7c3aed; --wh-violet-700: #6d28d9; --=
+wh-violet-800: #5b21b6; --wh-violet-900: #4c1d95; --wh-violet-950: #2e1065;=
+ --wh-purple-50: #faf5ff; --wh-purple-100: #f3e8ff; --wh-purple-200: #e9d5f=
+f; --wh-purple-300: #d8b4fe; --wh-purple-400: #c084fc; --wh-purple-500: #a8=
+55f7; --wh-purple-600: #9333ea; --wh-purple-700: #7e22ce; --wh-purple-800: =
+#6b21a8; --wh-purple-900: #581c87; --wh-purple-950: #3b0764; --wh-fuchsia-5=
+0: #fdf4ff; --wh-fuchsia-100: #fae8ff; --wh-fuchsia-200: #f5d0fe; --wh-fuch=
+sia-300: #f0abfc; --wh-fuchsia-400: #e879f9; --wh-fuchsia-500: #d946ef; --w=
+h-fuchsia-600: #c026d3; --wh-fuchsia-700: #a21caf; --wh-fuchsia-800: #86198=
+f; --wh-fuchsia-900: #701a75; --wh-fuchsia-950: #4a044e; --wh-pink-50: #fdf=
+2f8; --wh-pink-100: #fce7f3; --wh-pink-200: #fbcfe8; --wh-pink-300: #f9a8d4=
+; --wh-pink-400: #f472b6; --wh-pink-500: #ec4899; --wh-pink-600: #db2777; -=
+-wh-pink-700: #be185d; --wh-pink-800: #9d174d; --wh-pink-900: #831843; --wh=
+-pink-950: #500724; --wh-rose-50: #fff1f2; --wh-rose-100: #ffe4e6; --wh-ros=
+e-200: #fecdd3; --wh-rose-300: #fda4af; --wh-rose-400: #fb7185; --wh-rose-5=
+00: #f43f5e; --wh-rose-600: #e11d48; --wh-rose-700: #be123c; --wh-rose-800:=
+ #9f1239; --wh-rose-900: #881337; --wh-rose-950: #4c0519; --wh-primary-colo=
+r: var(--wh-primary-500); --wh-primary-color-hover: #00a16e; --wh-primary-c=
+olor-transparent: #00aa7424; --wh-primary-color-transparent-light: #00a8730=
+f; --wh-primary-light: #53e3a6; --wh-primary-dark: #007f4b; --wh-primary-da=
+rk-hover: #017444; --wh-primary-shadow: #00b07841; --wh-primary-shadow-2: #=
+00b07870; --wh-primary-border-color: #c8c8c870; --secondary-color: #3d4455;=
+ --secondary-color-hover: #3a4052; --secondary-color-transparent: #3d44556b=
+; --secondary-light: #4c556d; --secondary-dark: #252934; --secondary-dark-h=
+over: #191b22; --secondary-dark-transparent: #2e2d2d46; --highlight-color: =
+#92ffaa; --error-color: #d62d4c; --warning-color: #ffcc00; --error-info: #1=
+4854e; --success-color: #4BB543; --font-color: #2f3237; --font-color-light:=
+ #626364; --font-color-dark: #252525; --wh-font-family: 'Inter', 'SF Pro Di=
+splay', -apple-system, BlinkMacSystemFont,
+  'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+  'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif; --font-family: v=
+ar(--wh-font-family); --font-size: 12px; --webhighlights-font-size: 12px; -=
+-link-color: #1d9bf0; --wh-form-active-color: #3b82f6; --wh-mobile-breakpoi=
+nt: 767px; --BREAKPOINT_XS: 575px; --BREAKPOINT_S: 767px; --BREAKPOINT_M: 9=
+91px; --BREAKPOINT_L: 1199px; --BREAKPOINT_XL: 1399px; --BREAKPOINT_XXL: 16=
+99px; --wh-danger-color: var(--wh-red-600); --wh-danger-color-hover: var(--=
+wh-red-700); --wh-font-size: 13px; --wh-blockquote-line-height: 1.3; --wh-b=
+g-base: var(--wh-secondary-600); --wh-bg-base-hover: var(--wh-secondary-500=
+); --wh-border-base: var(--wh-secondary-200); --wh-border-base-hover: var(-=
+-wh-secondary-100); --wh-border-base-strong: var(--wh-secondary-100); --wh-=
+border-base-strong-hover: var(--wh-secondary-50); --wh-bg-base-hover-strong=
+: var(--wh-secondary-300); --wh-bg-back: var(--wh-secondary-700); --wh-bg-b=
+ack-strong: var(--wh-secondary-800); --wh-bg-back-strong-hover: var(--wh-se=
+condary-900); --wh-bg-back-hover: var(--wh-secondary-600); --wh-bg-back-hov=
+er-strong: var(--wh-secondary-800); --wh-border-back: var(--wh-secondary-10=
+0); --wh-border-back-strong: var(--wh-secondary-50); --wh-bg-front: var(--w=
+h-secondary-400); --wh-bg-front-strong: var(--wh-secondary-200); --wh-bg-fr=
+ont-strong-hover: var(--wh-secondary-100); --wh-bg-front-hover: var(--wh-se=
+condary-300); --wh-bg-front-hover-strong: var(--wh-secondary-200); --wh-bor=
+der-front: hsl(227, 20%, 25%); --wh-border-front-strong: hsl(227, 20%, 35%)=
+; --wh-text-stronger: hsla(0, 0%, 100%, 0.95); --wh-text-strongest: hsla(0,=
+ 0%, 100%, 1); --wh-text-strong: rgba(255, 255, 255, 0.9); --wh-text: rgba(=
+255, 255, 255, 0.85); --wh-text-hover: var(--wh-text-strong); --wh-text-lig=
+ht: rgba(255, 255, 255, 0.73); --wh-text-lighter: rgba(255, 255, 255, 0.63)=
+; --wh-text-lightest: rgba(255, 255, 255, 0.5); --wh-border-color: hsla(0, =
+0%, 100%, 0.15); --wh-border-color-strong: hsla(0, 0%, 100%, 0.25); --wh-no=
+te-editor-bg-color: hsl(221, 27%, 20%); --wh-note-editor-bg-color-preview: =
+hsl(221, 27%, 18%); --wh-bg-tags: var(--wh-secondary-300); --wh-bg-tags-hov=
+er: var(--wh-secondary-200); --wh-syntax-bg-color: rgba(255, 255, 255, 0.05=
+); --wh-fallback-img-color: var(--wh-secondary-600); --wh-bg-disabled: hsl(=
+220, 22%, 18%); --wh-bg-notification-unread: hsla(161, 100%, 20%, 0.15); --=
+wh-bg-notification-unread-hover: hsla(161, 100%, 20%, 0.05); --wh-subtle-gr=
+ay: rgb(255, 255, 255, 0.1); --wh-shadow: inset 0 0 0.5px 1px hsla(0, 0%, 1=
+00%, 0.1),
+      /* 2. shadow ring \1f447  */ 0 0 0 1px hsla(230, 13%, 9%, 0.075),
+      /* 3. multiple soft shadows \1f447  */ 0 0.3px 0.4px hsla(230, 13%, 9=
+%, 0.02),
+      0 0.9px 1.5px hsla(230, 13%, 9%, 0.045),
+      0 3.5px 6px hsla(230, 13%, 9%, 0.09); --wh-shadow-primary: var(--wh-p=
+rimary-500) 0px 0px 0px 1px inset,
+      var(--wh-primary-500) 0px 0px 1px; }
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-e35df1c0-995f-4930-8d68-b09e9cb2864d@mhtml.blink
+
+@charset "windows-1252";
+
+webhighlights-sidebar { --webhighlights-font-size: 14px; }
+
+body.web-highlights-animate { transition: margin-left 300ms linear 0s, marg=
+in-right; }
+
+body.web-highlights-open { margin-left: 410px !important; }
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-b63fe2e0-95f3-4ed1-821c-545638430d47@mhtml.blink
+
+@charset "windows-1252";
+
+web-highlight.webhighlights-highlight { border-radius: 2px; background-colo=
+r: rgb(146, 255, 170); cursor: pointer; visibility: visible !important; }
+
+web-highlight.webhighlights-highlight.webhighlight-with-tags, web-highlight=
+.webhighlights-highlight.webhighlight-with-notes { border-bottom: 2.8px sol=
+id gray; border-radius: 0px; }
+
+web-highlight > :not(webhighlights-popup-toolbox) { background-color: rgb(1=
+46, 255, 170); }
+
+webhighlights-popup-toolbox.contains-highlight { transform: translate(-63px=
+, -10px); position: fixed; }
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: cid:css-924ee210-4d50-4f56-91c4-4243852853ba@mhtml.blink
+
+@charset "windows-1252";
+
+#snackbar { z-index: 2147483647; font-family: var(--font-family, 'Inter', '=
+SF Pro Display', -apple-system, BlinkMacSystemFont,
+'Open Sans', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell',
+'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif); box-shadow: rgba(=
+0, 0, 0, 0.39) 0px 8px 20px 4px; visibility: hidden; width: 340px; backgrou=
+nd-color: rgb(37, 41, 52); color: rgb(255, 255, 255); text-align: center; b=
+order-radius: 8px; padding: 12px 8px; box-sizing: border-box; position: fix=
+ed; left: calc(50% - 170px); bottom: 30px; font-size: 14px; line-height: 1.=
+5; }
+
+#snackbar.show { visibility: visible; animation: 500ms ease 0s 1 normal non=
+e running fadein, 500ms ease 2000ms 1 normal none running fadeout; }
+
+@-webkit-keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@keyframes fadein {=20
+  0% { bottom: 0px; opacity: 0; }
+  100% { bottom: 30px; opacity: 1; }
+}
+
+@-webkit-keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+
+@keyframes fadeout {=20
+  0% { bottom: 30px; opacity: 1; }
+  100% { bottom: 0px; opacity: 0; }
+}
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://pdos.csail.mit.edu/6.S081/2020/labs/labs.css
+
+@charset "windows-1252";
+
+.easy { color: rgb(0, 204, 0); }
+
+.moderate { color: rgb(0, 102, 255); }
+
+.hard { color: rgb(255, 51, 0); }
+
+div.required, div.challenge, div.question, div.warning, div.prereq { margin=
+: 1em auto; width: 80%; background-color: rgb(224, 224, 255); padding-left:=
+ 1em; padding-right: 1em; }
+
+div.required .header { font-weight: bold; }
+
+div.challenge .header { font-style: italic; }
+
+div.question .header { font-weight: bold; }
+
+div.required { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.challenge { background-color: rgb(255, 224, 224); border: 1px solid rgb=
+(255, 192, 192); }
+
+div.question { background-color: rgb(224, 224, 255); border: 1px solid rgb(=
+192, 192, 255); }
+
+div.warning { background-color: rgb(255, 224, 224); border: 1px solid rgb(2=
+55, 192, 192); }
+
+div.prereq { background-color: rgb(255, 239, 213); border: 1px solid rgb(25=
+5, 192, 192); }
+
+kbd { color: rgb(0, 119, 0); font-family: monospace; font-weight: bold; }
+------MultipartBoundary--wBDEH7IdXuOGuDxazejlWrRy98b4esLtx86woNYUGK------
