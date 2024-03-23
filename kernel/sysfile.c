@@ -283,6 +283,7 @@ create(char *path, short type, short major, short minor)
   return ip;
 }
 
+#define MAX_SLINK_DEPTH 10
 uint64
 sys_open(void)
 {
@@ -291,6 +292,8 @@ sys_open(void)
   struct file *f;
   struct inode *ip;
   int n;
+  char slink_path[MAXPATH];
+  uint slinkcnt = 0;
 
   if((n = argstr(0, path, MAXPATH)) < 0 || argint(1, &omode) < 0)
     return -1;
@@ -313,6 +316,29 @@ sys_open(void)
       iunlockput(ip);
       end_op();
       return -1;
+    }
+  }
+
+  if (ip->type == T_SYMLINK && (!(omode & O_NOFOLLOW))) {
+recur_slink:
+    if (readi(ip, 0, (uint64)slink_path, 0, MAXPATH) < MAXPATH) {
+      end_op();
+      return -1;
+    }
+    iunlockput(ip);
+    if((ip = namei(slink_path)) == 0){
+      end_op();
+      return -1;
+    }
+    ilock(ip);
+    if (ip->type == T_SYMLINK) {
+      if (slinkcnt > MAX_SLINK_DEPTH) {
+        iunlockput(ip);
+        end_op();
+        return -1;
+      }
+      slinkcnt++;
+      goto recur_slink;
     }
   }
 
