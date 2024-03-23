@@ -489,9 +489,25 @@ sys_pipe(void)
 uint64 sys_symlink(void)
 {
   char target[MAXPATH], path[MAXPATH];
+  struct inode *ip;
 
   if(argstr(0, target, MAXPATH) < 0 || argstr(1, path, MAXPATH) < 0)
     return -1;
+  
+  begin_op();
+  // Create an inode for symbolic link
+  if ((ip = create(path, T_SYMLINK, 0, 0)) == 0) {
+    end_op();
+    return -1;
+  }
+  // Write the path of target
+  // No need to ilock(ip) since the create() above 
+  // has locked it.
+  if (writei(ip, 0, (uint64)target, 0, MAXPATH) != MAXPATH) {
+    panic("symlink: writei");
+  }
+  iunlockput(ip);
+  end_op();
 
   return 0;
 }
